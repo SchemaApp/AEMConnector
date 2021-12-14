@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -21,22 +22,43 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
+import com.day.cq.search.result.SearchResult;
 import com.schema.core.models.AssetFolderDefinition;
 import com.schema.core.models.WebhookEntity;
 import com.schema.core.models.WebhookEntityResult;
 import com.schema.core.services.WebhookHandlerService;
 
-@Component(service = WebhookHandlerService.class)
+@Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
+
+	private static final String ID = "id";
 
 	private static final String CONTENT_USERGENERATED = "/content/usergenerated/content";
 
 	private static final String CONTENT_USERGENERATED_SCHEMAAPP = "/content/usergenerated/content/schemaApp";
 
+	public static final String TYPE = "type";
+	public static final String PATH = "path";
+	public static final String P_LIMIT = "p.limit";
+	public static final String INFINITE = "-1";
+	public static final String PROPERTY = "property";
+	public static final String PROPERTY_VALUE = "property.value";
+
+
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
+
+	@Reference
+	private QueryBuilder builder;
+
+	private Session session;
 
 	/**
 	 * @return
@@ -62,12 +84,60 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		if (resource != null) {
 			Node node = resource.adaptTo(Node.class);
 			try {
-				Node dataNode = node.addNode("data", JcrConstants.NT_UNSTRUCTURED);
-				dataNode.setProperty("entity", entiry.getGraph().toString());
+				Node dataNode = createDataNode(node);
+				String nodeName = JcrUtil.createValidChildName(dataNode, entiry.getId());
+				Node pageNode = dataNode.addNode(nodeName, JcrConstants.NT_UNSTRUCTURED);
+				pageNode.setProperty("entity", entiry.getGraph().toString());
+				pageNode.setProperty(ID, entiry.getId());
 				resolver.commit();
 			} catch (RepositoryException | PersistenceException e) {
 				LOG.error("Error during create Schema App Entity Node");
 			}
+		}
+		return WebhookEntityResult.fromEntity(entiry);
+	}
+
+	private Node createDataNode(Node node) throws RepositoryException {
+		Node dataNode = null;
+		if (!node.hasNode("data")) {
+			dataNode = node.addNode("data", JcrConstants.NT_UNSTRUCTURED);
+		} else {
+			dataNode = node.getNode("data");
+		}
+		return dataNode;
+	}
+
+	@Override
+	public WebhookEntityResult updateEntity(WebhookEntity entiry) throws LoginException {
+		ResourceResolver resolver = getResourceResolver();
+		session = resolver.adaptTo(Session.class);
+		Resource resource = getResultsUsingId(entiry.getId());
+		if (resource != null) {
+			Node node = resource.adaptTo(Node.class);
+			try {
+				if (node != null) {
+					node.setProperty("entity", entiry.getGraph().toString());
+					node.setProperty(ID, entiry.getId());
+					resolver.commit();
+				} else {
+					createEntity(entiry);
+				}
+			} catch (RepositoryException | PersistenceException e) {
+				LOG.error("Error during updating Schema App Entity Node");
+			}
+		}
+		return WebhookEntityResult.fromEntity(entiry);
+	}
+
+
+	@Override
+	public WebhookEntityResult deleteEntity(WebhookEntity entiry) throws LoginException, PersistenceException {
+		ResourceResolver resolver = getResourceResolver();
+		session = resolver.adaptTo(Session.class);
+		Resource resource = getResultsUsingId(entiry.getId());
+		if (resource != null) {
+			resolver.delete(resource);
+			resolver.commit();
 		}
 		return WebhookEntityResult.fromEntity(entiry);
 	}
@@ -137,4 +207,29 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
 		}
 	}
+
+	private Resource getResultsUsingId(String id) {
+
+		final Map<String, String> map = new HashMap<>();
+		map.put(TYPE, JcrConstants.NT_UNSTRUCTURED);
+		map.put(PATH, CONTENT_USERGENERATED_SCHEMAAPP);
+		map.put(PROPERTY, ID);
+		map.put(PROPERTY_VALUE, id);
+		map.put(P_LIMIT, INFINITE);
+		final Query query = builder.createQuery(PredicateGroup.create(map), session);
+		final SearchResult result = query.getResult();
+		for(Hit hit : result.getHits()) {
+			try {
+				final Resource entityResource = hit.getResource();
+				if (entityResource!= null && !ResourceUtil.isNonExistingResource(entityResource)) {
+					return entityResource;
+				}
+			}
+			catch (final RepositoryException error) {
+				LOG.error("WebhookHandlerServiceImpl > getResultsUsingId  ", error);
+			}
+		}
+		return null;
+	}
+
 }

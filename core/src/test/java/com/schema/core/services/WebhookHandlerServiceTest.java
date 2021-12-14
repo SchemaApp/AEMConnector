@@ -1,14 +1,18 @@
 package com.schema.core.services;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Node;
+import javax.jcr.Session;
 
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
@@ -19,14 +23,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
+import com.day.cq.search.result.SearchResult;
 import com.schema.core.models.WebhookEntity;
 import com.schema.core.services.impl.WebhookHandlerServiceImpl;
 
 @ExtendWith({ MockitoExtension.class})
 class WebhookHandlerServiceTest {
+
+	private static final String GRAPH_DATA = "[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]";
 
 	@Mock
 	private ResourceResolver resolver;
@@ -41,8 +53,22 @@ class WebhookHandlerServiceTest {
 	private WebhookEntity entity;
 	
 	@Mock
-	private Node node;
+	private QueryBuilder queryBuilder;
 	
+	@Mock
+	private Query query;
+	
+	@Mock
+	private SearchResult searchResult;
+	
+	@Mock
+	private Session session;
+	
+	@Mock
+	private Hit hit;
+	
+	@Mock
+	private Node node;
 
 	@InjectMocks
 	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
@@ -53,12 +79,50 @@ class WebhookHandlerServiceTest {
 		mockResolver();
 		when(resource.getResourceType()).thenReturn("sling:nonexisting");
 		when(resolver.getResource(anyString())).thenReturn(resource);
-		when(entity.getGraph()).thenReturn(new String("test"));
+		when(entity.getGraph()).thenReturn(new String(GRAPH_DATA));
+		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
 		when(resource.adaptTo(Node.class)).thenReturn(node);
-		when(node.addNode("data", JcrConstants.NT_UNSTRUCTURED)).thenReturn(node);
+		when(node.addNode(anyString(), eq(JcrConstants.NT_UNSTRUCTURED))).thenReturn(node);
 		
 		webhookHandlerService.createEntity(entity);
 		verify(resolver, times(2)).commit();
+	}
+	
+	@Test
+	void updateEntityTest() throws Exception {
+
+		mockResolver();
+		when(entity.getGraph()).thenReturn(new String(GRAPH_DATA));
+		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
+		when(resource.adaptTo(Node.class)).thenReturn(node);
+		when(resolver.adaptTo(Session.class)).thenReturn(session); //maybe not needed
+		when(queryBuilder.createQuery(Mockito.any(PredicateGroup.class), Mockito.any(Session.class))).thenReturn(query);
+		when(query.getResult()).thenReturn(searchResult);
+		final List<Hit> hits = new ArrayList<>();
+		hits.add(hit);
+		when(searchResult.getHits()).thenReturn(hits);
+		when(hits.get(0).getResource()).thenReturn(resource);
+		
+		webhookHandlerService.updateEntity(entity);
+		verify(resolver, times(1)).commit();
+	}
+	
+	@Test
+	void deleteEntityTest() throws Exception {
+
+		mockResolver();
+		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
+		when(resolver.adaptTo(Session.class)).thenReturn(session); //maybe not needed
+		when(queryBuilder.createQuery(Mockito.any(PredicateGroup.class), Mockito.any(Session.class))).thenReturn(query);
+		when(query.getResult()).thenReturn(searchResult);
+		final List<Hit> hits = new ArrayList<>();
+		hits.add(hit);
+		when(searchResult.getHits()).thenReturn(hits);
+		when(hits.get(0).getResource()).thenReturn(resource);
+		
+		webhookHandlerService.deleteEntity(entity);
+		verify(resolver, times(1)).delete(resource);
+		verify(resolver, times(1)).commit();
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {

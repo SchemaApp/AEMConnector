@@ -10,10 +10,9 @@ import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.propertytypes.ServiceDescription;
 import org.slf4j.Logger;
@@ -26,9 +25,13 @@ import com.schema.core.models.WebhookEntity;
 import com.schema.core.models.WebhookEntityResult;
 import com.schema.core.services.WebhookHandlerService;
 
-@Component(service = Servlet.class, configurationPolicy = ConfigurationPolicy.OPTIONAL)
-@SlingServletPaths("/bin/schemaApp/WebhooksHandler")
 @ServiceDescription("Supergroup Permissions Servlet")
+@Component(service=Servlet.class,
+property={
+        "sling.servlet.methods=" + HttpConstants.METHOD_POST,
+        "sling.servlet.paths="+ "/bin/schemaApp/WebhooksHandler",
+        "sling.servlet.extensions=" + "json",
+})
 public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -48,7 +51,11 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 		WebhookEntityResult rerult = null;
 		LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());
 		try {
-			rerult = webhookHandlerService.createEntity(entity);
+			if (entity.getType() != null) {
+				if (entity.getType().equals("EntityCreated")) rerult = webhookHandlerService.createEntity(entity);
+				if (entity.getType().equals("EntityUpdated")) rerult = webhookHandlerService.updateEntity(entity);
+				if (entity.getType().equals("EntityDeleted")) rerult = webhookHandlerService.deleteEntity(entity);
+			}
 		} catch (LoginException e) {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred white creating entity", e);
 			response.setStatus(500);	
