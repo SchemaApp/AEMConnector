@@ -91,7 +91,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				pageNode.setProperty(ID, entiry.getId());
 				resolver.commit();
 			} catch (RepositoryException | PersistenceException e) {
-				LOG.error("Error during create Schema App Entity Node");
+				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
+				LOG.error(errorMessage, e);
+				return WebhookEntityResult.prepareError(errorMessage);
 			}
 		}
 		return WebhookEntityResult.fromEntity(entiry);
@@ -123,7 +125,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					createEntity(entiry);
 				}
 			} catch (RepositoryException | PersistenceException e) {
-				LOG.error("Error during updating Schema App Entity Node");
+				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
+				LOG.error(errorMessage, e);
+				return WebhookEntityResult.prepareError(errorMessage);
 			}
 		}
 		return WebhookEntityResult.fromEntity(entiry);
@@ -135,9 +139,15 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		ResourceResolver resolver = getResourceResolver();
 		session = resolver.adaptTo(Session.class);
 		Resource resource = getResultsUsingId(entiry.getId());
-		if (resource != null) {
-			resolver.delete(resource);
-			resolver.commit();
+		try {
+			if (resource != null) {
+				resolver.delete(resource);
+				resolver.commit();
+			}
+		} catch (PersistenceException e) {
+			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
+			LOG.error(errorMessage, e);
+			return WebhookEntityResult.prepareError(errorMessage);
 		}
 		return WebhookEntityResult.fromEntity(entiry);
 	}

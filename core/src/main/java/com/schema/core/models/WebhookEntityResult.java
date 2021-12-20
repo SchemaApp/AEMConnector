@@ -12,16 +12,27 @@ public final class WebhookEntityResult {
 
 	public static final String TYPE_CONSTANT = "type";
 	public static final String ID_CONSTANT = "id";
+	public static final String ERROR_MESSAGE = "error";
 
 	public static WebhookEntityResult fromEntity(WebhookEntity entiry) {
 		return new WebhookEntityResult(entiry.getId(), entiry.getType());
+	}
+	
+	public static WebhookEntityResult prepareError(String errorMessage) {
+		return new WebhookEntityResult(errorMessage);
 	}
 
 	private String id;
 
 	private String type;
+	
+	private String error;
 
 
+	private WebhookEntityResult(final String errorMessage) {
+		this.error = errorMessage;
+	}
+	
 	private WebhookEntityResult(final String id, final String type) {
 		this.id = id;
 		this.type = type;
@@ -57,6 +68,7 @@ public final class WebhookEntityResult {
 		return Objects.toStringHelper(this)
 				.add(ID_CONSTANT, id)
 				.add(TYPE_CONSTANT, type)
+				.add(ERROR_MESSAGE, error)
 				.toString();
 	}
 }
