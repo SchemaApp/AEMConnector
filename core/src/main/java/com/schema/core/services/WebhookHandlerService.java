@@ -8,7 +8,7 @@ import com.schema.core.models.WebhookEntityResult;
 
 /**
  * 
- * The <code>WebhookHandlerService</code> interface represents a Schema App Webhooks envets.
+ * The <code>WebhookEntityResult</code> interface represents a Schema App Webhooks envets.
  * 
  * @author nikhil
  *
