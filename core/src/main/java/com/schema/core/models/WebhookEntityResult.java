@@ -9,7 +9,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * The <code>WebhookEntityResult</code> class to prepare webhook API response.
+ * The <code>WebhookEntityResult</code> class to prepare Webhook API response.
  * 
  * @author nikhil
  *
