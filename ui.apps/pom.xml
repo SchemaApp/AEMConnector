@@ -88,9 +88,6 @@
                             <target>/apps/schemaApp/install</target>
                         </embedded>
                     </embeddeds>
-                   <filters>
-                        <filter><root>/apps/cq/core/content/nav/tools/schemaApp</root></filter>
-                   </filters>
                 </configuration>
                 
             </plugin>

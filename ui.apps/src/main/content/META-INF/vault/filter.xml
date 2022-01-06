@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/schemaApp"/>
+    <filter root="/content/usergenerated/content/rep:policy"/>
+    <filter root="/home/users/system/l7gN1R0Hs2iP2Jb-tH-w"/>
 </workspaceFilter>

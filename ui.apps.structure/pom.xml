@@ -40,10 +40,6 @@
 
                         <!-- Common overlay roots -->
                         <filter><root>/apps/sling</root></filter>
-                        <filter><root>/apps/cq/core</root></filter>
-                        <filter><root>/apps/cq/core/content</root></filter>
-                        <filter><root>/apps/cq/core/content/nav/</root></filter>
-                        <filter><root>/apps/cq/core/content/nav/tools</root></filter>
                         <filter><root>/apps/cq</root></filter>
                         <filter><root>/apps/dam</root></filter>
                         <filter><root>/apps/wcm</root></filter>
@@ -51,10 +47,16 @@
 
                         <!-- Immutable context-aware configurations -->
                         <filter><root>/apps/settings</root></filter>
+                        
+                        <filter><root>/content/usergenerated/content</root></filter>
+                        <filter><root>/home/users/system</root></filter>
 
                     </filters>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
 </project>
