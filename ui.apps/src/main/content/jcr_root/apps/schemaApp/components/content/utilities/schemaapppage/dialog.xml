@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Dialog"
+    xtype="dialog">
+    <items jcr:primaryType="cq:WidgetCollection">
+        <general
+            jcr:primaryType="nt:unstructured"
+            title="Schema App Settings"
+            xtype="panel">
+            <items jcr:primaryType="cq:WidgetCollection">
+                <apiKey
+                    jcr:primaryType="cq:Widget"
+                    allowBlank="{Boolean}false"
+                    fieldLabel="API Key"
+                    name="./apiKey"
+                    xtype="textfield"/>
+                <accountID
+                    jcr:primaryType="cq:Widget"
+                    allowBlank="{Boolean}false"
+                    fieldLabel="Accunt ID"
+                    name="./accountID"
+                    xtype="textfield"/>
+                <siteURL
+                    jcr:primaryType="cq:Widget"
+                    fieldLabel="AEM Publisher Site URL"
+                    allowBlank="{Boolean}false"
+                    name="./siteURL"
+                    xtype="textfield"/>
+            </items>
+        </general>
+    </items>
+</jcr:root>

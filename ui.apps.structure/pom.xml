@@ -50,6 +50,7 @@
                         
                         <filter><root>/content/usergenerated/content</root></filter>
                         <filter><root>/home/users/system</root></filter>
+                        <filter><root>/etc/cloudservices</root></filter>
 
                     </filters>
                 </configuration>

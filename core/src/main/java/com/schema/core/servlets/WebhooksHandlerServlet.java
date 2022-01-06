@@ -25,6 +25,11 @@ import com.schema.core.models.WebhookEntity;
 import com.schema.core.models.WebhookEntityResult;
 import com.schema.core.services.WebhookHandlerService;
 
+/**
+ * Webhooks Handler Servlet to handle webhooks API calls.
+ * @author nikhi
+ *
+ */
 @ServiceDescription("Supergroup Permissions Servlet")
 @Component(service=Servlet.class,
 property={

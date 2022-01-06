@@ -54,7 +54,6 @@ class WebhooksHandlerServletTest {
 		when(request.getReader()).thenReturn(reader);
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
 		WebhookEntityResult mockResults = WebhookEntityResult.fromEntity(entity);
-		when(webhookHandlerService.createEntity(entity)).thenReturn(mockResults);
 
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("MAPPER"), mockObjectMapper);
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("webhookHandlerService"), webhookHandlerService);
@@ -70,7 +69,6 @@ class WebhooksHandlerServletTest {
 		when(request.getReader()).thenReturn(reader);
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
 		WebhookEntityResult mockResults = WebhookEntityResult.fromEntity(entity);
-		when(webhookHandlerService.createEntity(entity)).thenReturn(mockResults);
 
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("MAPPER"), mockObjectMapper);
 		try {

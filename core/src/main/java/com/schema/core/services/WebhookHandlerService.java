@@ -42,4 +42,5 @@ public interface WebhookHandlerService {
 	 * @throws PersistenceException
 	 */
 	public WebhookEntityResult deleteEntity(WebhookEntity entiry) throws LoginException, PersistenceException;
+	
 }
