@@ -26,8 +26,9 @@ import com.schema.core.models.WebhookEntityResult;
 import com.schema.core.services.WebhookHandlerService;
 
 /**
- * Webhooks Handler Servlet to handle webhooks API calls.
- * @author nikhi
+ * The <code>WebhooksHandlerServlet</code> class to handle webhooks API calls.
+ * 
+ * @author nikhil
  *
  */
 @ServiceDescription("Supergroup Permissions Servlet")

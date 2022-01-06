@@ -22,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schema.core.models.WebhookEntity;
-import com.schema.core.models.WebhookEntityResult;
 import com.schema.core.services.WebhookHandlerService;
 import com.schema.core.servlets.WebhooksHandlerServlet;
 
@@ -53,7 +52,6 @@ class WebhooksHandlerServletTest {
 		WebhookEntity entity = new WebhookEntity();
 		when(request.getReader()).thenReturn(reader);
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
-		WebhookEntityResult mockResults = WebhookEntityResult.fromEntity(entity);
 
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("MAPPER"), mockObjectMapper);
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("webhookHandlerService"), webhookHandlerService);
@@ -68,7 +66,6 @@ class WebhooksHandlerServletTest {
 		WebhookEntity entity = new WebhookEntity();
 		when(request.getReader()).thenReturn(reader);
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
-		WebhookEntityResult mockResults = WebhookEntityResult.fromEntity(entity);
 
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("MAPPER"), mockObjectMapper);
 		try {

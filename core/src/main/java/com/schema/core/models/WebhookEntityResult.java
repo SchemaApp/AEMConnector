@@ -8,6 +8,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * The <code>WebhookEntityResult</code> class to prepare Webhook API response.
+ * 
+ * @author nikhil
+ *
+ */
 public final class WebhookEntityResult {
 
 	public static final String TYPE_CONSTANT = "type";
