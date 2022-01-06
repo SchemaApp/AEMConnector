@@ -22,7 +22,7 @@ public interface WebhookHandlerService {
 	 * @return
 	 * @throws LoginException
 	 */
-	public WebhookEntityResult createEntity(WebhookEntity entiry) throws LoginException;
+	public WebhookEntityResult createEntity(WebhookEntity entity) throws LoginException;
 	
 	/**
 	 * Schema App Update Entity Webhook. When markup for a page is updated.
@@ -31,7 +31,7 @@ public interface WebhookHandlerService {
 	 * @return
 	 * @throws LoginException
 	 */
-	public WebhookEntityResult updateEntity(WebhookEntity entiry) throws LoginException;
+	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException;
 	
 	/**
 	 * Schema App Delete Entity Webhook. When markup for a page is deleted.
@@ -41,6 +41,6 @@ public interface WebhookHandlerService {
 	 * @throws LoginException
 	 * @throws PersistenceException
 	 */
-	public WebhookEntityResult deleteEntity(WebhookEntity entiry) throws LoginException, PersistenceException;
+	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException;
 	
 }

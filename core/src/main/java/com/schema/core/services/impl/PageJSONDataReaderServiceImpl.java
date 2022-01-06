@@ -21,6 +21,12 @@ import com.day.cq.search.QueryBuilder;
 import com.schema.core.services.PageJSONDataReaderService;
 import com.schema.core.util.QueryHelper;
 
+/**
+ * The <code>WebhookHandlerService</code> class used to prepare page script data.
+ * 
+ * @author nikhil
+ *
+ */
 @Component(service = PageJSONDataReaderService.class, immediate = true)
 public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService {
 
@@ -55,6 +61,12 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 		return null;
 	}
 	
+	/**
+	 * This method Get Resource Resolver instance 
+	 * 
+	 * @return
+	 * @throws LoginException
+	 */
 	private ResourceResolver getResourceResolver() throws LoginException {
 		Map<String, Object> param = new HashMap<>();
 		param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
