@@ -1,4 +1,4 @@
-package com.schema.core.util;
+package com.schemaapp.core.util;
 
 public final class Constants {
 

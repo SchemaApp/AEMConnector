@@ -1,4 +1,4 @@
-package com.schema.core.services;
+package com.schemaapp.core.services;
 
 /**
  * The <code> PageJSONDataReaderService </code> class represents to fetch page JSON-LD data.

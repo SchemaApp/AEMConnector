@@ -1,10 +1,10 @@
-package com.schema.core.services;
+package com.schemaapp.core.services;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.models.WebhookEntityResult;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.models.WebhookEntityResult;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package com.schema.core.services.impl;
+package com.schemaapp.core.services.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +24,19 @@ import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
-import com.schema.core.models.AssetFolderDefinition;
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.models.WebhookEntityResult;
-import com.schema.core.services.WebhookHandlerService;
-import com.schema.core.util.Constants;
-import com.schema.core.util.QueryHelper;
+import com.schemaapp.core.models.AssetFolderDefinition;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.util.Constants;
+import com.schemaapp.core.util.QueryHelper;
 
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
+
+	private static final String DATA = "data";
+
+	private static final String ENTITY = "entity";
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
 
@@ -71,7 +75,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				Node dataNode = createDataNode(node);
 				String nodeName = JcrUtil.createValidChildName(dataNode, entiry.getId());
 				Node pageNode = dataNode.addNode(nodeName, JcrConstants.NT_UNSTRUCTURED);
-				pageNode.setProperty("entity", entiry.getGraph().toString());
+				pageNode.setProperty(ENTITY, entiry.getGraph().toString());
 				pageNode.setProperty(Constants.ID, entiry.getId());
 				resolver.commit();
 			} catch (RepositoryException | PersistenceException e) {
@@ -85,10 +89,10 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private Node createDataNode(Node node) throws RepositoryException {
 		Node dataNode = null;
-		if (!node.hasNode("data")) {
-			dataNode = node.addNode("data", JcrConstants.NT_UNSTRUCTURED);
+		if (!node.hasNode(DATA)) {
+			dataNode = node.addNode(DATA, JcrConstants.NT_UNSTRUCTURED);
 		} else {
-			dataNode = node.getNode("data");
+			dataNode = node.getNode(DATA);
 		}
 		return dataNode;
 	}
@@ -102,7 +106,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			Node node = resource.adaptTo(Node.class);
 			try {
 				if (node != null) {
-					node.setProperty("entity", entiry.getGraph().toString());
+					node.setProperty(ENTITY, entiry.getGraph().toString());
 					node.setProperty(Constants.ID, entiry.getId());
 					resolver.commit();
 				} else {

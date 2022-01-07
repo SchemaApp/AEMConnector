@@ -1,4 +1,4 @@
-package com.schema.core.servlets;
+package com.schemaapp.core.servlets;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.models.WebhookEntityResult;
-import com.schema.core.services.WebhookHandlerService;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.services.WebhookHandlerService;
 
 /**
  * The <code>WebhooksHandlerServlet</code> class to handle webhooks API calls.
@@ -53,6 +53,7 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 	public void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response)
 			throws ServletException, IOException {
 
+		
 		final WebhookEntity entity = MAPPER.readValue(request.getReader(), WebhookEntity.class);
 		WebhookEntityResult rerult = null;
 		LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());

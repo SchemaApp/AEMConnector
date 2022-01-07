@@ -1,4 +1,4 @@
-package com.schema.core.services;
+package com.schemaapp.core.services;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,8 +32,8 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.services.impl.WebhookHandlerServiceImpl;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.services.impl.WebhookHandlerServiceImpl;
 
 @ExtendWith({ MockitoExtension.class})
 class WebhookHandlerServiceTest {

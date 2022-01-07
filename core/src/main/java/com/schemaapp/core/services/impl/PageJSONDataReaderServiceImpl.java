@@ -1,4 +1,4 @@
-package com.schema.core.services.impl;
+package com.schemaapp.core.services.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.search.QueryBuilder;
-import com.schema.core.services.PageJSONDataReaderService;
-import com.schema.core.util.QueryHelper;
+import com.schemaapp.core.services.PageJSONDataReaderService;
+import com.schemaapp.core.util.QueryHelper;
 
 /**
  * The <code>WebhookHandlerService</code> class used to prepare page script data.

@@ -1,4 +1,4 @@
-package com.schema.core.services;
+package com.schemaapp.core.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -29,7 +29,7 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
-import com.schema.core.services.impl.PageJSONDataReaderServiceImpl;
+import com.schemaapp.core.services.impl.PageJSONDataReaderServiceImpl;
 
 @ExtendWith({ MockitoExtension.class})
 class PageJSONDataReaderServiceTest {
@@ -85,7 +85,7 @@ class PageJSONDataReaderServiceTest {
 		when(node.getProperty("entity")).thenReturn(entityProperty);
 		when(entityProperty.getString()).thenReturn(GRAPH_DATA);
 
-		assertEquals(pageJSONDataReaderService.getPageData("www.demosite.com/test.html"), GRAPH_DATA);
+		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("www.demosite.com/test.html"));
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {

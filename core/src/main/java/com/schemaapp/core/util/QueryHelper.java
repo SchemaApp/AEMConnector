@@ -1,4 +1,4 @@
-package com.schema.core.util;
+package com.schemaapp.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,4 +45,6 @@ public class QueryHelper {
 		}
 		return null;
 	}
+	
+	private QueryHelper() {}
 }

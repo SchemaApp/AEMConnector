@@ -1,4 +1,4 @@
-package com.schema.core.models;
+package com.schemaapp.core.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

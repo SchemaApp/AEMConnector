@@ -4,7 +4,7 @@
                 com.day.cq.wcm.webservicesupport.Configuration,
                 com.day.cq.wcm.webservicesupport.ConfigurationManager,
                 org.apache.commons.lang.StringUtils" %>
-<%@page import="com.schema.core.services.PageJSONDataReaderService"%>
+<%@page import="com.schemaapp.core.services.PageJSONDataReaderService"%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
