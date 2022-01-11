@@ -18,10 +18,24 @@ import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 
+/**
+ * The <code> QueryHelper </code> class is utilities for AEM Query Builder.
+ * 
+ * @author nikhil
+ *
+ */
 public class QueryHelper {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QueryHelper.class);
 
+	/**
+	 * This method is used to find Entity Resource from repository using ID.
+	 *   
+	 * @param id
+	 * @param builder
+	 * @param session
+	 * @return
+	 */
 	public static Resource getResultsUsingId(String id, QueryBuilder builder, Session session) {
 
 		final Map<String, String> map = new HashMap<>();

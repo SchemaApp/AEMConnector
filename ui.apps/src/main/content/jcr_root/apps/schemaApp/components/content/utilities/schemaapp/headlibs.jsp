@@ -35,6 +35,6 @@ final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDat
 String graphData = schemaAppJSONReader.getPageData(pageURL);
 if (graphData != null) {
 %>
-<script><%=graphData%></script>
+<script type="application/json"><%=graphData%></script>
 
 <%}%>

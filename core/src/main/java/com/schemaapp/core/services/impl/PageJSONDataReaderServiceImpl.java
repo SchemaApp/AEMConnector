@@ -38,6 +38,13 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 	@Reference
 	private QueryBuilder builder;
 
+	/**
+	 * Get Page Data method used to get page specific JSON data String.
+	 * 
+	 * @param pageURL
+	 * @return
+	 */
+	@Override
 	public String getPageData(String pageUrl) {
 
 		try {

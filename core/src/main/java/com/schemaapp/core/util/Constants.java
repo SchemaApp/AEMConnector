@@ -11,6 +11,8 @@ public final class Constants {
 	public static final String INFINITE = "-1";
 	public static final String PROPERTY = "property";
 	public static final String PROPERTY_VALUE = "property.value";
+	public static final String DATA = "data";
+	public static final String ENTITY = "entity";
 	
 	private Constants() {}
 }
