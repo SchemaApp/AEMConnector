@@ -1,6 +1,6 @@
 package com.schemaapp.core.servlets;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhooksHandlerServlet.class);
-	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 	private static final JsonFactory FACTORY = new JsonFactory().disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 
 	@Reference
