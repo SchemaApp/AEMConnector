@@ -1,4 +1,6 @@
-package com.schema.core.services.impl;
+package com.schemaapp.core.services.impl;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,38 +19,28 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
-import com.day.cq.search.result.SearchResult;
-import com.schema.core.models.AssetFolderDefinition;
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.models.WebhookEntityResult;
-import com.schema.core.services.WebhookHandlerService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schemaapp.core.models.AssetFolderDefinition;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.util.Constants;
+import com.schemaapp.core.util.QueryHelper;
 
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
-	private static final String ID = "id";
-
-	private static final String CONTENT_USERGENERATED = "/content/usergenerated/content";
-
-	private static final String CONTENT_USERGENERATED_SCHEMAAPP = "/content/usergenerated/content/schemaApp";
-
-	public static final String TYPE = "type";
-	public static final String PATH = "path";
-	public static final String P_LIMIT = "p.limit";
-	public static final String INFINITE = "-1";
-	public static final String PROPERTY = "property";
-	public static final String PROPERTY_VALUE = "property.value";
-
+	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
 
@@ -71,66 +63,80 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	}
 
 	@Override
-	public WebhookEntityResult createEntity(WebhookEntity entiry) throws LoginException {
+	public WebhookEntityResult createEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
-		Resource resource = resolver.getResource(CONTENT_USERGENERATED_SCHEMAAPP);
+		Resource resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
 		if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
 			AssetFolderDefinition folderDefinition = getAssestFolderDefinition();
 			createAssetFolder(folderDefinition, resolver);
 		}
 
-		resource = resolver.getResource(CONTENT_USERGENERATED_SCHEMAAPP);
+		resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
 
 		if (resource != null) {
 			Node node = resource.adaptTo(Node.class);
 			try {
 				Node dataNode = createDataNode(node);
-				String nodeName = JcrUtil.createValidChildName(dataNode, entiry.getId());
+				String nodeName = JcrUtil.createValidChildName(dataNode, entity.getId());
 				Node pageNode = dataNode.addNode(nodeName, JcrConstants.NT_UNSTRUCTURED);
-				pageNode.setProperty("entity", entiry.getGraph().toString());
-				pageNode.setProperty(ID, entiry.getId());
+				setGraphDatatoNode(entity, pageNode);
+				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
 				return WebhookEntityResult.prepareError(errorMessage);
-			}
+			} catch (JsonProcessingException | JSONException e) {
+				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
+				LOG.error(errorMessage, e);
+				return WebhookEntityResult.prepareError(errorMessage);
+			} 
 		}
-		return WebhookEntityResult.fromEntity(entiry);
+		return WebhookEntityResult.fromEntity(entity);
+	}
+
+	private void setGraphDatatoNode(WebhookEntity entity, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
+		String graphData = MAPPER.writeValueAsString(entity.getGraph());
+		JSONArray obj = new JSONArray(graphData);
+		pageNode.setProperty(Constants.ENTITY, obj.toString());
 	}
 
 	private Node createDataNode(Node node) throws RepositoryException {
 		Node dataNode = null;
-		if (!node.hasNode("data")) {
-			dataNode = node.addNode("data", JcrConstants.NT_UNSTRUCTURED);
+		if (!node.hasNode(Constants.DATA)) {
+			dataNode = node.addNode(Constants.DATA, JcrConstants.NT_UNSTRUCTURED);
 		} else {
-			dataNode = node.getNode("data");
+			dataNode = node.getNode(Constants.DATA);
 		}
 		return dataNode;
 	}
 
 	@Override
-	public WebhookEntityResult updateEntity(WebhookEntity entiry) throws LoginException {
+	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
 		session = resolver.adaptTo(Session.class);
-		Resource resource = getResultsUsingId(entiry.getId());
+		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		if (resource != null) {
 			Node node = resource.adaptTo(Node.class);
 			try {
 				if (node != null) {
-					node.setProperty("entity", entiry.getGraph().toString());
-					node.setProperty(ID, entiry.getId());
+					setGraphDatatoNode(entity, node);
+					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
 				} else {
-					createEntity(entiry);
+					createEntity(entity);
 				}
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
 				return WebhookEntityResult.prepareError(errorMessage);
-			}
+			} catch (JsonProcessingException | JSONException e) {
+				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
+				LOG.error(errorMessage, e);
+				return WebhookEntityResult.prepareError(errorMessage);
+			} 
 		}
-		return WebhookEntityResult.fromEntity(entiry);
+		return WebhookEntityResult.fromEntity(entity);
 	}
 
 
@@ -138,7 +144,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	public WebhookEntityResult deleteEntity(WebhookEntity entiry) throws LoginException, PersistenceException {
 		ResourceResolver resolver = getResourceResolver();
 		session = resolver.adaptTo(Session.class);
-		Resource resource = getResultsUsingId(entiry.getId());
+		Resource resource = QueryHelper.getResultsUsingId(entiry.getId(), builder, session);
 		try {
 			if (resource != null) {
 				resolver.delete(resource);
@@ -154,10 +160,10 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private AssetFolderDefinition getAssestFolderDefinition() {
 		AssetFolderDefinition folderDefinition = new AssetFolderDefinition();
-		folderDefinition.setParentPath(CONTENT_USERGENERATED);
+		folderDefinition.setParentPath(Constants.CONTENT_USERGENERATED);
 		folderDefinition.setName("schemaApp");
 		folderDefinition.setTitle("Schema App");
-		folderDefinition.setPath(CONTENT_USERGENERATED_SCHEMAAPP);
+		folderDefinition.setPath(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
 		folderDefinition.setNodeType(JcrResourceConstants.NT_SLING_FOLDER);
 		return folderDefinition;
 	}
@@ -216,30 +222,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		if (!StringUtils.equals(assetFolderDefinition.getTitle(), properties.get(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, String.class))) {
 			properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
 		}
-	}
-
-	private Resource getResultsUsingId(String id) {
-
-		final Map<String, String> map = new HashMap<>();
-		map.put(TYPE, JcrConstants.NT_UNSTRUCTURED);
-		map.put(PATH, CONTENT_USERGENERATED_SCHEMAAPP);
-		map.put(PROPERTY, ID);
-		map.put(PROPERTY_VALUE, id);
-		map.put(P_LIMIT, INFINITE);
-		final Query query = builder.createQuery(PredicateGroup.create(map), session);
-		final SearchResult result = query.getResult();
-		for(Hit hit : result.getHits()) {
-			try {
-				final Resource entityResource = hit.getResource();
-				if (entityResource!= null && !ResourceUtil.isNonExistingResource(entityResource)) {
-					return entityResource;
-				}
-			}
-			catch (final RepositoryException error) {
-				LOG.error("WebhookHandlerServiceImpl > getResultsUsingId  ", error);
-			}
-		}
-		return null;
 	}
 
 }

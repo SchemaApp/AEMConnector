@@ -1,4 +1,4 @@
-package com.schema.core.servlet;
+package com.schemaapp.core.servlet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,9 +21,9 @@ import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schema.core.models.WebhookEntity;
-import com.schema.core.services.WebhookHandlerService;
-import com.schema.core.servlets.WebhooksHandlerServlet;
+import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.servlets.WebhooksHandlerServlet;
 
 @ExtendWith({ MockitoExtension.class})
 class WebhooksHandlerServletTest {
@@ -45,12 +45,15 @@ class WebhooksHandlerServletTest {
 
 	@Mock
 	private BufferedReader reader;
+	
+	@Mock
+	private WebhookEntity entity;
 
 	@Test
 	void testDoPost() throws ServletException, IOException, NoSuchFieldException, RepositoryException, LoginException {
 
-		WebhookEntity entity = new WebhookEntity();
 		when(request.getReader()).thenReturn(reader);
+		when(entity.getType()).thenReturn(new String("EntityCreated"));
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
 
 		FieldSetter.setField(servlet, servlet.getClass().getDeclaredField("MAPPER"), mockObjectMapper);

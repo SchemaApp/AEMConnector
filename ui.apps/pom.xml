@@ -82,12 +82,27 @@
                         <cloudManagerTarget>none</cloudManagerTarget>
                     </properties>
                     <embeddeds>
+                    	<embedded>
+                            <groupId>com.adobe.cq</groupId>
+                            <artifactId>core.wcm.components.core</artifactId>
+                            <target>/apps/mchp/install</target>
+                        </embedded>
                         <embedded>
                             <groupId>com.schemaApp</groupId>
                             <artifactId>schemaApp.core</artifactId>
                             <target>/apps/schemaApp/install</target>
                         </embedded>
                     </embeddeds>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.adobe.cq</groupId>
+                            <artifactId>core.wcm.components.content</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.adobe.cq</groupId>
+                            <artifactId>core.wcm.components.config</artifactId>
+                        </dependency>
+                    </dependencies>
                 </configuration>
                 
             </plugin>
