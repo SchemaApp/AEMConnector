@@ -93,7 +93,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				return WebhookEntityResult.prepareError(errorMessage);
 			} 
 		}
-		return WebhookEntityResult.fromEntity(entity);
+		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 	private void setGraphDatatoNode(WebhookEntity entity, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
@@ -138,7 +138,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				return WebhookEntityResult.prepareError(errorMessage);
 			} 
 		}
-		return WebhookEntityResult.fromEntity(entity);
+		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 
@@ -157,7 +157,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			LOG.error(errorMessage, e);
 			return WebhookEntityResult.prepareError(errorMessage);
 		}
-		return WebhookEntityResult.fromEntity(entiry);
+		return WebhookEntityResult.prepareSucessResponse(entiry);
 	}
 
 	private AssetFolderDefinition getAssestFolderDefinition() {

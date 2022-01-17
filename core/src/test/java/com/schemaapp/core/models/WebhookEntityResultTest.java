@@ -22,18 +22,18 @@ class WebhookEntityResultTest {
 
 	@Test
 	void prepareErrorTest() throws Exception {
-		WebhookEntityResult result = WebhookEntityResult.prepareError(TEST_ERROR_MESSAGE);
-		assertEquals(TEST_ERROR_MESSAGE, result.getError());
+		WebhookEntityErrorResult result = (WebhookEntityErrorResult) WebhookEntityResult.prepareError(TEST_ERROR_MESSAGE);
+		assertEquals(TEST_ERROR_MESSAGE, result.getErrorMessage());
 	}
 
 	@Test
 	void prepareResultTest() throws Exception {
 		when(entity.getId()).thenReturn(new String(ID));
 		when(entity.getType()).thenReturn(new String(TYPE));
-		WebhookEntityResult result = WebhookEntityResult.fromEntity(entity);
+		WebhookEntitySucessResult result = (WebhookEntitySucessResult) WebhookEntityResult.prepareSucessResponse(entity);
 		assertEquals(TYPE, result.getType());
 		assertEquals(ID, result.getId());
-		assertEquals("WebhookEntityResult{id=https://dell.ca/products/monitors/dellultra30, type=created, error=null}", result.toString());
+		assertEquals("WebhookEntitySucessResult{id=https://dell.ca/products/monitors/dellultra30, type=created, message=Successfully, request completed!}", result.toString());
 	}
 
 }

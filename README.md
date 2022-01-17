@@ -1,4 +1,4 @@
-# Sample AEM project template
+# Schema App AEM project
 
 This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
 
@@ -24,7 +24,7 @@ To build all the modules run in the project root directory the following command
 
 To build all the modules and deploy the `all` package to a local instance of AEM, run in the project root directory the following command:
 
-    mvn clean install -PautoInstallSinglePackage
+    mvn clean install -PautoInstallPackage
 
 Or to deploy it to a publish instance, run
 

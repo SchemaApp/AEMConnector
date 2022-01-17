@@ -12,7 +12,7 @@ public class WebhookEntity {
 
 	@JsonProperty(value="@context", required = true)
 	private Context context;
-	
+
 	@JsonProperty(value="@type", required = true)
 	private String type;
 
