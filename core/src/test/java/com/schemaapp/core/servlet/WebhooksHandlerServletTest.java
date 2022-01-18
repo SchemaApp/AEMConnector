@@ -29,7 +29,7 @@ import com.schemaapp.core.servlets.WebhooksHandlerServlet;
 @ExtendWith({ MockitoExtension.class})
 class WebhooksHandlerServletTest {
 
-	private static final String JSONL_D = "{\"@context\":{\"@vocab\":\"http://hunchmanifest.com/ontology/Application#\",\"generatedAtTime\":\"http://www.w3.org/ns/prov#generatedAtTime\"},\"@type\":\"EntityCreated\",\"@id\":\"http://localhost:4502/page33\",\"base64encode\":\"aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"url\":\"https://data.schemaapp.com/ACCOUNTID/aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"generatedAtTime\":\"2018-02-15T10:20:00Z\",\"@graph\":[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]}";
+	private static final String JSON_LD = "{\"@context\":{\"@vocab\":\"http://hunchmanifest.com/ontology/Application#\",\"generatedAtTime\":\"http://www.w3.org/ns/prov#generatedAtTime\"},\"@type\":\"EntityCreated\",\"@id\":\"http://localhost:4502/page33\",\"base64encode\":\"aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"url\":\"https://data.schemaapp.com/ACCOUNTID/aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"generatedAtTime\":\"2018-02-15T10:20:00Z\",\"@graph\":[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]}";
 
 	@InjectMocks
 	private final WebhooksHandlerServlet servlet = new WebhooksHandlerServlet();
@@ -71,7 +71,7 @@ class WebhooksHandlerServletTest {
 	@Test
 	void testDoPostException() throws ServletException, IOException, NoSuchFieldException, LoginException {
 
-		final WebhookEntity entity = MAPPER.readValue(JSONL_D, WebhookEntity.class);
+		final WebhookEntity entity = MAPPER.readValue(JSON_LD, WebhookEntity.class);
 		when(request.getReader()).thenReturn(reader);
 		when(mockObjectMapper.readValue(reader, WebhookEntity.class)).thenReturn(entity);
 

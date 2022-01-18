@@ -42,7 +42,7 @@ property={
 })
 public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 
-	private static final String INVALID_JSONL_D_MESSAGE = "Invalid JSONL-D Data, Unable to parse.";
+	private static final String INVALID_JSON_LD_MESSAGE = "Invalid JSONL-D Data, Unable to parse.";
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,9 +71,9 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while creating entity", e);
 			response.setStatus(500);	
 		} catch (IOException e) {
-			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSONL-D Data", e);
+			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSON-LD Data", e);
 			response.setStatus(400);
-			rerult = WebhookEntityResult.prepareError(INVALID_JSONL_D_MESSAGE);
+			rerult = WebhookEntityResult.prepareError(INVALID_JSON_LD_MESSAGE);
 		} catch (MissingWebhookEntityAttributesException e) {
 			response.setStatus(400);
 			rerult = WebhookEntityResult.prepareError(e.getMessage());
