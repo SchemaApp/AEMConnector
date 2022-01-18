@@ -1,6 +1,85 @@
+// Copyright (C) 2012 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
 package com.schemaapp.core.util;
 import java.math.BigInteger;
 
+/**
+ * Given JSON-like content, converts it to valid JSON. This can be attached at
+ * either end of a data-pipeline to help satisfy Postel's principle:
+ * <blockquote> be conservative in what you do, be liberal in what you accept
+ * from others </blockquote>
+ * <p>
+ * Applied to JSON-like content from others, it will produce well-formed JSON
+ * that should satisfy any parser you use.
+ * <p>
+ * Applied to your output before you send, it will coerce minor mistakes in
+ * encoding and make it easier to embed your JSON in HTML and XML.
+ *
+ * <h2>Input</h2> The sanitizer takes JSON like content, and interprets it as JS
+ * eval would. Specifically, it deals with these non-standard constructs.
+ * <ul>
+ * <li>{@code '...'} Single quoted strings are converted to JSON strings.
+ * <li>{@code \xAB} Hex escapes are converted to JSON unicode escapes.
+ * <li>{@code \012} Octal escapes are converted to JSON unicode escapes.
+ * <li>{@code 0xAB} Hex integer literals are converted to JSON decimal numbers.
+ * <li>{@code 012} Octal integer literals are converted to JSON decimal numbers.
+ * <li>{@code +.5} Decimal numbers are coerced to JSON's stricter format.
+ * <li>{@code [0,,2]} Elisions in arrays are filled with {@code null}.
+ * <li>{@code [1,2,3,]} Trailing commas are removed.
+ * <li><code>{foo:"bar"}</code> Unquoted property names are quoted.
+ * <li><code>//comments</code> JS style line and block comments are removed.
+ * <li><code>(...)</code> Grouping parentheses are removed.
+ * </ul>
+ *
+ * The sanitizer fixes missing punctuation, end quotes, and mismatched or
+ * missing close brackets. If an input contains only white-space then the valid
+ * JSON string {@code null} is substituted.
+ *
+ * <h2>Output</h2> The output is well-formed JSON as defined by
+ * <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>. The output
+ * satisfies three additional properties:
+ * <ol>
+ * <li>The output will not contain the substring (case-insensitively)
+ * {@code "</script"} so can be embedded inside an HTML script element without
+ * further encoding.<li>The output will not contain the substring {@code "]]>"}
+ * so can be embedded inside an XML CDATA section without further encoding.</li>
+ * <li>The output is a valid Javascript expression, so can be parsed by
+ * Javascript's <code>eval</code> builtin (after being wrapped in parentheses)
+ * or by <code>JSON.parse</code>. Specifically, the output will not contain any
+ * string literals with embedded JS newlines (U+2028 Paragraph separator or
+ * U+2029 Line separator).
+ * <li>The output contains only valid Unicode scalar values (no isolated UTF-16
+ * surrogates) that are <a href="http://www.w3.org/TR/xml/#charsets">allowed in
+ * XML</a> unescaped.
+ * </ol>
+ *
+ * <h2>Security</h2> Since the output is well-formed JSON, passing it to
+ * <code>eval</code> will have no side-effects and no free variables, so is
+ * neither a code-injection vector, nor a vector for exfiltration of secrets.
+ *
+ * <p>
+ * This library only ensures that the JSON string &rarr; Javascript object phase
+ * has no side effects and resolves no free variables, and cannot control how
+ * other client side code later interprets the resulting Javascript object. So
+ * if client-side code takes a part of the parsed data that is controlled by an
+ * attacker and passes it back through a powerful interpreter like {@code eval}
+ * or {@code innerHTML} then that client-side code might suffer unintended
+ * side-effects.
+ *
+ * <h2>Efficiency</h2> The sanitize method will return the input string without
+ * allocating a new buffer when the input is already valid JSON that satisfies
+ * the properties above. Thus, if used on input that is usually well formed, it
+ * has minimal memory overhead.
+ * <p>
+ * The sanitize method takes O(n) time where n is the length in UTF-16
+ * code-units.
+ */
 public final class JsonSanitizer {
 
 	public static final int DEFAULT_NESTING_DEPTH = 64;
@@ -25,10 +104,25 @@ public final class JsonSanitizer {
 		return s.toString();
 	}
 
+	/**
+	   * Given JSON-like content, produces a string of JSON that is safe to embed,
+	   * safe to pass to JavaScript's {@code eval} operator.
+	   *
+	   * @param jsonish JSON-like content.
+	   * @return embeddable JSON
+	   */
 	JsonSanitizer(final String jsonish) {
 		this(jsonish, 64);
 	}
 
+	 /**
+	   * Same as {@link JsonSanitizer#sanitize(String)}, but allows to set a custom
+	   * maximum nesting depth.
+	   *
+	   * @param jsonish JSON-like content.
+	   * @param maximumNestingDepth maximum nesting depth.
+	   * @return embeddable JSON
+	   */
 	JsonSanitizer(final String jsonish, final int maximumNestingDepth) {
 		this.maximumNestingDepth = Math.min(Math.max(1, maximumNestingDepth), 4096);
 		this.jsonish = ((jsonish != null) ? jsonish : "null");
@@ -275,6 +369,22 @@ public final class JsonSanitizer {
 		}
 	}
 
+	/**
+	   * Ensures that the output corresponding to {@code jsonish[start:end]} is a
+	   * valid JSON string that has the same meaning when parsed by Javascript
+	   * {@code eval}.
+	   * <ul>
+	   *   <li>Making sure that it is fully quoted with double-quotes.
+	   *   <li>Escaping any Javascript newlines : CR, LF, U+2028, U+2029
+	   *   <li>Escaping HTML special characters to allow it to be safely embedded
+	   *       in HTML {@code <script>} elements and XML {@code <!CDATA[...]]>}
+	   *       sections.
+	   *   <li>Rewrite hex, octal, and other escapes that are valid in Javascript
+	   *       but not in JSON.
+	   * </ul>
+	   * @param start inclusive
+	   * @param end   exclusive
+	   */
 	private void sanitizeString(final int start, final int end) {
 		boolean closed = false;
 		for (int i = start; i < end; ++i) {

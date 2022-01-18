@@ -72,10 +72,10 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 			response.setStatus(500);	
 		} catch (IOException e) {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSONL-D Data", e);
-			response.setStatus(500);
+			response.setStatus(400);
 			rerult = WebhookEntityResult.prepareError(INVALID_JSONL_D_MESSAGE);
 		} catch (MissingWebhookEntityAttributesException e) {
-			response.setStatus(500);
+			response.setStatus(400);
 			rerult = WebhookEntityResult.prepareError(e.getMessage());
 		}
 
