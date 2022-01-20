@@ -9,7 +9,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -35,6 +35,7 @@ import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.Constants;
+import com.schemaapp.core.util.JsonSanitizer;
 import com.schemaapp.core.util.QueryHelper;
 
 @Component(service = WebhookHandlerService.class, immediate = true)
@@ -92,13 +93,14 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				return WebhookEntityResult.prepareError(errorMessage);
 			} 
 		}
-		return WebhookEntityResult.fromEntity(entity);
+		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 	private void setGraphDatatoNode(WebhookEntity entity, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
 		String graphData = MAPPER.writeValueAsString(entity.getGraph());
 		JSONArray obj = new JSONArray(graphData);
-		pageNode.setProperty(Constants.ENTITY, obj.toString());
+		String wellFormedJson = JsonSanitizer.sanitize(obj.toString());
+		pageNode.setProperty(Constants.ENTITY, wellFormedJson);
 	}
 
 	private Node createDataNode(Node node) throws RepositoryException {
@@ -136,7 +138,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				return WebhookEntityResult.prepareError(errorMessage);
 			} 
 		}
-		return WebhookEntityResult.fromEntity(entity);
+		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 
@@ -155,7 +157,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			LOG.error(errorMessage, e);
 			return WebhookEntityResult.prepareError(errorMessage);
 		}
-		return WebhookEntityResult.fromEntity(entiry);
+		return WebhookEntityResult.prepareSucessResponse(entiry);
 	}
 
 	private AssetFolderDefinition getAssestFolderDefinition() {

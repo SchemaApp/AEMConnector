@@ -1,6 +1,6 @@
 package com.schemaapp.core.servlets;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
 
 import java.io.IOException;
 
@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schemaapp.core.exception.MissingWebhookEntityAttributesException;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.util.Validator;
 
 /**
  * The <code>WebhooksHandlerServlet</code> class to handle webhooks API calls.
@@ -40,10 +42,13 @@ property={
 })
 public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 
+	private static final String INVALID_JSON_LD_MESSAGE = "Invalid JSONL-D Data, Unable to parse.";
+
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhooksHandlerServlet.class);
-	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+	private static ObjectMapper mapperObject = new ObjectMapper().configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+
 	private static final JsonFactory FACTORY = new JsonFactory().disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 
 	@Reference
@@ -55,34 +60,35 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 
 		WebhookEntityResult rerult = null;
 		try {
-			final WebhookEntity entity = MAPPER.readValue(request.getReader(), WebhookEntity.class);
+			final WebhookEntity entity = mapperObject.readValue(request.getReader(), WebhookEntity.class);
 			LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());
-			if (entity.getType() != null) {
+			if (Validator.validateEntity(entity)) {
 				if (entity.getType().equals("EntityCreated")) rerult = webhookHandlerService.createEntity(entity);
 				if (entity.getType().equals("EntityUpdated")) rerult = webhookHandlerService.updateEntity(entity);
 				if (entity.getType().equals("EntityDeleted")) rerult = webhookHandlerService.deleteEntity(entity);
-			} else {
-				rerult = WebhookEntityResult.prepareError("Missing Required fields");
-			}
+			} 
 		} catch (LoginException e) {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while creating entity", e);
 			response.setStatus(500);	
 		} catch (IOException e) {
-			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSONL-D Data", e);
-			response.setStatus(500);
-			rerult = WebhookEntityResult.prepareError("Invalid JSONL-D Data, Unable to parse.");
+			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSON-LD Data", e);
+			response.setStatus(400);
+			rerult = WebhookEntityResult.prepareError(INVALID_JSON_LD_MESSAGE);
+		} catch (MissingWebhookEntityAttributesException e) {
+			response.setStatus(400);
+			rerult = WebhookEntityResult.prepareError(e.getMessage());
 		}
 
 		writeJsonResponse(response, rerult);
 	}
-
+	
 	private void writeJsonResponse(final SlingHttpServletResponse response, final Object object) throws IOException {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
 		try {
 			final JsonGenerator generator = FACTORY.createGenerator(response.getWriter());
-			MAPPER.writeValue(generator, object);
+			mapperObject.writeValue(generator, object);
 		} catch (IOException e) {
 			throw new IOException("error writing JSON response", e);
 		}
