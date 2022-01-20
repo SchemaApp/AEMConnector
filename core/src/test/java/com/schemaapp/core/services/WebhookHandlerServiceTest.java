@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -73,6 +74,9 @@ class WebhookHandlerServiceTest {
 	
 	@Mock
 	private Node node;
+	
+	@Mock
+	private FlushService flushService;
 
 	@InjectMocks
 	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
