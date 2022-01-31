@@ -28,6 +28,9 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService;
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.FlushType;
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.RefetchType;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -40,10 +43,10 @@ import com.schemaapp.core.services.impl.WebhookHandlerServiceImpl;
 @ExtendWith({ MockitoExtension.class})
 class WebhookHandlerServiceTest {
 
-	private static final String GRAPH_DATA = "[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]";
-
 	private static final String JSON_LD = "{\"@context\":{\"@vocab\":\"http://hunchmanifest.com/ontology/Application#\",\"generatedAtTime\":\"http://www.w3.org/ns/prov#generatedAtTime\"},\"@type\":\"EntityCreated\",\"@id\":\"http://localhost:4502/page33\",\"base64encode\":\"aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"url\":\"https://data.schemaapp.com/ACCOUNTID/aHR0cHM6Ly9kZWxsLmNhL3Byb2R1Y3RzL21vbml0b3JzL2RlbGx1bHRyYTMw\",\"generatedAtTime\":\"2018-02-15T10:20:00Z\",\"@graph\":[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]}";
 
+	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
+	
 	@Mock
 	private ResourceResolver resolver;
 
@@ -73,6 +76,9 @@ class WebhookHandlerServiceTest {
 	
 	@Mock
 	private Node node;
+	
+	@Mock
+	private FlushService flushService;
 
 	@InjectMocks
 	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
@@ -85,13 +91,15 @@ class WebhookHandlerServiceTest {
 		mockResolver();
 		when(resource.getResourceType()).thenReturn("sling:nonexisting");
 		when(resolver.getResource(anyString())).thenReturn(resource);
-		when(entity.getGraph()).thenReturn(new String(GRAPH_DATA));
+		final WebhookEntity mockEntity = MAPPER.readValue(JSON_LD, WebhookEntity.class);
+		when(entity.getGraph()).thenReturn(mockEntity.getGraph());
 		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
 		when(resource.adaptTo(Node.class)).thenReturn(node);
 		when(node.addNode(anyString(), eq(JcrConstants.NT_UNSTRUCTURED))).thenReturn(node);
 		
 		webhookHandlerService.createEntity(entity);
-		verify(resolver, times(1)).commit();
+		verify(resolver, times(2)).commit();
+		verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 	}
 	
 	@Test
@@ -112,6 +120,7 @@ class WebhookHandlerServiceTest {
 		
 		webhookHandlerService.updateEntity(entity);
 		verify(resolver, times(1)).commit();
+		verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 	}
 	
 	@Test

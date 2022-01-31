@@ -26,6 +26,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService;
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.FlushType;
+import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.RefetchType;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,6 +44,8 @@ import com.schemaapp.core.util.QueryHelper;
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
+	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
+
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
@@ -50,6 +55,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	@Reference
 	private QueryBuilder builder;
+	
+	@Reference
+	private FlushService flushService;
 
 	private Session session;
 
@@ -83,6 +91,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				setGraphDatatoNode(entity, pageNode);
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
+				
+				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -125,9 +135,11 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
+					flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 				} else {
 					createEntity(entity);
 				}
+				
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -143,21 +155,24 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 
 	@Override
-	public WebhookEntityResult deleteEntity(WebhookEntity entiry) throws LoginException, PersistenceException {
+	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
 		ResourceResolver resolver = getResourceResolver();
 		session = resolver.adaptTo(Session.class);
-		Resource resource = QueryHelper.getResultsUsingId(entiry.getId(), builder, session);
+		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		try {
 			if (resource != null) {
 				resolver.delete(resource);
 				resolver.commit();
+				
+				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			}
+			
 		} catch (PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 			LOG.error(errorMessage, e);
 			return WebhookEntityResult.prepareError(errorMessage);
 		}
-		return WebhookEntityResult.prepareSucessResponse(entiry);
+		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 	private AssetFolderDefinition getAssestFolderDefinition() {
