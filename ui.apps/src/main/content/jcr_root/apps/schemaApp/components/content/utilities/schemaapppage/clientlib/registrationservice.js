@@ -1,11 +1,17 @@
 CQ.SchemaAppRegistrationService = CQ.SchemaAppRegistrationService || {};
 CQ.SchemaAppRegistrationService.showButtonIndicator = function(dialog, isShown) {
     if (!isShown) {
-        CQ.Ext.Msg.wait(CQ.I18n.getMessage("Connection successful")).hide();
+        CQ.Ext.Msg.wait(CQ.I18n.getMessage("Registration complete")).hide();
     } else {
         CQ.Ext.Msg.wait(CQ.I18n.getMessage("Connecting to server..."));
     }
 }
+
+/**
+ * doConnect function used to connect Schema App and register the Account.
+ * @param  {[type]} dialog [dialog reference object ]
+ * 
+ */
 CQ.SchemaAppRegistrationService.doConnect = function(dialog) {
     var that = this;
     var apiKey = dialog.find("name", "./apiKey")[0];
@@ -16,6 +22,12 @@ CQ.SchemaAppRegistrationService.doConnect = function(dialog) {
 
     this.showButtonIndicator(dialog, true);
 
+	/**
+	 * fieldEmpty function used to field empty or not. if empty, display alert box with error message.
+	 * @param  {[type]} field [field object ]
+	 * @param  {[type]} msg [Error message to display if field value is empty]
+	 * 
+	 */
     function fieldEmpty(field, msg) {
         if (!field || field.getValue() == "") {
             that.showButtonIndicator(dialog, false);
@@ -25,18 +37,18 @@ CQ.SchemaAppRegistrationService.doConnect = function(dialog) {
         return false;
     }
 
-    if (fieldEmpty(apiKey, CQ.I18n.getMessage("Please enter the apiKey.")) ||
-        fieldEmpty(accountID, CQ.I18n.getMessage("Please enter the accountID.")) ||
-        fieldEmpty(endpoint, CQ.I18n.getMessage("Please select the siteURL."))) {
+    if (fieldEmpty(apiKey, CQ.I18n.getMessage("Please enter the API Key.")) ||
+        fieldEmpty(accountID, CQ.I18n.getMessage("Please enter the Account ID.")) ||
+        fieldEmpty(endpoint, CQ.I18n.getMessage("Please select the site URL."))) {
         return;
     }
 
     that.showButtonIndicator(dialog, false);
 
-    var akey = encodeURIComponent(apiKey.getValue());
-    var aID = accountID.getValue();
+    var apiKeyValue = encodeURIComponent(apiKey.getValue());
+    var accountIdValue = accountID.getValue();
     var siteurl = endpoint.getValue();
-    var checkUrl = CQ.shared.HTTP.externalize("https://app.schemaapp.com/register/plugin", true);
+    var schemaAppRegistrationEndpoint = CQ.shared.HTTP.externalize("https://app.schemaapp.com/register/plugin", true);
     siteurl = siteurl.replace(/\/$/, "");
 
 
@@ -48,22 +60,21 @@ CQ.SchemaAppRegistrationService.doConnect = function(dialog) {
 
 
     $CQ.ajax({
-        url: checkUrl,
+        url: schemaAppRegistrationEndpoint,
         type: "POST",
         headers: {
             "Accept": "application/json; charset=utf-8",
             "Content-Type": "application/json; charset=utf-8",
-            "x-api-key": akey,
-            "x-account-id": aID
+            "x-api-key": apiKeyValue,
+            "x-account-id": accountIdValue
         },
         data: JSON.stringify(data),
         dataType: "json",
         success: function(data) {
-            console.info(data);
-             CQ.cloudservices.getEditOk().enable();
+            CQ.cloudservices.getEditOk().enable();
             CQ.Ext.Msg.show({
                 "title": CQ.I18n.getMessage("Success"),
-                "msg": CQ.I18n.getMessage("Connection tested successfully."),
+                "msg": CQ.I18n.getMessage("Your site has been registered with Schema App."),
                 "buttons": CQ.Ext.Msg.OK,
                 "icon": CQ.Ext.Msg.INFO
             });

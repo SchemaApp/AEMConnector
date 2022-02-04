@@ -12,27 +12,27 @@
                     jcr:primaryType="cq:Widget"
                     allowBlank="{Boolean}false"
                     fieldLabel="API Key"
-                    id="sapp-apikey"
+                    id="schema-app-apikey"
                     name="./apiKey"
                     xtype="textfield">
                     <listeners
                         jcr:primaryType="nt:unstructured"
                         change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
-                        invalid="function(cmp) { CQ.Ext.getCmp('sapp-connect').disable(); }"
-                        valid="function(cmp) {var apikey = CQ.Ext.getCmp('sapp-apikey');var accoutkey = CQ.Ext.getCmp('sapp-accountid');var url = CQ.Ext.getCmp('sapp-siteurl');if (cmp.isValid() &amp;&amp; apikey.isValid() &amp;&amp; accoutkey.isValid() &amp;&amp; url.isValid()) {CQ.Ext.getCmp('sapp-connect').enable();}}"/>
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp) {var apikey = CQ.Ext.getCmp('schema-app-apikey');var accoutkey = CQ.Ext.getCmp('schema-app-accountid');var url = CQ.Ext.getCmp('schema-app-siteurl');if (cmp.isValid() &amp;&amp; apikey.isValid() &amp;&amp; accoutkey.isValid() &amp;&amp; url.isValid()) {CQ.Ext.getCmp('schema-app-connect').enable();}}"/>
                 </apiKey>
                 <accountID
                     jcr:primaryType="cq:Widget"
                     allowBlank="{Boolean}false"
                     fieldLabel="Accunt ID"
-                    id="sapp-accountid"
+                    id="schema-app-accountid"
                     name="./accountID"
                     xtype="textfield">
                     <listeners
                         jcr:primaryType="nt:unstructured"
                         change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
-                        invalid="function(cmp) { CQ.Ext.getCmp('sapp-connect').disable(); }"
-                        valid="function(cmp){ var accoutkey = CQ.Ext.getCmp('sapp-accountid');var apikey = CQ.Ext.getCmp('sapp-apikey'); var url = CQ.Ext.getCmp('sapp-siteurl'); if (cmp.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid() &amp;&amp; url.isValid()) { CQ.Ext.getCmp('sapp-connect').enable(); } }"/>
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp){ var accoutkey = CQ.Ext.getCmp('schema-app-accountid');var apikey = CQ.Ext.getCmp('schema-app-apikey'); var url = CQ.Ext.getCmp('schema-app-siteurl'); if (cmp.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid() &amp;&amp; url.isValid()) { CQ.Ext.getCmp('schema-app-connect').enable(); } }"/>
                 </accountID>
                 <siteURL
                     jcr:primaryType="cq:Widget"
@@ -40,14 +40,14 @@
                     fieldLabel="AEM Publisher Site URL"
 					regex="/^(https?:\\/\\/)(([\\da-z\\.-]+)\\.([a-z\\.]{2,6})|localhost|\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b)(:[0-9]{1,5})?([\\/\\w \\.-]*)*\\/?$/"
 					regexText="The provided input is not a valid URL."
-                    id="sapp-siteurl"
+                    id="schema-app-siteurl"
                     name="./siteURL"
                     xtype="textfield">
                     <listeners
                         jcr:primaryType="nt:unstructured"
                         change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
-                        invalid="function(cmp) { CQ.Ext.getCmp('sapp-connect').disable(); }"
-                        valid="function(cmp){ var url = CQ.Ext.getCmp('sapp-siteurl'); var apikey = CQ.Ext.getCmp('sapp-apikey');var accoutkey = CQ.Ext.getCmp('sapp-accountid'); if (cmp.isValid() &amp;&amp; url.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid()) { CQ.Ext.getCmp('sapp-connect').enable(); } }"/>
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp){ var url = CQ.Ext.getCmp('schema-app-siteurl'); var apikey = CQ.Ext.getCmp('schema-app-apikey');var accoutkey = CQ.Ext.getCmp('schema-app-accountid'); if (cmp.isValid() &amp;&amp; url.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid()) { CQ.Ext.getCmp('schema-app-connect').enable(); } }"/>
                 </siteURL>
                 <btnpanel
                     jcr:primaryType="cq:Widget"
@@ -57,7 +57,7 @@
                         <connectbutton
                             jcr:primaryType="cq:Widget"
                             disabled="true"
-                            id="sapp-connect"
+                            id="schema-app-connect"
                             localName="connectButton"
                             style="float:right;"
                             text="Connect to Schema App"

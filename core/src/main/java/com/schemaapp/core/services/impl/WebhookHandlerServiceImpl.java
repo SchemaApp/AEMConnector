@@ -21,6 +21,7 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -108,8 +109,15 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private void setGraphDatatoNode(WebhookEntity entity, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
 		String graphData = MAPPER.writeValueAsString(entity.getGraph());
-		JSONArray obj = new JSONArray(graphData);
-		String wellFormedJson = JsonSanitizer.sanitize(obj.toString());
+		String wellFormedJson = null;
+		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
+			JSONArray obj = new JSONArray(graphData);
+			wellFormedJson = JsonSanitizer.sanitize(obj.toString());
+		} else {
+			JSONObject graphJsonObject = new JSONObject(graphData);
+			wellFormedJson = JsonSanitizer.sanitize(graphJsonObject.toString());
+
+		}	
 		pageNode.setProperty(Constants.ENTITY, wellFormedJson);
 	}
 
@@ -128,28 +136,27 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		ResourceResolver resolver = getResourceResolver();
 		session = resolver.adaptTo(Session.class);
 		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
-		if (resource != null) {
-			Node node = resource.adaptTo(Node.class);
-			try {
+		try {
+			if (resource != null) {
+				Node node = resource.adaptTo(Node.class);
 				if (node != null) {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
 					flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
-				} else {
-					createEntity(entity);
-				}
-				
-			} catch (RepositoryException | PersistenceException e) {
-				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
-				LOG.error(errorMessage, e);
-				return WebhookEntityResult.prepareError(errorMessage);
-			} catch (JsonProcessingException | JSONException e) {
-				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
-				LOG.error(errorMessage, e);
-				return WebhookEntityResult.prepareError(errorMessage);
-			} 
-		}
+				} 
+			} else {
+				createEntity(entity);
+			}
+		} catch (RepositoryException | PersistenceException e) {
+			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
+			LOG.error(errorMessage, e);
+			return WebhookEntityResult.prepareError(errorMessage);
+		} catch (JsonProcessingException | JSONException e) {
+			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
+			LOG.error(errorMessage, e);
+			return WebhookEntityResult.prepareError(errorMessage);
+		} 
 		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
