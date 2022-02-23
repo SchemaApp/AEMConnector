@@ -24,7 +24,7 @@
                 <accountID
                     jcr:primaryType="cq:Widget"
                     allowBlank="{Boolean}false"
-                    fieldLabel="Accunt ID"
+                    fieldLabel="Account ID"
                     id="schema-app-accountid"
                     name="./accountID"
                     xtype="textfield">

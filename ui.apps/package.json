@@ -1,0 +1,18 @@
+{
+  "name": "com.sourcedcode",
+  "version": "1.0.0",
+  "description": "This is an example of testing AEM component's clientlib (with JavaScript) using NodeJS and maven build",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "author": "SourcedCode",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-jest": "^23.6.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "jest": "^23.6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1"
+  }
+}
