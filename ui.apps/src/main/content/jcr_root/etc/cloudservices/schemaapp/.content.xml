@@ -2,20 +2,12 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
     jcr:mixinTypes="[rep:AccessControllable]"
     jcr:primaryType="cq:Page">
-    <jcr:content
-        cq:lastModified="{Date}2011-09-26T13:32:27.764+02:00"
-        cq:lastModifiedBy="admin"
+    <jcr:content      
         cq:template="/libs/cq/cloudserviceconfigs/templates/servicepage"
-        jcr:description="Unleash the Power of Structured Data."
         jcr:primaryType="cq:PageContent"
         jcr:title="Schema App"
         sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
-        componentReference="/apps/schemaApp/components/content/utilities/schemaapp"
-        description="Focus on customer experiences. We'll take care of the code."
-        inclusionRank="{Long}300"
-        ranking="100"
-        serviceAdminUrl="https://app.schemaapp.com/login"
-        serviceUrl="https://www.schemaapp.com"
+        componentReference="/apps/schemaApp/components/content/utilities/schemaapp"       
         thumbnailPath="/apps/schemaApp/components/content/utilities/schemaapp/thumbnail.png"/>
     <rep:policy/>
 </jcr:root>

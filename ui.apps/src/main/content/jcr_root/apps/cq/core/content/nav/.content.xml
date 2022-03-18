@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    id="root">
+    <projects/>
+    <sites/>
+    <experiencefragments/>
+    <assets/>
+    <personalization/>
+    <tools
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Tools"
+        id="cq-tools"
+        order="{Long}200">
+        <general/>
+        <workflow/>
+        <operations/>
+        <sites/>
+        <assets/>
+        <resources/>
+        <deployment/>
+        <security/>
+        <cloudservices
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Cloud Services"
+            id="cq-touch-cloudservices">
+            <cloudservices/>
+            <translationCloudServices/>
+            <youtube/>
+            <scene7/>
+            <dmscene7/>
+            <dynamicmedia/>
+            <stock/>
+            <adobelaunch/>
+            <typekitlaunch/>
+            <recaptchalaunch/>
+            <facebookconnect/>
+            <twitterconnect/>
+            <pinterestconnect/>
+            <schemaAppconfig
+                jcr:description="Schema App Cloud Service Configuration"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Schema App Cloud Service Configuration"
+                href="/apps/schemaApp/utilities/schemaAppcloudconfig.html/etc/cloudservices/schemaapp"
+                icon="cloud"/>
+        </cloudservices>
+        <communities/>
+        <commerce/>
+    </tools>
+    <communities/>
+    <commerce/>
+    <screens/>
+    <forms/>
+</jcr:root>
