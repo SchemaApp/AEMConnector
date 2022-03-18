@@ -43,12 +43,6 @@
         <bnd.version>5.0.0</bnd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-         <!-- custom properties -->
-	    <skipTests>false</skipTests>
-	    <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
-	    <node.version>v10.15.0</node.version>
-	    <npm.version>6.5.0</npm.version>
     </properties>
 
     <build>
