@@ -44,7 +44,7 @@
                             jcr:primaryType="nt:unstructured"
                             jcr:title="Schema App Cloud Service Configuration"
                             sling:resourceType="granite/ui/components/coral/foundation/wizard"
-                            cancelHref="${empty header.Referer ? granite:encodeURIPath(&quot;/apps/schemaApp/utilities/schemaAppcloudconfig.html/etc/cloudservices/schemaapp&quot;) : header.Referer}">
+                            cancelHref="${empty header.Referer ? granite:encodeURIPath(&quot;/apps/schemaapp/utilities/schemaappcloudconfig.html/etc/cloudservices/schemaapp&quot;) : header.Referer}">
                             <items jcr:primaryType="nt:unstructured">
                                 <editingStep
                                     jcr:primaryType="nt:unstructured"
@@ -58,7 +58,13 @@
                                                 <propColumn
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/coral/foundation/container">
-                                                    <items jcr:primaryType="nt:unstructured">                                                       
+                                                    <items jcr:primaryType="nt:unstructured">      
+                                                   		 <title
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            fieldLabel="Title"
+                                                            name="./jcr:title"
+                                                            required="{Boolean}true"/>                                                 
                                                         <apiKey
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
@@ -78,7 +84,14 @@
 															fieldDescription="Define the relative path (no leading slash) to /home/users in which registered users will be created in AEM User Directory."
                                                             fieldLabel="Path in AEM User Directory"
 															required="{Boolean}true"
-                                                            name="./siteURL"/>                                                       
+                                                            name="./siteURL"/> 
+                                                        <connect
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                                            text="Connect to Schema App"	
+                                                            granite:class="cq-confadmin-schema-app-connect"															
+															variant="primary"
+                                                            name="./siteURL"/>                                                              
                                                     </items>
                                                 </propColumn>
                                             </items>
@@ -86,7 +99,7 @@
                                     </items>
                                     <parentConfig jcr:primaryType="nt:unstructured">
                                         <next
-                                            granite:class="foundation-wizard-control dmconfig-submit-btn"
+                                            granite:class="foundation-wizard-control dmconfig-sa-submit-btn"
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             text="Save"

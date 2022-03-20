@@ -7,7 +7,7 @@
         jcr:primaryType="cq:PageContent"
         jcr:title="Schema App"
         sling:resourceType="cq/cloudserviceconfigs/components/servicepage"
-        componentReference="/apps/schemaApp/components/content/utilities/schemaapp"       
-        thumbnailPath="/apps/schemaApp/components/content/utilities/schemaapp/thumbnail.png"/>
+        componentReference="/apps/schemaApp/registration/components/schemaapp"       
+        thumbnailPath="/apps/schemaApp/registration/components/schemaapp/thumbnail.png"/>
     <rep:policy/>
 </jcr:root>
