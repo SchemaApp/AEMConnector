@@ -1,9 +1,6 @@
-const CQ = CQ || {};
-const $CQ = $CQ || {};
 CQ.SchemaAppRegistrationService = CQ.SchemaAppRegistrationService || {};
-
-function errorHandler(isShown) {
- if (!isShown) {
+CQ.SchemaAppRegistrationService.showButtonIndicator = function(isShown) {
+    if (!isShown) {
         CQ.Ext.Msg.wait(CQ.I18n.getMessage("Registration complete")).hide();
     } else {
         CQ.Ext.Msg.wait(CQ.I18n.getMessage("Connecting to server..."));
@@ -15,13 +12,15 @@ function errorHandler(isShown) {
  * @param  {[type]} dialog [dialog reference object ]
  * 
  */
-function register(dialog) {
+CQ.SchemaAppRegistrationService.doConnect = function(dialog) {
     var that = this;
     var apiKey = dialog.find("name", "./apiKey")[0];
     var accountID = dialog.find("name", "./accountID")[0];
     var endpoint = dialog.find("name", "./siteURL")[0];
 
-    errorHandler(true);
+
+
+    this.showButtonIndicator(true);
 
 	/**
 	 * fieldEmpty function used to field empty or not. if empty, display alert box with error message.
@@ -31,7 +30,7 @@ function register(dialog) {
 	 */
     function fieldEmpty(field, msg) {
         if (!field || field.getValue() == "") {
-            errorHandler(false);
+            that.showButtonIndicator(false);
             CQ.Ext.Msg.alert(CQ.I18n.getMessage("Error"), msg);
             return true;
         }
@@ -44,7 +43,7 @@ function register(dialog) {
         return;
     }
 
-    errorHandler(false);
+    that.showButtonIndicator(false);
 
     var apiKeyValue = encodeURIComponent(apiKey.getValue());
     var accountIdValue = accountID.getValue();
@@ -85,6 +84,3 @@ function register(dialog) {
     	}
     });
 };
-
-CQ.SchemaAppRegistrationService.showButtonIndicator = errorHandler;
-CQ.SchemaAppRegistrationService.doConnect = register;
