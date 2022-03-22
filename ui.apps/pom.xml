@@ -93,16 +93,6 @@
                             <target>/apps/schemaApp/install</target>
                         </embedded>
                     </embeddeds>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.cq</groupId>
-                            <artifactId>core.wcm.components.content</artifactId>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.adobe.cq</groupId>
-                            <artifactId>core.wcm.components.config</artifactId>
-                        </dependency>
-                    </dependencies>
                 </configuration>
                 
             </plugin>

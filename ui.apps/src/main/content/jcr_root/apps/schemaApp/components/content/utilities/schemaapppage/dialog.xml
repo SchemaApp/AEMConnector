@@ -12,20 +12,63 @@
                     jcr:primaryType="cq:Widget"
                     allowBlank="{Boolean}false"
                     fieldLabel="API Key"
+                    id="schema-app-apikey"
                     name="./apiKey"
-                    xtype="textfield"/>
+                    xtype="textfield">
+                    <listeners
+                        jcr:primaryType="nt:unstructured"
+                        change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp) {var apikey = CQ.Ext.getCmp('schema-app-apikey');var accoutkey = CQ.Ext.getCmp('schema-app-accountid');var url = CQ.Ext.getCmp('schema-app-siteurl');if (cmp.isValid() &amp;&amp; apikey.isValid() &amp;&amp; accoutkey.isValid() &amp;&amp; url.isValid()) {CQ.Ext.getCmp('schema-app-connect').enable();}}"/>
+                </apiKey>
                 <accountID
                     jcr:primaryType="cq:Widget"
                     allowBlank="{Boolean}false"
-                    fieldLabel="Accunt ID"
+                    fieldLabel="Account ID"
+                    id="schema-app-accountid"
                     name="./accountID"
-                    xtype="textfield"/>
+                    xtype="textfield">
+                    <listeners
+                        jcr:primaryType="nt:unstructured"
+                        change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp){ var accoutkey = CQ.Ext.getCmp('schema-app-accountid');var apikey = CQ.Ext.getCmp('schema-app-apikey'); var url = CQ.Ext.getCmp('schema-app-siteurl'); if (cmp.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid() &amp;&amp; url.isValid()) { CQ.Ext.getCmp('schema-app-connect').enable(); } }"/>
+                </accountID>
                 <siteURL
                     jcr:primaryType="cq:Widget"
-                    fieldLabel="AEM Publisher Site URL"
                     allowBlank="{Boolean}false"
+                    fieldLabel="AEM Publisher Site URL"
+					regex="/^(https?:\\/\\/)(([\\da-z\\.-]+)\\.([a-z\\.]{2,6})|localhost|\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b)(:[0-9]{1,5})?([\\/\\w \\.-]*)*\\/?$/"
+					regexText="The provided input is not a valid URL."
+                    id="schema-app-siteurl"
                     name="./siteURL"
-                    xtype="textfield"/>
+                    xtype="textfield">
+                    <listeners
+                        jcr:primaryType="nt:unstructured"
+                        change="function(comp) {CQ.cloudservices.getEditOk().disable();}"
+                        invalid="function(cmp) { CQ.Ext.getCmp('schema-app-connect').disable(); }"
+                        valid="function(cmp){ var url = CQ.Ext.getCmp('schema-app-siteurl'); var apikey = CQ.Ext.getCmp('schema-app-apikey');var accoutkey = CQ.Ext.getCmp('schema-app-accountid'); if (cmp.isValid() &amp;&amp; url.isValid() &amp;&amp; accoutkey.isValid()  &amp;&amp; apikey.isValid()) { CQ.Ext.getCmp('schema-app-connect').enable(); } }"/>
+                </siteURL>
+                <btnpanel
+                    jcr:primaryType="cq:Widget"
+                    border="{Boolean}false"
+                    xtype="panel">
+                    <items jcr:primaryType="cq:WidgetCollection">
+                        <connectbutton
+                            jcr:primaryType="cq:Widget"
+                            disabled="true"
+                            id="schema-app-connect"
+                            localName="connectButton"
+                            style="float:right;"
+                            text="Connect to Schema App"
+                            xtype="button">
+                            <listeners
+                                jcr:primaryType="nt:unstructured"
+                                afterrender="function(comp) {var dialog = this.findParentByType('dialog'); dialog.on('loadcontent', function(dlg){ var apikey = dialog.find('name', './apiKey'); if(apikey[0].getValue() != '') { comp.setText(CQ.I18n.getMessage('Re-Connect to Schema App'));} });  }"
+                                click="function(comp, evt) {var dialog = this.findParentByType('dialog'); CQ.SchemaAppRegistrationService.doConnect(dialog); }"/>
+                        </connectbutton>
+                    </items>
+                </btnpanel>
             </items>
         </general>
     </items>

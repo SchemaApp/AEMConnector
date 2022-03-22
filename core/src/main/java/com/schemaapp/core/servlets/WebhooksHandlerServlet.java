@@ -33,7 +33,7 @@ import com.schemaapp.core.util.Validator;
  * @author nikhil
  *
  */
-@ServiceDescription("Supergroup Permissions Servlet")
+@ServiceDescription("Webhook Handler Servlet")
 @Component(service=Servlet.class,
 property={
         "sling.servlet.methods=" + HttpConstants.METHOD_POST,
