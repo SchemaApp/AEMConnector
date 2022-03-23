@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:description="Manage configuration for Schema App Registration"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="SchemaApp Registration"
+    href="/apps/schemaApp/components/content/registration.html"
+    icon="login"	
+    id="schemaApp_registration"
+    target="_blank"/>
