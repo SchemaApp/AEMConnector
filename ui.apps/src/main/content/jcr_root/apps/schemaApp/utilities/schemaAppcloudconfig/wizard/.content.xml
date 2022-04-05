@@ -75,14 +75,15 @@
                                                         <accountID
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            fieldDescription="Copy and paste the Account Id for your site domain that is generated for you at the Schema App Administration Console."
                                                             fieldLabel="Schema App Account ID"
                                                             name="./accountID"
                                                             required="{Boolean}true"/>                                                            
                                                         <sitePath
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-															fieldDescription="Define the relative path (no leading slash) to /home/users in which registered users will be created in AEM User Directory."
-                                                            fieldLabel="Path in AEM User Directory"
+															fieldDescription="Please provide the production site URL, e.g https://www.mydomain.com."
+                                                            fieldLabel="Website URL"
 															required="{Boolean}true"
                                                             name="./siteURL"/> 
                                                         <connect

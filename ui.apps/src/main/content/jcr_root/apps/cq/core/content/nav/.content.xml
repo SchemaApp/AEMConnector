@@ -40,7 +40,7 @@
             <schemaAppconfig
                 jcr:description="Schema App Cloud Service Configuration"
                 jcr:primaryType="nt:unstructured"
-                jcr:title="Schema App Cloud Service Configuration"
+                jcr:title="Schema App Connector"
                 href="/apps/schemaApp/utilities/schemaAppcloudconfig.html/etc/cloudservices/schemaapp"
                 icon="cloud"/>
         </cloudservices>
