@@ -123,12 +123,12 @@ public final class JsonSanitizer {
 	   * @param maximumNestingDepth maximum nesting depth.
 	   * @return embeddable JSON
 	   */
-	JsonSanitizer(final String jsonish, final int maximumNestingDepth) {
+	public JsonSanitizer(final String jsonish, final int maximumNestingDepth) {
 		this.maximumNestingDepth = Math.min(Math.max(1, maximumNestingDepth), 4096);
 		this.jsonish = ((jsonish != null) ? jsonish : "null");
 	}
 
-	int getMaximumNestingDepth() {
+	public int getMaximumNestingDepth() {
 		return this.maximumNestingDepth;
 	}
 
@@ -276,6 +276,8 @@ public final class JsonSanitizer {
 								}
 								break;
 							}
+							default:
+								break;
 							}
 						}
 						this.elide(i, end);
@@ -736,6 +738,8 @@ public final class JsonSanitizer {
 				++pos;
 				break;
 			}
+			default:
+				break;
 			}
 		}
 		int intEnd = this.endOfDigitRun(pos, end);
@@ -814,6 +818,8 @@ public final class JsonSanitizer {
 					++pos;
 					break;
 				}
+				default:
+					break;
 				}
 			}
 			final int expEnd = this.endOfDigitRun(pos, end);
@@ -1125,6 +1131,8 @@ public final class JsonSanitizer {
 		case 'v': {
 			return 131080;
 		}
+		default:
+			break;
 		}
 		return 0x20000 | nc;
 	}

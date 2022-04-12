@@ -60,8 +60,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Reference
 	private FlushService flushService;
 
-	private Session session;
-
 	/**
 	 * @return
 	 * @throws LoginException
@@ -134,7 +132,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
-		session = resolver.adaptTo(Session.class);
+		Session session = resolver.adaptTo(Session.class);
 		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		try {
 			if (resource != null) {
@@ -164,7 +162,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
 		ResourceResolver resolver = getResourceResolver();
-		session = resolver.adaptTo(Session.class);
+		Session session = resolver.adaptTo(Session.class);
 		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		try {
 			if (resource != null) {
@@ -243,8 +241,10 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 		final ModifiableValueMap properties = jcrContent.adaptTo(ModifiableValueMap.class);
 
-		if (!StringUtils.equals(assetFolderDefinition.getTitle(), properties.get(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, String.class))) {
-			properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
+		if (properties != null) {
+			if (!StringUtils.equals(assetFolderDefinition.getTitle(), properties.get(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, String.class))) {
+				properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
+			}
 		}
 	}
 
