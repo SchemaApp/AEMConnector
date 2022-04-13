@@ -32,7 +32,6 @@
     String path = resource.getPath();
     String resourceType = resource.getResourceType();
     String dialogPath = resource.getResourceResolver().getResource(resourceType).getPath() + "/dialog";
-//	String dialogPath = (!resourceType.startsWith("/apps") ? "/apps/" : "") + resourceType + "/dialog";
 
 %><body>
     <div><cq:include path="trail" resourceType="cq/cloudserviceconfigs/components/trail"/></div>
