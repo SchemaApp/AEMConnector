@@ -57,8 +57,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Reference
 	private QueryBuilder builder;
 	
-	@Reference
-	private FlushService flushService;
+	//@Reference
+	//private FlushService flushService;
 
 	/**
 	 * @return
@@ -91,7 +91,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
 				
-				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -141,7 +141,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
-					flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+					//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 				} 
 			} else {
 				createEntity(entity);
@@ -169,7 +169,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				resolver.delete(resource);
 				resolver.commit();
 				
-				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			}
 			
 		} catch (PersistenceException e) {

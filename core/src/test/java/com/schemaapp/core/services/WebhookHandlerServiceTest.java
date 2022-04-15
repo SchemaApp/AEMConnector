@@ -77,8 +77,8 @@ class WebhookHandlerServiceTest {
 	@Mock
 	private Node node;
 	
-	@Mock
-	private FlushService flushService;
+	//@Mock
+	//private FlushService flushService;
 
 	@InjectMocks
 	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
@@ -99,7 +99,7 @@ class WebhookHandlerServiceTest {
 		
 		webhookHandlerService.createEntity(entity);
 		verify(resolver, times(2)).commit();
-		verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+		//verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 	}
 	
 	@Test
@@ -120,7 +120,7 @@ class WebhookHandlerServiceTest {
 		
 		webhookHandlerService.updateEntity(entity);
 		verify(resolver, times(1)).commit();
-		verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+		//verify(flushService).sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 	}
 	
 	@Test
