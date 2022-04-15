@@ -165,7 +165,7 @@ public final class JsonSanitizer {
 					}
 					case '[':
 					case '{': {
-						//state = this.requireValueState(i, state, false);
+						this.requireValueState(i, state, false);
 						if (this.isMap == null) {
 							this.isMap = new boolean[this.maximumNestingDepth];
 						}
@@ -561,7 +561,7 @@ public final class JsonSanitizer {
 					int value = 0;
 					for (int j = octalStart; j < octalEnd; ++j) {
 						final char digit = this.jsonish.charAt(j);
-						value = value << 3 | digit - '0';
+						value = (value << 3 | digit - '0');
 					}
 					this.replace(octalStart, octalEnd, "u00");
 					this.appendHex(value, 2);

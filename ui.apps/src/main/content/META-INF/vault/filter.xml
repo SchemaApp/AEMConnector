@@ -5,5 +5,13 @@
     <filter root="/home/users/system/l7gN1R0Hs2iP2Jb-tH-w"/>
     <filter root="/home/users/rep:policy" mode="merge"/>
     <filter root="/etc/cloudservices/rep:policy" mode="merge"/>
-	<filter root="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig"/>
+    <filter root="/apps/cq">
+        <include pattern="/apps/cq"/>
+        <include pattern="/apps/cq/core"/>
+        <include pattern="/apps/cq/core/content"/>
+        <include pattern="/apps/cq/core/content/nav"/>
+        <include pattern="/apps/cq/core/content/nav/tools"/>
+        <include pattern="/apps/cq/core/content/nav/tools/cloudservices"/>
+        <include pattern="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig(/.*)?"/>
+    </filter>
 </workspaceFilter>
