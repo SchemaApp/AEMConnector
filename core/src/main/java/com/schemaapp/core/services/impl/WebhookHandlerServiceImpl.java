@@ -201,29 +201,37 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	private void createAssetFolder(final AssetFolderDefinition assetFolderDefinition, final ResourceResolver resourceResolver) {
 
 		Resource folder = resourceResolver.getResource(assetFolderDefinition.getPath());
-		try {
-			if (folder == null) {
-				final Map<String, Object> folderProperties = new HashMap<>();
-				folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+		if (folder == null) {
+			final Map<String, Object> folderProperties = new HashMap<>();
+			folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+			try {
 				folder = resourceResolver.create(resourceResolver.getResource(assetFolderDefinition.getParentPath()),
 						assetFolderDefinition.getName(),
 						folderProperties);
-			} 
-
-			final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
-
-			if (jcrContent == null) {
-				final Map<String, Object> jcrContentProperties = new HashMap<>();
-				jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-				resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+			} catch (PersistenceException e) {
+				LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
 			}
+		} 
 
+		final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
+
+		if (jcrContent == null) {
+			final Map<String, Object> jcrContentProperties = new HashMap<>();
+			jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+			try {
+				resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+			} catch (PersistenceException e) {
+				LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			}
+		}
+
+		try {
 			setTitles(folder, assetFolderDefinition);
 			resourceResolver.commit();
-			LOG.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-		} catch (Exception e) {
+		} catch (PersistenceException | RepositoryException e) {
 			LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
 		}
+		LOG.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
 	}
 
 	/**

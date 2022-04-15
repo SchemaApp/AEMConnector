@@ -26,7 +26,6 @@ public class WebhookEntity {
 	private String url;
 
 	@JsonProperty(value="generatedAtTime", required = true)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 	private Date generatedAtTime;
 
 	@JsonProperty(value="@graph", required = true)

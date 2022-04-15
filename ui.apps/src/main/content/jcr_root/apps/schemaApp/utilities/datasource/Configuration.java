@@ -1,35 +1,20 @@
-/*************************************************************************
- *
- * ADOBE CONFIDENTIAL
- * __________________
- *
- *  Copyright 2017 Adobe Systems Incorporated
- *  All Rights Reserved.
- *
- * NOTICE:  All information contained herein is, and remains
- * the property of Adobe Systems Incorporated and its suppliers,
- * if any.  The intellectual and technical concepts contained
- * herein are proprietary to Adobe Systems Incorporated and its
- * suppliers and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Adobe Systems Incorporated.
- **************************************************************************/
-package apps.gigya.touchui.datasource;
+package apps.schemaApp.utilities.datasource;
+
+import java.util.Calendar;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 
 import com.adobe.cq.sightly.WCMUsePojo;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.Template;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.Resource;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.Calendar;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import com.day.cq.wcm.api.Page;
 
 public class Configuration extends WCMUsePojo {
     private Resource currentResource;
@@ -119,7 +104,14 @@ public class Configuration extends WCMUsePojo {
 
     private boolean hasPermission(String action) {
         try {
-            return getResourceResolver().adaptTo(Session.class).hasPermission(currentResource.getPath(), action);
+        	ResourceResolver resolver = getResourceResolver();
+        	if (resolver != null) {
+    			 Session session = resolver.adaptTo(Session.class);
+    			 if (session != null) {
+    				 return session.hasPermission(currentResource.getPath(), action);
+    			 }
+        	}
+            return false;
         } catch (RepositoryException e) {
             return false;
         }
