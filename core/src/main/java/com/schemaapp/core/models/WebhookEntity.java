@@ -26,7 +26,7 @@ public class WebhookEntity {
 	private String url;
 
 	@JsonProperty(value="generatedAtTime", required = true)
-	private Date generatedAtTime = null;
+	private Date generatedAtTime = new Date();
 
 	@JsonProperty(value="@graph", required = true)
 	private Object graph;
@@ -42,7 +42,9 @@ public class WebhookEntity {
 		this.type = type;
 		this.id = id;
 		this.base64encode = base64encode;
-		this.generatedAtTime = generatedAtTime;
+		
+		Date date = generatedAtTime;
+		this.generatedAtTime = date;
 		this.graph = graph;
 	}
 	
