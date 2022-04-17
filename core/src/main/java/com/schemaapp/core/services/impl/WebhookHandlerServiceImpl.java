@@ -45,6 +45,8 @@ import com.schemaapp.core.util.QueryHelper;
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
+	private static final String UNABLE_TO_CREATE_ASSET_FOLDER = "Unable to create Asset Folder [ {} -> {} ]";
+
 	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
 
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -209,27 +211,29 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 						assetFolderDefinition.getName(),
 						folderProperties);
 			} catch (PersistenceException e) {
-				LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+				LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
 			}
 		} 
 
-		final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
+		if (folder != null) {
+			final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
 
-		if (jcrContent == null) {
-			final Map<String, Object> jcrContentProperties = new HashMap<>();
-			jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-			try {
-				resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
-			} catch (PersistenceException e) {
-				LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			if (jcrContent == null) {
+				final Map<String, Object> jcrContentProperties = new HashMap<>();
+				jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+				try {
+					resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+				} catch (PersistenceException e) {
+					LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+				}
 			}
-		}
 
-		try {
-			setTitles(folder, assetFolderDefinition);
-			resourceResolver.commit();
-		} catch (PersistenceException | RepositoryException e) {
-			LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			try {
+				setTitles(folder, assetFolderDefinition);
+				resourceResolver.commit();
+			} catch (PersistenceException | RepositoryException e) {
+				LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			}
 		}
 		LOG.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
 	}
