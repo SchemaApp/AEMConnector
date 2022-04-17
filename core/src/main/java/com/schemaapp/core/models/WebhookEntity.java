@@ -42,9 +42,7 @@ public class WebhookEntity {
 		this.type = type;
 		this.id = id;
 		this.base64encode = base64encode;
-		
-		Date date = generatedAtTime;
-		this.generatedAtTime = date;
+		this.generatedAtTime = (Date) generatedAtTime.clone();
 		this.graph = graph;
 	}
 	
