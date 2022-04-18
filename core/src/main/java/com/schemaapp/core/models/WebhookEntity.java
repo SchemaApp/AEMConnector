@@ -67,7 +67,7 @@ public class WebhookEntity {
 	}
 
 	public Date getGeneratedAtTime() {
-		return generatedAtTime;
+		return (Date) generatedAtTime.clone();
 	}
 
 	public Object getGraph() {
