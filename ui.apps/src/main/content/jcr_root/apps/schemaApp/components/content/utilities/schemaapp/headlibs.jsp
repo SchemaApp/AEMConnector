@@ -2,13 +2,16 @@
                 org.apache.sling.api.resource.ValueMap,
                 org.apache.sling.api.resource.ResourceUtil,
                 com.day.cq.wcm.webservicesupport.Configuration,
+                org.apache.sling.api.resource.ResourceResolver,
                 com.day.cq.wcm.webservicesupport.ConfigurationManager,
                 org.apache.commons.lang.StringUtils" %>
 <%@page import="com.schemaapp.core.services.PageJSONDataReaderService"%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%
 String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
-ConfigurationManager cfgMgr = resourceResolver.adaptTo(ConfigurationManager.class);
+final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDataReaderService.class);
+ResourceResolver resolver = schemaAppJSONReader.getResourceResolver();
+ConfigurationManager cfgMgr = resolver.adaptTo(ConfigurationManager.class);
 if(cfgMgr != null) {
 	String apiKey = null;
 	String accountID = null;
@@ -30,7 +33,6 @@ if(cfgMgr != null) {
 
 String pageURL = request.getRequestURL().toString();
 
-final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDataReaderService.class);
 
 String graphData = schemaAppJSONReader.getPageData(pageURL);
 if (graphData != null) {
