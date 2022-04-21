@@ -45,6 +45,8 @@ import com.schemaapp.core.util.QueryHelper;
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
+	private static final String UNABLE_TO_CREATE_ASSET_FOLDER = "Unable to create Asset Folder [ {} -> {} ]";
+
 	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
 
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -57,10 +59,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Reference
 	private QueryBuilder builder;
 	
-	@Reference
-	private FlushService flushService;
-
-	private Session session;
+	//@Reference
+	//private FlushService flushService;
 
 	/**
 	 * @return
@@ -93,7 +93,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
 				
-				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -134,7 +134,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
-		session = resolver.adaptTo(Session.class);
+		Session session = resolver.adaptTo(Session.class);
 		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		try {
 			if (resource != null) {
@@ -143,7 +143,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
-					flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+					//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 				} 
 			} else {
 				createEntity(entity);
@@ -164,14 +164,14 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
 		ResourceResolver resolver = getResourceResolver();
-		session = resolver.adaptTo(Session.class);
+		Session session = resolver.adaptTo(Session.class);
 		Resource resource = QueryHelper.getResultsUsingId(entity.getId(), builder, session);
 		try {
 			if (resource != null) {
 				resolver.delete(resource);
 				resolver.commit();
 				
-				flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			}
 			
 		} catch (PersistenceException e) {
@@ -203,29 +203,39 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	private void createAssetFolder(final AssetFolderDefinition assetFolderDefinition, final ResourceResolver resourceResolver) {
 
 		Resource folder = resourceResolver.getResource(assetFolderDefinition.getPath());
-		try {
-			if (folder == null) {
-				final Map<String, Object> folderProperties = new HashMap<>();
-				folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+		if (folder == null) {
+			final Map<String, Object> folderProperties = new HashMap<>();
+			folderProperties.put(JcrConstants.JCR_PRIMARYTYPE, assetFolderDefinition.getNodeType());
+			try {
 				folder = resourceResolver.create(resourceResolver.getResource(assetFolderDefinition.getParentPath()),
 						assetFolderDefinition.getName(),
 						folderProperties);
-			} 
+			} catch (PersistenceException e) {
+				LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			}
+		} 
 
+		if (folder != null) {
 			final Resource jcrContent = folder.getChild(JcrConstants.JCR_CONTENT);
 
 			if (jcrContent == null) {
 				final Map<String, Object> jcrContentProperties = new HashMap<>();
 				jcrContentProperties.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-				resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+				try {
+					resourceResolver.create(folder, JcrConstants.JCR_CONTENT, jcrContentProperties);
+				} catch (PersistenceException e) {
+					LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+				}
 			}
 
-			setTitles(folder, assetFolderDefinition);
-			resourceResolver.commit();
-			LOG.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
-		} catch (Exception e) {
-			LOG.error("Unable to create Asset Folder [ {} -> {} ]", new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			try {
+				setTitles(folder, assetFolderDefinition);
+				resourceResolver.commit();
+			} catch (PersistenceException | RepositoryException e) {
+				LOG.error(UNABLE_TO_CREATE_ASSET_FOLDER, new String[]{assetFolderDefinition.getPath(), assetFolderDefinition.getTitle()}, e);
+			}
 		}
+		LOG.debug("Created Asset Folder [ {} -> {} ]", assetFolderDefinition.getPath(), assetFolderDefinition.getTitle());
 	}
 
 	/**
@@ -243,8 +253,10 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 		final ModifiableValueMap properties = jcrContent.adaptTo(ModifiableValueMap.class);
 
-		if (!StringUtils.equals(assetFolderDefinition.getTitle(), properties.get(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, String.class))) {
-			properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
+		if (properties != null) {
+			if (!StringUtils.equals(assetFolderDefinition.getTitle(), properties.get(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, String.class))) {
+				properties.put(com.day.cq.commons.jcr.JcrConstants.JCR_TITLE, assetFolderDefinition.getTitle());
+			}
 		}
 	}
 

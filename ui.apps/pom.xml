@@ -138,7 +138,6 @@
             <artifactId>schemaApp.core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
 		<dependency>
             <groupId>com.schemaApp</groupId>
             <artifactId>schemaApp.ui.apps.structure</artifactId>

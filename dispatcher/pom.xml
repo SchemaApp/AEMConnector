@@ -129,7 +129,6 @@
                                             <type>md5</type>
                                             <message>There have been changes detected in a file which is supposed to be immutable according to https://docs.adobe.com/content/help/en/experience-manager-cloud-service/implementing/content-delivery/disp-overview.html#file-structure: src/conf.dispatcher.d/virtualhosts/default_virtualhosts.any</message>
                                         </requireTextFileChecksum>
-
                                     </rules>
                                 </configuration>
                             </execution>
@@ -159,7 +158,7 @@
                                 </goals>
                                 <configuration>
                                     <rules>
-                                       <!-- rules being inserted by archetype-pre-package.groovy -->
+                                        <!-- rules being inserted by archetype-pre-package.groovy -->
                                         <requireTextFileChecksum>
                                             <file>src/conf.d/available_vhosts/default.vhost</file>
                                             <checksum>fbe1225838269b6481db31868868da91</checksum>
@@ -226,7 +225,6 @@
                                             <type>md5</type>
                                             <message>There have been changes detected in a file which is supposed to be immutable according to https://docs.adobe.com/content/help/en/experience-manager-cloud-service/implementing/content-delivery/disp-overview.html#file-structure: src/conf.dispatcher.d/virtualhosts/default_virtualhosts.any</message>
                                         </requireTextFileChecksum>
-
                                     </rules>
                                 </configuration>
                             </execution>

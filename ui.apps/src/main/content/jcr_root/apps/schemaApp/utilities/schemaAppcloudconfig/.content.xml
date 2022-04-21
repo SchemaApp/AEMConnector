@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+	<columnpreview
+		jcr:primaryType="nt:unstructured"
+		sling:resourceType="dam/components/configurations/scene7/views/columnpreview"/>
+    <wizard/>
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Schema App Cloud Service Configurations"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        contentPath="${requestPathInfo.suffix}"
+        currentView="${state[&quot;config-reactor.shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="cq-confadmin-admin-childpages"
+        targetCollection=".cq-confadmin-admin-childpages">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[cq.common.wcm,cq.conf.admin.schemaapp.create]"/>
+        </head>
+        <breadcrumbs
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/cloudconfig/components/admin/datasources/breadcrumbs"
+            rootPath="/etc/cloudservices/schemaapp"
+            rootTitle="Schema App Cloud Service Configurations"/>
+        <views jcr:primaryType="nt:unstructured">
+            <column
+                granite:rel="cq-confadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Column View"
+                sling:resourceType="granite/ui/components/coral/foundation/columnview"
+                icon="viewColumn"
+                limit="{Long}40"
+                loadAncestors="{Boolean}true"
+                modeGroup="cq-confadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                previewSrc="/apps/schemaApp/utilities/schemaAppcloudconfig/columnpreview.html{+id}"
+                rootPath="/etc/cloudservices/schemaapp"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                src="/apps/schemaApp/utilities/schemaAppcloudconfig/jcr:content/views/column{.offset,limit}.html{+id}">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    allowedResourceTypes="[schemaApp/registration/components/schemaapppage]"/>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
+                    itemResourceType="schemaApp/utilities/datasource/column"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${requestPathInfo.suffix}"/>
+               </column>
+        </views>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <create
+                    granite:class="create-config"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Create"
+                    variant="primary">
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/renderconditions/privilege"
+                        path="/etc/cloudservices/schemaapp"
+                        privileges="[jcr:write]"/>
+                </create>
+            </secondary>
+            <selection jcr:primaryType="nt:unstructured">
+                <edit
+                    granite:class="cq-confadmin-actions-properties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    activeSelectionCount="single"
+                    icon="edit"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Edit"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/apps/schemaApp/utilities/schemaAppcloudconfig/wizard.html{+item}"/>
+                </edit>
+                <delete
+                    granite:rel="cq-confadmin-actions-delete-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.delete"
+                    activeSelectionCount="multiple"
+                    icon="delete"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Delete"
+                    variant="actionBar"/>
+                <publish
+                    granite:class="cq-confadmin-actions-properties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.publish"
+                    activeSelectionCount="single"
+                    icon="globe"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Publish"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        referenceSrc="/libs/wcm/core/content/reference.json?_charset_=utf-8{&amp;path*}"/>
+                </publish>
+            </selection>
+        </actions>
+    </jcr:content>
+</jcr:root>
