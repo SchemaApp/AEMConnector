@@ -14,11 +14,4 @@
         <include pattern="/apps/cq/core/content/nav/tools/cloudservices"/>
         <include pattern="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig(/.*)?"/>
     </filter>
-	 <filter root="/etc/packages">
-        <include pattern="/etc/packages"/>
-        <include pattern="/etc/packages/com.adobe.aem.guides"/>
-        <include pattern="/etc/packages/com.adobe.aem.guides/aem-guides-wknd.all-1.1.1-SNAPSHOT.zip"/>
-
-    </filter>
-
 </workspaceFilter>

@@ -52,7 +52,6 @@
                         <filter><root>/home/users</root></filter>
                         <filter><root>/home/users/system</root></filter>
                         <filter><root>/etc/cloudservices</root></filter>
-						<filter><root>/etc/packages</root></filter>
 						<filter><root>/apps/cq/core/content/nav/tools</root></filter>
 						<filter><root>/apps/cq/core/content/nav/tools/cloudservices</root></filter>	
                     </filters>
