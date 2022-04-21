@@ -78,9 +78,6 @@
                             <artifactId>schemaApp.ui.apps.structure</artifactId>
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
-                    <properties>
-                        <cloudManagerTarget>none</cloudManagerTarget>
-                    </properties>
                     <embeddeds>
                     	<embedded>
                             <groupId>com.adobe.cq</groupId>

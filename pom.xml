@@ -28,6 +28,7 @@
         <module>core</module>
         <module>ui.apps</module>
 		<module>ui.apps.structure</module>
+		<module>dispatcher</module>
     </modules>
 
     <properties>
