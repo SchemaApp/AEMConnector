@@ -72,9 +72,9 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 	 * This method Get Resource Resolver instance 
 	 * 
 	 * @return
-	 * @throws LoginException
+	 * @throws LoginException 
 	 */
-	private ResourceResolver getResourceResolver() throws LoginException {
+	public ResourceResolver getResourceResolver() throws LoginException {
 		Map<String, Object> param = new HashMap<>();
 		param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
 		return resolverFactory.getServiceResourceResolver(param);

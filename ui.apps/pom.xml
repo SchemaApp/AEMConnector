@@ -78,9 +78,6 @@
                             <artifactId>schemaApp.ui.apps.structure</artifactId>
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
-                    <properties>
-                        <cloudManagerTarget>none</cloudManagerTarget>
-                    </properties>
                     <embeddeds>
                     	<embedded>
                             <groupId>com.adobe.cq</groupId>
@@ -141,7 +138,6 @@
             <artifactId>schemaApp.core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
 		<dependency>
             <groupId>com.schemaApp</groupId>
             <artifactId>schemaApp.ui.apps.structure</artifactId>
