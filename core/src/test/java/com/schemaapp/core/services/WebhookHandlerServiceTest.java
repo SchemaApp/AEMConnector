@@ -77,6 +77,9 @@ class WebhookHandlerServiceTest {
 	@Mock
 	private Node node;
 	
+	@Mock
+	private FlushParentPageJsonService flushService;
+	
 	//@Mock
 	//private FlushService flushService;
 

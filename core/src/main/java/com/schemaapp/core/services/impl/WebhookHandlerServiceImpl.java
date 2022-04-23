@@ -2,6 +2,8 @@ package com.schemaapp.core.services.impl;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +29,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService;
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.FlushType;
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.RefetchType;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.models.AssetFolderDefinition;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.services.FlushParentPageJsonService;
 import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.Constants;
 import com.schemaapp.core.util.JsonSanitizer;
@@ -58,6 +58,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	@Reference
 	private QueryBuilder builder;
+	
+	@Reference
+	FlushParentPageJsonService flushService;
 	
 	//@Reference
 	//private FlushService flushService;
@@ -93,6 +96,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
 				
+				String path = getPath(entity);
+				flushService.invalidatePageJson(path);
 				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
@@ -144,6 +149,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
 					//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+					String path = getPath(entity);
+					flushService.invalidatePageJson(path);
 				} 
 			} else {
 				createEntity(entity);
@@ -160,6 +167,20 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
+	private String getPath(WebhookEntity entity) {
+		URL aURL;
+		try {
+			aURL = new URL(entity.getId());
+			String path = aURL.getPath();
+			if (path.indexOf(".") > -1) {
+				path = path.substring(0, path.lastIndexOf("."));
+			}
+			return path;
+		} catch (MalformedURLException e) {
+		}
+		return entity.getId();
+	}
+
 
 	@Override
 	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
@@ -171,6 +192,8 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				resolver.delete(resource);
 				resolver.commit();
 				
+				String path = getPath(entity);
+				flushService.invalidatePageJson(path);
 				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			}
 			
