@@ -203,7 +203,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		folderDefinition.setName("schemaApp-data");
 		folderDefinition.setTitle("Schema App");
 		folderDefinition.setPath(Constants.CONTENT_SCHEMAAPP);
-		folderDefinition.setNodeType(JcrResourceConstants.NT_SLING_FOLDER);
+		folderDefinition.setNodeType("cq:Page");
 		return folderDefinition;
 	}
 
