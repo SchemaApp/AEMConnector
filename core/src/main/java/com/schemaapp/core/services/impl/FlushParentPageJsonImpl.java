@@ -142,9 +142,9 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 				}
 				LOGGER.error("invalidateDispatcherCacheURL :: Invalidating {}", pagePath);
 			} catch (ClientProtocolException e) {
-				LOGGER.error("Dispatcher Cache Invalidator ClientProtocolException: ", e);
+				LOGGER.error("Dispatcher Cache Invalidator ClientProtocolException: ", e.getMessage());
 			} catch (IOException e) {
-				LOGGER.error("Dispatcher Cache Invalidator IOException:", e);
+				LOGGER.error("Dispatcher Cache Invalidator IOException:", e.getMessage());
 			} finally {
 				request.releaseConnection();
 			}

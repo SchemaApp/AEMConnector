@@ -146,7 +146,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					flushService.invalidatePageJson(path);
 				} 
 			} else {
-				createEntity(entity);
+				return createEntity(entity);
 			}
 		} catch (RepositoryException | PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
@@ -200,7 +200,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	private AssetFolderDefinition getAssestFolderDefinition() {
 		AssetFolderDefinition folderDefinition = new AssetFolderDefinition();
 		folderDefinition.setParentPath(Constants.CONTENT);
-		folderDefinition.setName("schemaApp:jsonld");
+		folderDefinition.setName("schemaApp-data");
 		folderDefinition.setTitle("Schema App");
 		folderDefinition.setPath(Constants.CONTENT_SCHEMAAPP);
 		folderDefinition.setNodeType(JcrResourceConstants.NT_SLING_FOLDER);

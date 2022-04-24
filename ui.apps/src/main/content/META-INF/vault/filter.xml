@@ -15,4 +15,5 @@
         <include pattern="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig(/.*)?"/>
     </filter>
     <filter root="/etc/replication/agents.publish/rep:policy" mode="merge"/>
+    <filter root="/content/schemaApp-data" mode="merge"/>
 </workspaceFilter>
