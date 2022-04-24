@@ -35,11 +35,10 @@ import com.schemaapp.core.util.ReplicationConstants;
 public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 	public static final Logger LOGGER = LoggerFactory.getLogger(FlushParentPageJsonImpl.class);
 	private int locationLevel = 5;
-	private String dispatcherCacheUrl;
-	
+
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
-	
+
 	/**
 	 * Override invalidatePageJson method of FlushParentPageJsonService
 	 *
@@ -49,16 +48,16 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 	@Override
 	public void invalidatePageJson(String pageUrl) {
 		try {
-			LOGGER.error("invalidatePageJson start -"+pageUrl);
+			LOGGER.debug("invalidatePageJson start {}", pageUrl);
 			ResourceResolver resourceResolver = getResourceResolver();
 			Resource publishReplicationAgentResource = resourceResolver.getResource(ReplicationConstants.REPLICATION_AGENT_PATH_PUBLISH);
 			if (publishReplicationAgentResource != null) {
 				getResourceNode(publishReplicationAgentResource, pageUrl);
 			} else {
-				LOGGER.error("publishReplicationAgentResource is null");
+				LOGGER.debug("publishReplicationAgentResource is null");
 			}
 		} catch (LoginException e) {
-			LOGGER.error("login exception:{} ", e);
+			LOGGER.error("login exception:", e);
 		}
 	}
 	/**
@@ -79,14 +78,14 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 					Resource contentResource = publishReplicationAgentsChildPage.getContentResource();
 					Node contentResourceNode = contentResource.adaptTo(Node.class);
 					if (contentResourceNode != null && contentResourceNode.hasProperty("transportUri")) {
-						dispatcherCacheUrl = contentResourceNode.getProperty("transportUri").getValue().getString();
-						LOGGER.error("getResourceNode :: dispatcherCacheUrl is {}", dispatcherCacheUrl);
+						String dispatcherCacheUrl = contentResourceNode.getProperty("transportUri").getValue().getString();
+						LOGGER.debug("getResourceNode :: dispatcherCacheUrl is {}", dispatcherCacheUrl);
 						getTransportUri(pageUrl, dispatcherCacheUrl);
 					}
 				}
 			}
 		} catch (RepositoryException e) {
-			LOGGER.error("getResourceNode :: RepositoryException is {}", e);
+			LOGGER.error("getResourceNode :: RepositoryException is", e);
 		}
 	}
 	/**
@@ -100,30 +99,30 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 	public void getTransportUri(String pageUrl, String dispatcherCacheUrl) {
 		try {
 			Resource pageUrlResource = getResourceResolver().getResource(pageUrl);
-			LOGGER.error("getTransportUri :: Resource path:{}", pageUrl);
+			LOGGER.debug("getTransportUri :: Resource path:{}", pageUrl);
 			if (pageUrlResource != null && pageUrlResource.adaptTo(Page.class) != null) {
-				getParentModelJsonCheck(pageUrl, dispatcherCacheUrl);
+				invalidateDispatcherCacheURL(pageUrl, dispatcherCacheUrl);
 			} else {
 				LOGGER.error("getTransportUri :: Resource is either NULL or not a content page for resource path: {}",
 						pageUrl);
 			}
 		} catch (LoginException e) {
-			LOGGER.error("getTransportUri :: LoginException is {}", e);
+			LOGGER.error("getTransportUri :: LoginException is", e);
 		}
 	}
 	/**
-	 * Method to check invalidation of parent JSON.
+	 * Method to invalidation Dispatcher cache of page.
 	 *
 	 * @param pageUrl                       , Resource page which is being activated/deactivated
 	 * @param dispatcherCacheUrl , Dispatcher cache url page retrieved from publish replication agent
 	 * @return Boolean
 	 */
-	private void getParentModelJsonCheck(String pageUrl, String dispatcherCacheUrl) {
+	private void invalidateDispatcherCacheURL(String pageUrl, String dispatcherCacheUrl) {
 		String[] contentPathSplit = pageUrl.split("\\/");
 		if (contentPathSplit.length >= locationLevel) {
-			String parentPagePath = Arrays.stream(contentPathSplit).limit(locationLevel)
+			String pagePath = Arrays.stream(contentPathSplit).limit(locationLevel)
 					.collect(Collectors.joining(Constants.SLASH));
-			LOGGER.error("getParentModelJsonCheck :: Parent Page Path {}", parentPagePath);
+			LOGGER.debug("invalidateDispatcherCacheURL :: Parent Page Path {}", pagePath);
 			HttpGet request = new HttpGet(dispatcherCacheUrl);
 			try {
 				HttpClientBuilder builder = HttpClientBuilder.create();
@@ -132,34 +131,34 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 				builder.setDefaultRequestConfig(requestConfig);
 				HttpClient client = builder.build();
 				request.addHeader(ReplicationConstants.CQ_ACTION_HEADER, ReplicationConstants.ACTIVATE);
-				request.addHeader(ReplicationConstants.CQ_HANDLE_HEADER, parentPagePath);
-				request.addHeader(ReplicationConstants.CQ_PATH, parentPagePath);
+				request.addHeader(ReplicationConstants.CQ_HANDLE_HEADER, pagePath);
+				request.addHeader(ReplicationConstants.CQ_PATH, pagePath);
 				HttpResponse response = client.execute(request);
 				int statusCode = response.getStatusLine().getStatusCode();
-				LOGGER.error("getParentModelJsonCheck :: status code is {}", statusCode);
+				LOGGER.debug("invalidateDispatcherCacheURL :: status code is {}", statusCode);
 				if (statusCode != HttpStatus.SC_OK) {
-					LOGGER.error("Dispatcher Cache Invalidator returned status-code:{} with summary: {}",
+					LOGGER.debug("Dispatcher Cache Invalidator returned status-code:{} with summary: {}",
 							statusCode, response.getStatusLine());
 				}
-				LOGGER.error("getParentModelJsonCheck :: Invalidating {}", parentPagePath);
+				LOGGER.error("invalidateDispatcherCacheURL :: Invalidating {}", pagePath);
 			} catch (ClientProtocolException e) {
-				LOGGER.error("Dispatcher Cache Invalidator ClientProtocolException:{} ", e);
+				LOGGER.error("Dispatcher Cache Invalidator ClientProtocolException: ", e);
 			} catch (IOException e) {
-				LOGGER.error("Dispatcher Cache Invalidator IOException:{} ", e);
+				LOGGER.error("Dispatcher Cache Invalidator IOException:", e);
 			} finally {
 				request.releaseConnection();
 			}
 		}
 	}
 
-		/**
-		 * @return
-		 * @throws LoginException
-		 * @throws org.apache.sling.api.resource.LoginException 
-		 */
-		private ResourceResolver getResourceResolver() throws LoginException {
-			Map<String, Object> param = new HashMap<>();
-			param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
-			return resolverFactory.getServiceResourceResolver(param);
-		}
+	/**
+	 * @return
+	 * @throws LoginException
+	 * @throws org.apache.sling.api.resource.LoginException 
+	 */
+	private ResourceResolver getResourceResolver() throws LoginException {
+		Map<String, Object> param = new HashMap<>();
+		param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
+		return resolverFactory.getServiceResourceResolver(param);
+	}
 }

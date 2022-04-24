@@ -48,7 +48,7 @@
                         <!-- Immutable context-aware configurations -->
                         <filter><root>/apps/settings</root></filter>
                         
-                        <filter><root>/content/usergenerated/content</root></filter>
+                        <filter><root>/content/schemaApp-data</root></filter>
                         <filter><root>/home/users</root></filter>
                         <filter><root>/home/users/system</root></filter>
                         <filter><root>/etc/cloudservices</root></filter>

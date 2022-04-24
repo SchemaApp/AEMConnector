@@ -47,8 +47,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private static final String UNABLE_TO_CREATE_ASSET_FOLDER = "Unable to create Asset Folder [ {} -> {} ]";
 
-	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
-
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
@@ -58,12 +56,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	@Reference
 	private QueryBuilder builder;
-	
+
 	@Reference
 	FlushParentPageJsonService flushService;
-	
-	//@Reference
-	//private FlushService flushService;
 
 	/**
 	 * @return
@@ -78,13 +73,13 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult createEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
-		Resource resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		Resource resource = resolver.getResource(Constants.CONTENT_SCHEMAAPP);
 		if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
 			AssetFolderDefinition folderDefinition = getAssestFolderDefinition();
 			createAssetFolder(folderDefinition, resolver);
 		}
 
-		resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		resource = resolver.getResource(Constants.CONTENT_SCHEMAAPP);
 
 		if (resource != null) {
 			Node node = resource.adaptTo(Node.class);
@@ -95,10 +90,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				setGraphDatatoNode(entity, pageNode);
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
-				
+
 				String path = getPath(entity);
 				flushService.invalidatePageJson(path);
-				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -148,7 +142,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
-					//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 					String path = getPath(entity);
 					flushService.invalidatePageJson(path);
 				} 
@@ -191,12 +184,11 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			if (resource != null) {
 				resolver.delete(resource);
 				resolver.commit();
-				
+
 				String path = getPath(entity);
 				flushService.invalidatePageJson(path);
-				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
 			}
-			
+
 		} catch (PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 			LOG.error(errorMessage, e);
@@ -207,10 +199,10 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private AssetFolderDefinition getAssestFolderDefinition() {
 		AssetFolderDefinition folderDefinition = new AssetFolderDefinition();
-		folderDefinition.setParentPath(Constants.CONTENT_USERGENERATED);
-		folderDefinition.setName("schemaApp");
+		folderDefinition.setParentPath(Constants.CONTENT);
+		folderDefinition.setName("schemaApp:jsonld");
 		folderDefinition.setTitle("Schema App");
-		folderDefinition.setPath(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		folderDefinition.setPath(Constants.CONTENT_SCHEMAAPP);
 		folderDefinition.setNodeType(JcrResourceConstants.NT_SLING_FOLDER);
 		return folderDefinition;
 	}
