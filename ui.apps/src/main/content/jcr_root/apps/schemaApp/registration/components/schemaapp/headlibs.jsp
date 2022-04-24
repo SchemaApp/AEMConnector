@@ -4,11 +4,13 @@
                 com.day.cq.wcm.webservicesupport.Configuration,
                 org.apache.sling.api.resource.ResourceResolver,
                 com.day.cq.wcm.webservicesupport.ConfigurationManager,
+                com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap,
                 org.apache.commons.lang.StringUtils" %>
 <%@page import="com.schemaapp.core.services.PageJSONDataReaderService"%>
 <%@include file="/libs/foundation/global.jsp" %>
 <%
-String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
+HierarchyNodeInheritanceValueMap pageProperties1 = new HierarchyNodeInheritanceValueMap(resource);
+String[] services = pageProperties1.getInherited("cq:cloudserviceconfigs", new String[]{});
 final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDataReaderService.class);
 ResourceResolver resolver = schemaAppJSONReader.getResourceResolver();
 ConfigurationManager cfgMgr = resolver.adaptTo(ConfigurationManager.class);
