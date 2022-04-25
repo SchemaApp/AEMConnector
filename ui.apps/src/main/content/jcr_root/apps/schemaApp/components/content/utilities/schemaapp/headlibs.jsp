@@ -10,8 +10,8 @@
 <%@include file="/libs/foundation/global.jsp" %>
 <%
 
-HierarchyNodeInheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(resource);
-String[] services = pageProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
+HierarchyNodeInheritanceValueMap pageProperties1 = new HierarchyNodeInheritanceValueMap(resource);
+String[] services = inheritedProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
 final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDataReaderService.class);
 ResourceResolver resolver = schemaAppJSONReader.getResourceResolver();
 ConfigurationManager cfgMgr = resolver.adaptTo(ConfigurationManager.class);
