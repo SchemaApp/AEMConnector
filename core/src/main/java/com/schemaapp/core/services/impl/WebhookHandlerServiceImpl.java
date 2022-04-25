@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.models.AssetFolderDefinition;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
-import com.schemaapp.core.services.FlushParentPageJsonService;
+import com.schemaapp.core.services.FlushService;
 import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.Constants;
 import com.schemaapp.core.util.JsonSanitizer;
@@ -57,7 +57,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	private QueryBuilder builder;
 
 	@Reference
-	FlushParentPageJsonService flushService;
+	FlushService flushService;
 
 	/**
 	 * @return

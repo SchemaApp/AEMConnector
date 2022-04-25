@@ -1,11 +1,9 @@
 package com.schemaapp.core.services.impl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -27,14 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.wcm.api.Page;
-import com.schemaapp.core.services.FlushParentPageJsonService;
-import com.schemaapp.core.util.Constants;
+import com.schemaapp.core.services.FlushService;
 import com.schemaapp.core.util.ReplicationConstants;
 
-@Component(service = FlushParentPageJsonService.class)
-public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
-	public static final Logger LOGGER = LoggerFactory.getLogger(FlushParentPageJsonImpl.class);
-	private int locationLevel = 5;
+@Component(service = FlushService.class)
+public class FlushServiceImpl implements FlushService {
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(FlushServiceImpl.class);
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
@@ -80,7 +77,7 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 					if (contentResourceNode != null && contentResourceNode.hasProperty("transportUri")) {
 						String dispatcherCacheUrl = contentResourceNode.getProperty("transportUri").getValue().getString();
 						LOGGER.debug("getResourceNode :: dispatcherCacheUrl is {}", dispatcherCacheUrl);
-						getTransportUri(pageUrl, dispatcherCacheUrl);
+						invalidateDispatcherCache(pageUrl, dispatcherCacheUrl);
 					}
 				}
 			}
@@ -88,28 +85,7 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 			LOGGER.error("getResourceNode :: RepositoryException is", e);
 		}
 	}
-	/**
-	 * Method to get Transport Uri from the publish replication agent jcr:content
-	 * property.
-	 *
-	 * @param pageUrl                        , Resource page which is being activated/deactivated
-	 * @param dispatcherCacheUrl  ,  The dispatcher cache url
-	 * @return void
-	 */
-	public void getTransportUri(String pageUrl, String dispatcherCacheUrl) {
-		try {
-			Resource pageUrlResource = getResourceResolver().getResource(pageUrl);
-			LOGGER.debug("getTransportUri :: Resource path:{}", pageUrl);
-			if (pageUrlResource != null && pageUrlResource.adaptTo(Page.class) != null) {
-				invalidateDispatcherCacheURL(pageUrl, dispatcherCacheUrl);
-			} else {
-				LOGGER.error("getTransportUri :: Resource is either NULL or not a content page for resource path: {}",
-						pageUrl);
-			}
-		} catch (LoginException e) {
-			LOGGER.error("getTransportUri :: LoginException is", e);
-		}
-	}
+
 	/**
 	 * Method to invalidation Dispatcher cache of page.
 	 *
@@ -117,11 +93,9 @@ public class FlushParentPageJsonImpl implements FlushParentPageJsonService {
 	 * @param dispatcherCacheUrl , Dispatcher cache url page retrieved from publish replication agent
 	 * @return Boolean
 	 */
-	private void invalidateDispatcherCacheURL(String pageUrl, String dispatcherCacheUrl) {
-		String[] contentPathSplit = pageUrl.split("\\/");
-		if (contentPathSplit.length >= locationLevel) {
-			String pagePath = Arrays.stream(contentPathSplit).limit(locationLevel)
-					.collect(Collectors.joining(Constants.SLASH));
+	private void invalidateDispatcherCache(String pagePath, String dispatcherCacheUrl) {
+		
+		if (pagePath != null) {
 			LOGGER.debug("invalidateDispatcherCacheURL :: Parent Page Path {}", pagePath);
 			HttpGet request = new HttpGet(dispatcherCacheUrl);
 			try {
