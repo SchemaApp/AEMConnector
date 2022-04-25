@@ -4,5 +4,5 @@
     <allow
         jcr:primaryType="rep:GrantACE"
         rep:principalName="aem-schema-app-service-user"
-        rep:privileges="{Name}[jcr:versionManagement,jcr:read,rep:write,jcr:lockManagement]"/>
+        rep:privileges="{Name}[jcr:read]"/>
 </jcr:root>

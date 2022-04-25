@@ -82,7 +82,7 @@
                     	<embedded>
                             <groupId>com.adobe.cq</groupId>
                             <artifactId>core.wcm.components.core</artifactId>
-                            <target>/apps/mchp/install</target>
+                            <target>/apps/schemaApp/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.schemaApp</groupId>

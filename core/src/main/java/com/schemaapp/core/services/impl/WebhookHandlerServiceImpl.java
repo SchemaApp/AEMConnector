@@ -2,6 +2,8 @@ package com.schemaapp.core.services.impl;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +20,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,9 +28,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService;
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.FlushType;
-import com.adobe.cq.social.ugcbase.dispatcher.api.FlushService.RefetchType;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.models.AssetFolderDefinition;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.services.FlushService;
 import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.Constants;
 import com.schemaapp.core.util.JsonSanitizer;
@@ -47,8 +46,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private static final String UNABLE_TO_CREATE_ASSET_FOLDER = "Unable to create Asset Folder [ {} -> {} ]";
 
-	private static final String AEM_SCHEMA_APP_SERVICE_USER = "aem-schema-app-service-user";
-
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
@@ -58,9 +55,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	@Reference
 	private QueryBuilder builder;
-	
-	//@Reference
-	//private FlushService flushService;
+
+	@Reference
+	FlushService flushService;
 
 	/**
 	 * @return
@@ -75,13 +72,13 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	@Override
 	public WebhookEntityResult createEntity(WebhookEntity entity) throws LoginException {
 		ResourceResolver resolver = getResourceResolver();
-		Resource resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		Resource resource = resolver.getResource(Constants.CONTENT_SCHEMAAPP);
 		if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
 			AssetFolderDefinition folderDefinition = getAssestFolderDefinition();
 			createAssetFolder(folderDefinition, resolver);
 		}
 
-		resource = resolver.getResource(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		resource = resolver.getResource(Constants.CONTENT_SCHEMAAPP);
 
 		if (resource != null) {
 			Node node = resource.adaptTo(Node.class);
@@ -92,8 +89,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 				setGraphDatatoNode(entity, pageNode);
 				pageNode.setProperty(Constants.ID, entity.getId());
 				resolver.commit();
-				
-				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+
+				String path = getPath(entity);
+				flushService.invalidatePageJson(path);
 			} catch (RepositoryException | PersistenceException e) {
 				String errorMessage = "WebhookHandlerServiceImpl :: Occured error during creation Schema App Entity Node into the AEM Instance ";
 				LOG.error(errorMessage, e);
@@ -143,10 +141,11 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 					setGraphDatatoNode(entity, node);
 					node.setProperty(Constants.ID, entity.getId());
 					resolver.commit();
-					//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+					String path = getPath(entity);
+					flushService.invalidatePageJson(path);
 				} 
 			} else {
-				createEntity(entity);
+				return createEntity(entity);
 			}
 		} catch (RepositoryException | PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
@@ -160,6 +159,20 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
+	private String getPath(WebhookEntity entity) {
+		URL aURL;
+		try {
+			aURL = new URL(entity.getId());
+			String path = aURL.getPath();
+			if (path.indexOf(".") > -1) {
+				path = path.substring(0, path.lastIndexOf("."));
+			}
+			return path;
+		} catch (MalformedURLException e) {
+		}
+		return entity.getId();
+	}
+
 
 	@Override
 	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
@@ -170,10 +183,11 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			if (resource != null) {
 				resolver.delete(resource);
 				resolver.commit();
-				
-				//flushService.sendFlushUrl(AEM_SCHEMA_APP_SERVICE_USER, FlushType.IMMEDIATE_FLUSH, entity.getId(), RefetchType.NO_REFETCH);
+
+				String path = getPath(entity);
+				flushService.invalidatePageJson(path);
 			}
-			
+
 		} catch (PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 			LOG.error(errorMessage, e);
@@ -184,11 +198,11 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 	private AssetFolderDefinition getAssestFolderDefinition() {
 		AssetFolderDefinition folderDefinition = new AssetFolderDefinition();
-		folderDefinition.setParentPath(Constants.CONTENT_USERGENERATED);
-		folderDefinition.setName("schemaApp");
+		folderDefinition.setParentPath(Constants.CONTENT);
+		folderDefinition.setName("schemaApp-data");
 		folderDefinition.setTitle("Schema App");
-		folderDefinition.setPath(Constants.CONTENT_USERGENERATED_SCHEMAAPP);
-		folderDefinition.setNodeType(JcrResourceConstants.NT_SLING_FOLDER);
+		folderDefinition.setPath(Constants.CONTENT_SCHEMAAPP);
+		folderDefinition.setNodeType("cq:Page");
 		return folderDefinition;
 	}
 

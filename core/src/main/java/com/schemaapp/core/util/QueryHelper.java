@@ -40,7 +40,7 @@ public class QueryHelper {
 
 		final Map<String, String> map = new HashMap<>();
 		map.put(Constants.TYPE, JcrConstants.NT_UNSTRUCTURED);
-		map.put(Constants.PATH, Constants.CONTENT_USERGENERATED_SCHEMAAPP);
+		map.put(Constants.PATH, Constants.CONTENT_SCHEMAAPP);
 		map.put(Constants.PROPERTY, Constants.ID);
 		map.put(Constants.PROPERTY_VALUE, id);
 		map.put(Constants.P_LIMIT, Constants.INFINITE);
