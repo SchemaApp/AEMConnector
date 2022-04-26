@@ -114,11 +114,9 @@ public class FlushServiceImpl implements FlushService {
 					LOGGER.debug("Dispatcher Cache Invalidator returned status-code:{} with summary: {}",
 							statusCode, response.getStatusLine());
 				}
-				LOGGER.error("invalidateDispatcherCacheURL :: Invalidating {}", pagePath);
-			} catch (ClientProtocolException e) {
-				LOGGER.error("Dispatcher Cache Invalidator ClientProtocolException: ", e.getMessage());
+				LOGGER.debug("invalidateDispatcherCacheURL :: Invalidating {}", pagePath);
 			} catch (IOException e) {
-				LOGGER.error("Dispatcher Cache Invalidator IOException:", e.getMessage());
+				LOGGER.error("Dispatcher Cache Invalidator IOException");
 			} finally {
 				request.releaseConnection();
 			}
