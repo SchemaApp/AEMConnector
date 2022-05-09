@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schemaapp.core.exception.MissingWebhookEntityAttributesException;
+import com.schemaapp.core.exception.AEMURLNotFoundException;
+import com.schemaapp.core.exception.InvalidWebHookJsonDataException;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 import com.schemaapp.core.services.WebhookHandlerService;
@@ -63,21 +64,21 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 			final WebhookEntity entity = mapperObject.readValue(request.getReader(), WebhookEntity.class);
 			LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());
 			if (Validator.validateEntity(entity)) {
-				if (entity.getType().equals("EntityCreated")) rerult = webhookHandlerService.createEntity(entity);
+				if (entity.getType().equals("EntityCreated")) rerult = webhookHandlerService.updateEntity(entity);
 				if (entity.getType().equals("EntityUpdated")) rerult = webhookHandlerService.updateEntity(entity);
 				if (entity.getType().equals("EntityDeleted")) rerult = webhookHandlerService.deleteEntity(entity);
 			} 
 		} catch (LoginException e) {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while creating entity", e);
 			response.setStatus(500);	
-		} catch (IOException e) {
+		} catch (IOException | InvalidWebHookJsonDataException e) {
 			LOG.error("Schema App : WebhooksHandlerServlet : Error occurred while parsing JSON-LD Data", e);
 			response.setStatus(400);
 			rerult = WebhookEntityResult.prepareError(INVALID_JSON_LD_MESSAGE);
-		} catch (MissingWebhookEntityAttributesException e) {
+		} catch (AEMURLNotFoundException e) {
 			response.setStatus(400);
 			rerult = WebhookEntityResult.prepareError(e.getMessage());
-		}
+		} 
 
 		writeJsonResponse(response, rerult);
 	}

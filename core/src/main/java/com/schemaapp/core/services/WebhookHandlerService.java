@@ -3,6 +3,8 @@ package com.schemaapp.core.services;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 
+import com.schemaapp.core.exception.AEMURLNotFoundException;
+import com.schemaapp.core.exception.InvalidWebHookJsonDataException;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 
@@ -14,24 +16,15 @@ import com.schemaapp.core.models.WebhookEntityResult;
  *
  */
 public interface WebhookHandlerService {
-
-	/**
-	 * Schema App Create Entity Webhook. When markup for a page is first created.
-	 * 
-	 * @param entiry
-	 * @return
-	 * @throws LoginException
-	 */
-	public WebhookEntityResult createEntity(WebhookEntity entity) throws LoginException;
 	
 	/**
 	 * Schema App Update Entity Webhook. When markup for a page is updated.
 	 * 
 	 * @param entiry
 	 * @return
-	 * @throws LoginException
+	 * @throws LoginException, AEMURLNotFoundException
 	 */
-	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException;
+	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException, AEMURLNotFoundException, InvalidWebHookJsonDataException;
 	
 	/**
 	 * Schema App Delete Entity Webhook. When markup for a page is deleted.

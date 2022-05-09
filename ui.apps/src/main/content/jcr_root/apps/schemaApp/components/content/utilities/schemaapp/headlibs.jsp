@@ -28,7 +28,7 @@ if(cfgMgr != null) {
 	if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(accountID)) {
 		%>
 		<script>window.schema_highlighter={output: false, key:"<%=apiKey%>", accountId: "<%=accountID%>"}</script>
-		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
+		<script async src="/etc.clientlibs/schemaApp/clientlibs/highlight/resources/js/highlight.js"></script>
 		<%
 	}
 }
