@@ -86,6 +86,24 @@
                                                             fieldLabel="Website URL"
 															required="{Boolean}true"
                                                             name="./siteURL"/> 
+                                                        <aemUsername
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+															fieldDescription="Please provide the aem author username for webhooks call."
+                                                            fieldLabel="AEM Author Username"
+															required="{Boolean}true"
+                                                            name="./aemUsername"/> 
+                                                        <aemPassword
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="schemaApp/utilities/password"
+                                                            fieldDescription="AEM Author password required. Please check documentation to make connection between author instance and schema app application."
+                                                            fieldLabel="AEM Author Password"
+                                                            name="./aemPassword"/>
+                                                        <aemPasswordEncryption
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/foundation/form/hidden"
+                                                            name="./aemPassword@Encrypted"
+                                                            value="true"/>
                                                         <connect
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/button"
