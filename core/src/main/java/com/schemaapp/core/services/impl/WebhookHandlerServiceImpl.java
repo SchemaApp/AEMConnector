@@ -213,7 +213,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 		String id = getPath(entity);
 		Resource urlResource = resolver.resolve(id);
-		if (urlResource == null || ResourceUtil.isNonExistingResource(urlResource)) {
+		if (ResourceUtil.isNonExistingResource(urlResource)) {
 			try {
 				List<Resource> schemaAppConfigresources = findSchemaAppConfigUsingSiteDomain(entity, session);
 				for (Resource configResource : schemaAppConfigresources) {
