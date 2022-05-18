@@ -158,7 +158,10 @@
         var schemaAppData = {
             source: "AdobeExperienceManager",
 	        url: siteurl,
-	        webhook: siteurl+"/bin/schemaApp/WebhooksHandler.html"
+	        webhook: siteurl+"/bin/schemaApp/WebhooksHandler.html",
+			headers: {
+				"Authorization": "Basic " + btoa(username + ":" + password)
+			}
         };
         $.ajax({
             type: 'POST',
