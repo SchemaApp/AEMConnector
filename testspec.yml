@@ -1,0 +1,20 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - echo "Running mvn install"
+      - mvn install
+  post_build:
+    commands:
+      - echo "Dumping test coverage"
+      - cat core/target/site/jacoco/jacoco.xml
+
+      - echo "Sending Coverage Report to Codacy"
+      - git clone https://$GIT_TOKEN@github.com/SchemaApp/AdobeExperienceManager.git && cd AdobeExperienceManager
+      - branch=$(echo $CODEBUILD_WEBHOOK_HEAD_REF | cut -d '/' -f 3-)
+      - git checkout $branch
+      - curl -sL https://coverage.codacy.com/get.sh -o get.sh && chmod +x ./get.sh
+      - ./get.sh report -r ../core/target/site/jacoco/jacoco.xml
