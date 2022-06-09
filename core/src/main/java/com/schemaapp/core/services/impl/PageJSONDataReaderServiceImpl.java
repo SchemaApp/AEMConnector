@@ -1,12 +1,13 @@
 package com.schemaapp.core.services.impl;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.day.cq.search.QueryBuilder;
 import com.schemaapp.core.services.PageJSONDataReaderService;
-import com.schemaapp.core.util.QueryHelper;
+import com.schemaapp.core.util.Constants;
 
 /**
  * The <code>WebhookHandlerService</code> class used to prepare page script data.
@@ -49,11 +50,11 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 
 		try {
 			ResourceResolver resolver = getResourceResolver();
-			Session session = resolver.adaptTo(Session.class);
-			Resource resource = QueryHelper.getResultsUsingId(pageUrl, builder, session);
-			if (resource != null) {
-				Node node = resource.adaptTo(Node.class);
-
+			String id = getPath(pageUrl);
+			Resource urlResource = resolver.resolve(id);
+			Resource schemaAppData = urlResource.getChild(Constants.DATA);
+			if (schemaAppData != null) {
+				Node node = schemaAppData.adaptTo(Node.class);
 				if (node != null && node.hasProperty("entity")) {
 					Property entityProperty = node.getProperty("entity");
 					if(entityProperty != null) {
@@ -80,5 +81,24 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 		return resolverFactory.getServiceResourceResolver(param);
 	}
 
-
+	/**
+	 * Prepare and Get Path from the Payload
+	 * @param pageUrl
+	 * @return
+	 */
+	private String getPath(String pageUrl) {
+		
+		URL aURL;
+		try {
+			aURL = new URL(pageUrl);
+			String path = aURL.getPath();
+			if (path.indexOf(".") > -1) {
+				path = path.substring(0, path.lastIndexOf("."));
+			}
+			return path;
+		} catch (MalformedURLException e) {
+			LOG.error(e.getMessage());
+		}
+		return pageUrl;
+	}
 }

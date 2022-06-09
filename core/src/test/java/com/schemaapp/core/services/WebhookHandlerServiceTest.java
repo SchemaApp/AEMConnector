@@ -2,7 +2,6 @@ package com.schemaapp.core.services;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +14,6 @@ import java.util.Map;
 import javax.jcr.Node;
 import javax.jcr.Session;
 
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -28,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.day.cq.replication.Replicator;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -36,6 +35,7 @@ import com.day.cq.search.result.SearchResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.services.impl.WebhookHandlerServiceImpl;
+import com.schemaapp.core.util.Constants;
 
 @ExtendWith({ MockitoExtension.class})
 class WebhookHandlerServiceTest {
@@ -73,28 +73,12 @@ class WebhookHandlerServiceTest {
 	private Node node;
 	
 	@Mock
-	private FlushService flushService;
+	private Replicator replicator;
 	
 	@InjectMocks
 	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
 
 	private static ObjectMapper MAPPER = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-	
-	@Test
-	void createEntityTest() throws Exception {
-
-		mockResolver();
-		when(resource.getResourceType()).thenReturn("sling:nonexisting");
-		when(resolver.getResource(anyString())).thenReturn(resource);
-		final WebhookEntity mockEntity = MAPPER.readValue(JSON_LD, WebhookEntity.class);
-		when(entity.getGraph()).thenReturn(mockEntity.getGraph());
-		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
-		when(resource.adaptTo(Node.class)).thenReturn(node);
-		when(node.addNode(anyString(), eq(JcrConstants.NT_UNSTRUCTURED))).thenReturn(node);
-		
-		webhookHandlerService.createEntity(entity);
-		verify(resolver, times(2)).commit();
-	}
 	
 	@Test
 	void updateEntityTest() throws Exception {
@@ -104,14 +88,18 @@ class WebhookHandlerServiceTest {
 		when(entity.getGraph()).thenReturn(mockEntity.getGraph());
 		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
 		when(resource.adaptTo(Node.class)).thenReturn(node);
-		when(resolver.adaptTo(Session.class)).thenReturn(session); //maybe not needed
+		when(node.hasNode(Constants.DATA)).thenReturn(true);
+		when(node.getNode(Constants.DATA)).thenReturn(node);
+		when(resolver.adaptTo(Session.class)).thenReturn(session); 
 		when(queryBuilder.createQuery(Mockito.any(PredicateGroup.class), Mockito.any(Session.class))).thenReturn(query);
 		when(query.getResult()).thenReturn(searchResult);
 		final List<Hit> hits = new ArrayList<>();
 		hits.add(hit);
 		when(searchResult.getHits()).thenReturn(hits);
 		when(hits.get(0).getResource()).thenReturn(resource);
-		
+		when(resolver.resolve(anyString())).thenReturn(resource);
+		when(resource.getResourceType()).thenReturn(Resource.RESOURCE_TYPE_NON_EXISTING);
+
 		webhookHandlerService.updateEntity(entity);
 		verify(resolver, times(1)).commit();
 	}
@@ -121,14 +109,16 @@ class WebhookHandlerServiceTest {
 
 		mockResolver();
 		when(entity.getId()).thenReturn(new String("https://dell.ca/products/monitors/dellultra30"));
-		when(resolver.adaptTo(Session.class)).thenReturn(session); //maybe not needed
+		when(resolver.adaptTo(Session.class)).thenReturn(session); 
+		when(resolver.resolve(anyString())).thenReturn(resource);
+		when(resource.getResourceType()).thenReturn(Resource.RESOURCE_TYPE_NON_EXISTING);
 		when(queryBuilder.createQuery(Mockito.any(PredicateGroup.class), Mockito.any(Session.class))).thenReturn(query);
 		when(query.getResult()).thenReturn(searchResult);
 		final List<Hit> hits = new ArrayList<>();
 		hits.add(hit);
 		when(searchResult.getHits()).thenReturn(hits);
 		when(hits.get(0).getResource()).thenReturn(resource);
-		
+
 		webhookHandlerService.deleteEntity(entity);
 		verify(resolver, times(1)).delete(resource);
 		verify(resolver, times(1)).commit();

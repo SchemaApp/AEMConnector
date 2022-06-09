@@ -21,7 +21,7 @@
     <groupId>com.schemaApp</groupId>
     <artifactId>schemaApp</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2</version>
     <description>SchemaApp</description>
 
     <modules>
