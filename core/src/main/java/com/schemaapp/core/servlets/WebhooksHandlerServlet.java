@@ -62,8 +62,8 @@ public class WebhooksHandlerServlet extends SlingAllMethodsServlet {
 		WebhookEntityResult rerult = null;
 		try {
 			final WebhookEntity entity = mapperObject.readValue(request.getReader(), WebhookEntity.class);
-			LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());
 			if (Validator.validateEntity(entity)) {
+				LOG.info("Schema App : WebhooksHandlerServlet : ID - {} , Type - {}", entity.getId(), entity.getType());
 				if (entity.getType().equals("EntityCreated")) rerult = webhookHandlerService.updateEntity(entity);
 				if (entity.getType().equals("EntityUpdated")) rerult = webhookHandlerService.updateEntity(entity);
 				if (entity.getType().equals("EntityDeleted")) rerult = webhookHandlerService.deleteEntity(entity);
