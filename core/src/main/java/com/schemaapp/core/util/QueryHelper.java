@@ -30,38 +30,6 @@ public class QueryHelper {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QueryHelper.class);
 
-	/**
-	 * This method is used to find Entity Resource from repository using ID.
-	 *   
-	 * @param id
-	 * @param builder
-	 * @param session
-	 * @return
-	 */
-	public static Resource getResultsUsingId(String id, QueryBuilder builder, Session session) {
-
-		final Map<String, String> map = new HashMap<>();
-		map.put(Constants.TYPE, JcrConstants.NT_UNSTRUCTURED);
-		map.put(Constants.PATH, Constants.CONTENT_USERGENERATED_SCHEMAAPP);
-		map.put(Constants.PROPERTY, Constants.ID);
-		map.put(Constants.PROPERTY_VALUE, id);
-		map.put(Constants.P_LIMIT, Constants.INFINITE);
-		final Query query = builder.createQuery(PredicateGroup.create(map), session);
-		final SearchResult result = query.getResult();
-		for(Hit hit : result.getHits()) {
-			try {
-				final Resource entityResource = hit.getResource();
-				if (entityResource!= null && !ResourceUtil.isNonExistingResource(entityResource)) {
-					return entityResource;
-				}
-			}
-			catch (final RepositoryException error) {
-				LOG.error("QueryHelper > getResultsUsingId  ", error);
-			}
-		}
-		return null;
-	}
-	
 	public static List<Resource> getSchemaAppConfig(String siteDoamin, QueryBuilder builder, Session session) {
 
 		List<Resource> resources = new ArrayList<>();

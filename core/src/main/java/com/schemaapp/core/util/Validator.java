@@ -23,6 +23,7 @@ public final class Validator {
 	 * @throws AEMURLNotFoundException
 	 */
 	public static boolean validateEntity(WebhookEntity entity) throws AEMURLNotFoundException {
+		if (entity == null) throw new AEMURLNotFoundException("Missing Required Attributes ");
 		if (StringUtils.isBlank(entity.getType())) throw new AEMURLNotFoundException("Missing Required Attribute -> Type ");
 		if (StringUtils.isBlank(entity.getId())) throw new AEMURLNotFoundException("Missing Required Attribute -> Id ");
 		if (StringUtils.isBlank(entity.getBase64encode())) throw new AEMURLNotFoundException("Missing Required Attribute -> Base64encode");

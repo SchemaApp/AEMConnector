@@ -78,7 +78,7 @@ class PageJSONDataReaderServiceTest {
 		when(node.getProperty("entity")).thenReturn(entityProperty);
 		when(entityProperty.getString()).thenReturn(GRAPH_DATA);
 
-		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("www.demosite.com/test.html"));
+		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("https://www.demosite.com/test.html"));
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {
