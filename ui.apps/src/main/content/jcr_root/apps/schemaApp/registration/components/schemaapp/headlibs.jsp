@@ -20,13 +20,12 @@ if(cfgMgr != null) {
 	String siteURL = null;
 	Configuration cfg = cfgMgr.getConfiguration("schemaapp", services);
 	if (cfg != null) {
-		apiKey = cfg.get("apiKey", "");
 		accountID = cfg.get("accountID", "");
 		siteURL = cfg.get("siteURL", "");
 	}
 	if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(accountID)) {
 		%>
-		<script>window.schema_highlighter={output: false, key:"<%=apiKey%>", accountId: "<%=accountID%>"}</script>
+		<script>window.schema_highlighter={output: false, accountId: "<%=accountID%>"}</script>
 		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
 		<%
 	}
