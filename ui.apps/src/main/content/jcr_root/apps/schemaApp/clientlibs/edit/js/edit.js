@@ -126,14 +126,9 @@
     }
 
  function doConnect() {
-        var apiKey = $('input[name="./apiKey"]').val();
         var accountID = $('input[name="./accountID"]').val();
         var siteurl = $('input[name="./siteURL"]').val();
 
-        if (!apiKey) {
-            popupAlert(Granite.I18n.get('Please provide an Schema App API Key.'));
-            return;
-        }
         if (!accountID) {
             popupAlert(Granite.I18n.get('Please provide the Schema App account\'s Id.'));
             return;
@@ -156,7 +151,6 @@
             headers: {
 	            "Accept": "application/json; charset=utf-8",
 	            "Content-Type": "application/json; charset=utf-8",
-	            "x-api-key": apiKey,
 	            "x-account-id": accountID
 	        },
             data: JSON.stringify(schemaAppData),
@@ -180,7 +174,6 @@
     }
     
     function cleanupFields() {
-        $('input[name="./apiKey"]').val('');
         $('input[name="./accountID"]').val('');
         $('input[name="./siteURL"]').val('');
     }
