@@ -21,7 +21,7 @@
     <groupId>com.schemaApp</groupId>
     <artifactId>schemaApp</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2</version>
     <description>SchemaApp</description>
 
     <modules>
@@ -41,7 +41,7 @@
         <vault.user>admin</vault.user>
         <vault.password>admin</vault.password>
         <core.wcm.components.version>2.11.1</core.wcm.components.version>
-        <bnd.version>5.0.0</bnd.version>
+        <bnd.version>5.1.1</bnd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -89,6 +89,26 @@
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>coverage-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>coverage-report</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -151,6 +171,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.1</version>
                     <configuration>
+                        <argLine>@{argLine}</argLine>
                         <useSystemClassLoader>false</useSystemClassLoader>
                     </configuration>
                 </plugin>

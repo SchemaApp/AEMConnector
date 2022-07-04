@@ -1,6 +1,6 @@
 package com.schemaapp.core.services;
 
-public interface FlushParentPageJsonService {
+public interface FlushService {
 
 	/**
 	 * Override invalidatePageJson method of FlushParentPageJsonService

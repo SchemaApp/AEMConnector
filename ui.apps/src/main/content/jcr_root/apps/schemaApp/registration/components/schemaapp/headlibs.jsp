@@ -34,7 +34,6 @@ if(cfgMgr != null) {
 
 String pageURL = request.getRequestURL().toString();
 
-
 String graphData = schemaAppJSONReader.getPageData(pageURL);
 if (graphData != null) {
 %>

@@ -1,11 +1,10 @@
 package com.schemaapp.core.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Node;
@@ -20,16 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import com.schemaapp.core.services.impl.PageJSONDataReaderServiceImpl;
+import com.schemaapp.core.util.Constants;
 
 @ExtendWith({ MockitoExtension.class})
 class PageJSONDataReaderServiceTest {
@@ -73,19 +71,14 @@ class PageJSONDataReaderServiceTest {
 	void pageDataTest() throws Exception {
 
 		mockResolver();
+		when(resolver.resolve(anyString())).thenReturn(resource);
+		when(resource.getChild(Constants.DATA)).thenReturn(resource);
 		when(resource.adaptTo(Node.class)).thenReturn(node);
-		when(resolver.adaptTo(Session.class)).thenReturn(session); 
-		when(queryBuilder.createQuery(Mockito.any(PredicateGroup.class), Mockito.any(Session.class))).thenReturn(query);
-		when(query.getResult()).thenReturn(searchResult);
-		final List<Hit> hits = new ArrayList<>();
-		hits.add(hit);
-		when(searchResult.getHits()).thenReturn(hits);
-		when(hits.get(0).getResource()).thenReturn(resource);
 		when(node.hasProperty("entity")).thenReturn(true);
 		when(node.getProperty("entity")).thenReturn(entityProperty);
 		when(entityProperty.getString()).thenReturn(GRAPH_DATA);
 
-		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("www.demosite.com/test.html"));
+		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("https://www.demosite.com/test.html"));
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {

@@ -128,6 +128,8 @@
  function doConnect() {
         var accountID = $('input[name="./accountID"]').val();
         var siteurl = $('input[name="./siteURL"]').val();
+		var username = $('input[name="./aemUsername"]').val();
+        var password = $('input[name="./aemPassword"]').val();
 
         if (!accountID) {
             popupAlert(Granite.I18n.get('Please provide the Schema App account\'s Id.'));
@@ -137,13 +139,24 @@
             popupAlert(Granite.I18n.get('Please provide the AEM Publisher URL.'));
             return;
         }
+        if (!username) {
+            popupAlert(Granite.I18n.get('Please provide the AEM Author User name.'));
+            return;
+        }
+        if (!password) {
+            popupAlert(Granite.I18n.get('Please provide the AEM Author Password.'));
+            return;
+        }
 
         var schemaAppConnectionPath = 'https://app.schemaapp.com/register/plugin';
         ui.wait();
         var schemaAppData = {
             source: "AdobeExperienceManager",
 	        url: siteurl,
-	        webhook: siteurl+"/bin/schemaApp/WebhooksHandler.html"
+	        webhook: siteurl+"/bin/schemaApp/WebhooksHandler.html",
+			headers: {
+				"Authorization": "Basic " + btoa(username + ":" + password)
+			}
         };
         $.ajax({
             type: 'POST',
@@ -151,7 +164,8 @@
             headers: {
 	            "Accept": "application/json; charset=utf-8",
 	            "Content-Type": "application/json; charset=utf-8",
-	            "x-account-id": accountID
+	            "x-account-id": accountID,
+	            "Authorization":"Basic " + btoa(username + ":" + password)
 	        },
             data: JSON.stringify(schemaAppData),
             cache: false
@@ -176,5 +190,7 @@
     function cleanupFields() {
         $('input[name="./accountID"]').val('');
         $('input[name="./siteURL"]').val('');
+        $('input[name="./aemUsername"]').val('');
+        $('input[name="./aemPassword"]').val('');
     }
 })(document, Granite.$);

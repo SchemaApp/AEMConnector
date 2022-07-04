@@ -11,7 +11,7 @@
 <%
 
 HierarchyNodeInheritanceValueMap pageProperties1 = new HierarchyNodeInheritanceValueMap(resource);
-String[] services = inheritedProperties.getInherited("cq:cloudserviceconfigs", new String[]{});
+String[] services = pageProperties1.getInherited("cq:cloudserviceconfigs", new String[]{});
 final PageJSONDataReaderService schemaAppJSONReader=sling.getService(PageJSONDataReaderService.class);
 ResourceResolver resolver = schemaAppJSONReader.getResourceResolver();
 ConfigurationManager cfgMgr = resolver.adaptTo(ConfigurationManager.class);
@@ -28,7 +28,7 @@ if(cfgMgr != null) {
 	if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(accountID)) {
 		%>
 		<script>window.schema_highlighter={output: false, key:"<%=apiKey%>", accountId: "<%=accountID%>"}</script>
-		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
+		<script async src="/etc.clientlibs/schemaApp/clientlibs/highlight/resources/js/highlight.js"></script>
 		<%
 	}
 }
