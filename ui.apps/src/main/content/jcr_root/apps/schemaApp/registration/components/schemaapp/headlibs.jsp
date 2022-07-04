@@ -23,7 +23,7 @@ if(cfgMgr != null) {
 		accountID = cfg.get("accountID", "");
 		siteURL = cfg.get("siteURL", "");
 	}
-	if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(accountID)) {
+	if (StringUtils.isNotBlank(accountID)) {
 		%>
 		<script>window.schema_highlighter={output: false, accountId: "<%=accountID%>"}</script>
 		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
