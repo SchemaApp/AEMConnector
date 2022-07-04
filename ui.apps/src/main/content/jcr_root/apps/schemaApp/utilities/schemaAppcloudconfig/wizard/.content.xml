@@ -65,13 +65,6 @@
                                                             fieldLabel="Title"
                                                             name="./jcr:title"
                                                             required="{Boolean}true"/>                                                 
-                                                        <apiKey
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-															fieldDescription="Copy and paste the API key for your site domain that is generated for you at the Schema App Administration Console."
-                                                            fieldLabel="Schema App API key"
-                                                            name="./apiKey"
-                                                            required="{Boolean}true"/>
                                                         <accountID
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
