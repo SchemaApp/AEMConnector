@@ -30,7 +30,9 @@ if(cfgMgr != null) {
 		<%
 	}
 }
-
+%>
+<meta data-page-path="<%=request.getScheme()+"://"+request.getServerName()+currentPage.getPath()%>">
+<%
 
 String pageURL = request.getRequestURL().toString();
 

@@ -1,10 +1,10 @@
 package com.schemaapp.core.services.impl;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jcr.Session;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.schemaapp.core.services.CDNDataAPIService;
+import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.ConfigurationUtil;
 import com.schemaapp.core.util.Constants;
 
@@ -40,7 +44,10 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	private final Logger LOG = LoggerFactory.getLogger(CDNDataAPIServiceImpl.class);
 
 	@Reference
-	ConfigurationAdmin configurationAdmin;
+	private ConfigurationAdmin configurationAdmin;
+
+	@Reference
+	private WebhookHandlerService webhookHandlerService;
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
@@ -55,24 +62,28 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				getSchemaAppCDNData(resolver, page);
 			}
 		} catch (Exception e) {
-			LOG.error("Error occurs while read CDN data", e.getMessage());
+			LOG.error("Error occurs while read CDN data, Error :: {}", e.getMessage());
 		}
 	}
 
+	/**
+	 * @param resolver
+	 * @param page
+	 */
 	private void getSchemaAppCDNData(ResourceResolver resolver, Page page) {
-		String accountId;
 		try {
-			accountId = geAccountId(resolver, page);
+			String accountId = geAccountId(resolver, page);
+			String siteURL = geSiteURL(resolver, page);
 			Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
 			while (childPages.hasNext()) {
 				final Page child = childPages.next();
 				String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
 						Constants.API_ENDPOINT_CONFIG_PID,
 						configurationAdmin, "");
-				String pagePath = child.getPath();
+				String pagePath = siteURL + child.getPath();
 				String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
 				URL url = getURL(endpoint, accountId, encodedURL);
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				HttpURLConnection connection = getHttpURLConnection(url);
 				connection.setRequestMethod(HttpConstants.METHOD_GET);
 				connection.setConnectTimeout(5 * 1000);
 				connection.setReadTimeout(7 * 1000);
@@ -82,16 +93,24 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				StringBuilder content = new StringBuilder();
 				while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
 
-				LOG.error("pagePath - {} Data  {}",pagePath, content.toString());
+				if (StringUtils.isNotBlank(content.toString())) {
+					Resource pageResource = child.adaptTo(Resource.class);
+					webhookHandlerService.savenReplicate(content.toString(), resolver, resolver.adaptTo(Session.class), pageResource);
+				}
 
 				bufferedReader.close();
 				connection.disconnect();
 			}
 		} catch (Exception e) {
-			LOG.error("Error in fetching details from API", e.getMessage());
+			LOG.error("Error in fetching details from API ,Error :: {}", e.getMessage());
 		}
 	}
 
+	/**
+	 * @param resolver
+	 * @param page
+	 * @return
+	 */
 	private String geAccountId(ResourceResolver resolver, Page page) {
 		String accountId = null;
 		ValueMap valueMap = page.getProperties();
@@ -103,7 +122,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 					if (configResource != null) {
 						accountId = (String) configResource.getValueMap().get("accountID");
 
-						if (accountId != null) {
+						if (accountId != null && accountId.lastIndexOf('/') > 0) {
 							int index = accountId.lastIndexOf('/');
 							accountId = accountId.substring(index, accountId.length());
 						}
@@ -115,7 +134,34 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		return accountId;
 	}
 
-	private List<Page> getSiteRootPages(ResourceResolver resolver) throws LoginException {
+	/**
+	 * @param resolver
+	 * @param page
+	 * @return
+	 */
+	private String geSiteURL(ResourceResolver resolver, Page page) {
+		String siteURL = null;
+		ValueMap valueMap = page.getProperties();
+		if (valueMap.containsKey(CQ_CLOUDSERVICECONFIGS)) {
+			String[] cloudserviceconfigs = (String[]) valueMap.get(CQ_CLOUDSERVICECONFIGS);
+			for (String cloudserviceconfig : cloudserviceconfigs) {
+				if (cloudserviceconfig.startsWith("/etc/cloudservices/schemaapp/")) {
+					Resource configResource = resolver.getResource(cloudserviceconfig + "/jcr:content");
+					if (configResource != null) {
+						siteURL = (String) configResource.getValueMap().get("siteURL");
+					}
+				}
+			}
+		}
+
+		return siteURL;
+	}
+
+	/**
+	 * @param resolver
+	 * @return
+	 */
+	private List<Page> getSiteRootPages(ResourceResolver resolver) {
 		List<Page> rootpages = new ArrayList<>();
 		Resource contentResource = resolver.getResource("/content");
 		if (contentResource == null) return rootpages;
@@ -152,6 +198,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		Map<String, Object> param = new HashMap<>();
 		param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
 		return resolverFactory.getServiceResourceResolver(param);
+	}
+
+	@Override
+	public HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+		return (HttpURLConnection) url.openConnection();
 	}
 
 }
