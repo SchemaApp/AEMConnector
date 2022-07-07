@@ -1,6 +1,5 @@
 package com.schemaapp.core.schedulers;
 
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.osgi.service.component.annotations.Activate;
@@ -12,7 +11,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.replication.Replicator;
 import com.schemaapp.core.services.CDNDataAPIService;
 
 @Designate(ocd = SchemaAppDataAPIScheduler.Config.class)
@@ -28,7 +26,7 @@ public class SchemaAppDataAPIScheduler {
 		boolean enabled() default true;
 
 		@AttributeDefinition(name = "Cron-job expression", description = "Cron-job expression. Default is every 6 hours.")
-		String expression() default "0 0 0/6 ? * * *";
+		String expression() default "0 0 0 * * *";
 
 		@AttributeDefinition(name = "Concurrent task", description = "Whether or not to schedule this task concurrently")
 		boolean concurrent() default false;
@@ -40,12 +38,6 @@ public class SchemaAppDataAPIScheduler {
 
 	@Reference
 	private Scheduler scheduler;
-
-	@Reference
-	private Replicator replicator;
-
-	@Reference
-	private ResourceResolverFactory resolverFactory;
 
 	@Reference
 	private CDNDataAPIService cdnDataAPIService;
