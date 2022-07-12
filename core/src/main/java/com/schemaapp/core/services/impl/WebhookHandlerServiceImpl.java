@@ -22,6 +22,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,6 +49,8 @@ import com.schemaapp.core.util.QueryHelper;
 
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
+
+	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
 
 	private static ObjectMapper mapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -111,6 +114,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		Node dataNode = null;
 		if (!node.hasNode(Constants.DATA)) {
 			dataNode = node.addNode(Constants.DATA, JcrConstants.NT_UNSTRUCTURED);
+			dataNode.setProperty(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, SCHEMA_APP_COMPONENTS_RESOURCE_TYPE);
 		} else {
 			dataNode = node.getNode(Constants.DATA);
 		}
