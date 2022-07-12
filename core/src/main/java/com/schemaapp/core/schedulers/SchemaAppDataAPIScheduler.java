@@ -17,6 +17,20 @@ import com.schemaapp.core.services.CDNDataAPIService;
 @Component
 public class SchemaAppDataAPIScheduler {
 
+	private final Logger LOG = LoggerFactory.getLogger(SchemaAppDataAPIScheduler.class);
+
+	private static final String AUTOSUGGESTJOBNAME = "SchemaAppDataAPIScheduler";
+
+	@Reference
+	private Scheduler scheduler;
+
+	@Reference
+	private CDNDataAPIService cdnDataAPIService;
+
+	boolean enabled;
+	String schedulerExpression;
+	boolean schedulerConcurrent;
+	
 	@ObjectClassDefinition(
 			name = "SchemaApp Data API Scheduler",
 			description = "Scheduler to create list of valid silicon devices for Devtool Selector Search."
@@ -31,20 +45,6 @@ public class SchemaAppDataAPIScheduler {
 		@AttributeDefinition(name = "Concurrent task", description = "Whether or not to schedule this task concurrently")
 		boolean concurrent() default false;
 	}
-
-	private final Logger LOG = LoggerFactory.getLogger(SchemaAppDataAPIScheduler.class);
-
-	private static final String AUTOSUGGESTJOBNAME = "SchemaAppDataAPIScheduler";
-
-	@Reference
-	private Scheduler scheduler;
-
-	@Reference
-	private CDNDataAPIService cdnDataAPIService;
-
-	boolean enabled;
-	String schedulerExpression;
-	boolean schedulerConcurrent;
 
 	@Activate
 	public void activate(final Config config){

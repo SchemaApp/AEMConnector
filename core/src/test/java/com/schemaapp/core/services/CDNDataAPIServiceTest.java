@@ -3,11 +3,11 @@ package com.schemaapp.core.services;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,10 +60,7 @@ class CDNDataAPIServiceTest {
 	private ResourceResolverFactory resolverFactory;
 
 	@Mock
-	private Resource resource, entityResource;
-
-	@Mock
-	private Session session;
+	private Resource resource;
 
 	@Mock
 	private WebhookHandlerService webhookHandlerService;
@@ -144,7 +139,7 @@ class CDNDataAPIServiceTest {
 
 		HttpURLConnection connection = mock(HttpURLConnection.class);
 		URL url = new URL("https://data.schemaapp.com");
-		Mockito.doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
+		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
 		doReturn(connection).when(cdnDataAPIServiceImpl).getHttpURLConnection(any());
 
 		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));
