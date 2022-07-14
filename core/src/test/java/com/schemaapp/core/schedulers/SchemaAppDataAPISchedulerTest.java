@@ -64,12 +64,12 @@ class SchemaAppDataAPISchedulerTest {
 	@Test
     void testSchedulerInit() {
         parameters.put("enabled", true);
-        parameters.put("scheduler.expression", "0 */8 * ? * *");
+        parameters.put("scheduler.expression", "0 */30 * ? * *");
         parameters.put("scheduler.concurrent", false);
         context.registerInjectActivateService(schemaAppDataAPIScheduler, parameters);
 
         assertTrue(schemaAppDataAPIScheduler.enabled);
-        assertEquals("0 0 0 * * *", schemaAppDataAPIScheduler.schedulerExpression);
+        assertEquals("0 */30 * ? * *", schemaAppDataAPIScheduler.schedulerExpression);
         assertFalse(schemaAppDataAPIScheduler.schedulerConcurrent);
     }
 

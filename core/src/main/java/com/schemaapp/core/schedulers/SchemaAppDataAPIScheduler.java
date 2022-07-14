@@ -39,8 +39,8 @@ public class SchemaAppDataAPIScheduler {
 		@AttributeDefinition(name = "Enabled", description = "Enable/disable the scheduler")
 		boolean enabled() default true;
 
-		@AttributeDefinition(name = "Cron-job expression", description = "Cron-job expression. Default is every 6 hours.")
-		String expression() default "0 0 0 * * *";
+		@AttributeDefinition(name = "Cron-job expression", description = "Cron-job expression. Default is every 30 min.")
+		String expression() default "0 */30 * ? * *";
 
 		@AttributeDefinition(name = "Concurrent task", description = "Whether or not to schedule this task concurrently")
 		boolean concurrent() default false;
@@ -48,6 +48,7 @@ public class SchemaAppDataAPIScheduler {
 
 	@Activate
 	public void activate(final Config config){
+		LOG.error(" :: SchemaAppDataAPIScheduler activate ::");
 		enabled = config.enabled();
 		schedulerExpression = config.expression();
 		schedulerConcurrent = config.concurrent();
@@ -57,6 +58,7 @@ public class SchemaAppDataAPIScheduler {
 		scheduleOptions.canRunConcurrently(schedulerConcurrent);
 
 		final Runnable autoSuggestSchedulerJob = () -> {
+			LOG.error(" :: SchemaAppDataAPIScheduler Runnable ::");
 			if(enabled) {
 				schedulerJob();
 			}
@@ -71,7 +73,7 @@ public class SchemaAppDataAPIScheduler {
 	}
 
 	public boolean schedulerJob() {
-		
+		LOG.error(" :: SchemaAppDataAPIScheduler start ::");
 		cdnDataAPIService.readCDNData();
 		return enabled;
 
