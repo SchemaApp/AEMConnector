@@ -15,8 +15,6 @@ RewriteRule ^(.+)/$ $1
 
 RewriteRule ^/content/${CONTENT_FOLDER_NAME}/(.*).html$ $1.html [R,L]
 
-RewriteRule ^/?$ en/home.html [R,L]
-
 RewriteCond %{REQUEST_URI} !^/apps
 RewriteCond %{REQUEST_URI} !^/bin
 RewriteCond %{REQUEST_URI} !^/content
@@ -29,5 +27,3 @@ RewriteCond %{REQUEST_URI} !^/tmp
 RewriteCond %{REQUEST_URI} !^/var
 RewriteCond %{REQUEST_URI} (.html|.jpe?g|.png|.svg)$
 RewriteRule ^/(.*)$ /content/${CONTENT_FOLDER_NAME}/$1 [PT,L]
-
-
