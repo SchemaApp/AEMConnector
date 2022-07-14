@@ -7,6 +7,9 @@
 
 Include conf.d/rewrites/default_rewrite.rules
 
+#insurance
+RewriteRule ^/schemaapp-rewrite.html$ https://${CONTENT_FOLDER_NAME}/en/article/sample-article-3.html [L,R=301]
+
 # rewrite for root redirect
 RewriteRule ^/?$ /content/${CONTENT_FOLDER_NAME}/en/home.html [PT,L]
 
@@ -22,3 +25,5 @@ RewriteCond %{REQUEST_URI} !^/tmp
 RewriteCond %{REQUEST_URI} !^/var
 RewriteCond %{REQUEST_URI} (.html|.jpe?g|.png|.svg)$
 RewriteRule ^/(.*)$ /content/${CONTENT_FOLDER_NAME}/$1 [PT,L]
+
+
