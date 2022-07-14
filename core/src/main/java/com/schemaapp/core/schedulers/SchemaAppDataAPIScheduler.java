@@ -2,6 +2,7 @@ package com.schemaapp.core.schedulers;
 
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
+import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,6 +27,9 @@ public class SchemaAppDataAPIScheduler {
 
 	@Reference
 	private CDNDataAPIService cdnDataAPIService;
+	
+	@Reference
+    private SlingSettingsService slingSettingsService;
 
 	boolean enabled;
 	String schedulerExpression;
@@ -59,7 +63,7 @@ public class SchemaAppDataAPIScheduler {
 
 		final Runnable autoSuggestSchedulerJob = () -> {
 			LOG.error(" :: SchemaAppDataAPIScheduler Runnable ::");
-			if(enabled) {
+			if(enabled && isPublish()) {
 				schedulerJob();
 			}
 		};
@@ -78,4 +82,8 @@ public class SchemaAppDataAPIScheduler {
 		return enabled;
 
 	}
+	
+	private boolean isPublish() {
+        return this.slingSettingsService.getRunModes().contains("publish");
+    }
 }
