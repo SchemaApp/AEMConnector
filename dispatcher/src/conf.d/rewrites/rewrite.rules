@@ -8,15 +8,11 @@
 Include conf.d/rewrites/default_rewrite.rules
 
 #insurance
-RewriteRule ^/schemaapp-rewrite.html$ https://${AEM_HOST}:${AEM_PORT}/content/${CONTENT_FOLDER_NAME}/en/article/sample-article-3.html [L,R=301]
+RewriteRule ^/schemaapp-rewrite.html$ /content/${CONTENT_FOLDER_NAME}/en/article/sample-article-3.html [L,R=301]
 
-
-# remove any trailing slash, if it's there.
-RewriteRule ^(.+)/$ $1
+ # rewrite for root redirect
+ RewriteRule ^/?$ /content/${CONTENT_FOLDER_NAME}/en/home.html [PT,L]
  
-#Shorten the URL
-RewriteRule ^/content/${CONTENT_FOLDER_NAME}/(.*).html$ $1.html [R,L]
-
 RewriteCond %{REQUEST_URI} !^/apps
 RewriteCond %{REQUEST_URI} !^/bin
 RewriteCond %{REQUEST_URI} !^/content
