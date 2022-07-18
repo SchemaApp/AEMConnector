@@ -126,25 +126,21 @@
     }
 
  function doConnect() {
+		var apiKey = $('input[name="./apiKey"]').val();
         var accountID = $('input[name="./accountID"]').val();
         var siteurl = $('input[name="./siteURL"]').val();
-		var username = $('input[name="./aemUsername"]').val();
-        var password = $('input[name="./aemPassword"]').val();
 
+        if (!apiKey) {
+            popupAlert(Granite.I18n.get('Please provide an Schema App API Key.'));
+            return;
+        }
+        
         if (!accountID) {
             popupAlert(Granite.I18n.get('Please provide the Schema App account\'s Id.'));
             return;
         }
         if (!siteurl) {
             popupAlert(Granite.I18n.get('Please provide the AEM Publisher URL.'));
-            return;
-        }
-        if (!username) {
-            popupAlert(Granite.I18n.get('Please provide the AEM Author User name.'));
-            return;
-        }
-        if (!password) {
-            popupAlert(Granite.I18n.get('Please provide the AEM Author Password.'));
             return;
         }
 
@@ -164,8 +160,8 @@
             headers: {
 	            "Accept": "application/json; charset=utf-8",
 	            "Content-Type": "application/json; charset=utf-8",
-	            "x-account-id": accountID,
-	            "Authorization":"Basic " + btoa(username + ":" + password)
+	            "x-api-key": apiKey,
+	            "x-account-id": accountID
 	        },
             data: JSON.stringify(schemaAppData),
             cache: false
@@ -188,9 +184,8 @@
     }
     
     function cleanupFields() {
+        $('input[name="./apiKey"]').val('');
         $('input[name="./accountID"]').val('');
         $('input[name="./siteURL"]').val('');
-        $('input[name="./aemUsername"]').val('');
-        $('input[name="./aemPassword"]').val('');
     }
 })(document, Granite.$);

@@ -64,7 +64,14 @@
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                                             fieldLabel="Title"
                                                             name="./jcr:title"
-                                                            required="{Boolean}true"/>                                                 
+                                                            required="{Boolean}true"/>     
+                                                        <apiKey
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+															fieldDescription="Copy and paste the API key for your site domain that is generated for you at the Schema App Administration Console."
+                                                            fieldLabel="Schema App API key"
+                                                            name="./apiKey"
+                                                            required="{Boolean}true"/>                                            
                                                         <accountID
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
@@ -79,31 +86,13 @@
                                                             fieldLabel="Website URL"
 															required="{Boolean}true"
                                                             name="./siteURL"/> 
-                                                        <aemUsername
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-															fieldDescription="Please provide the aem author username for webhooks call."
-                                                            fieldLabel="AEM Author Username"
-															required="{Boolean}true"
-                                                            name="./aemUsername"/> 
-                                                        <aemPassword
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="schemaApp/utilities/password"
-                                                            fieldDescription="AEM Author password required. Please check documentation to make connection between author instance and schema app application."
-                                                            fieldLabel="AEM Author Password"
-                                                            name="./aemPassword"/>
-                                                        <aemPasswordEncryption
-                                                            jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/foundation/form/hidden"
-                                                            name="./aemPassword@Encrypted"
-                                                            value="true"/>
                                                         <connect
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                                             text="Connect to Schema App"	
                                                             granite:class="cq-confadmin-schema-app-connect"															
 															variant="primary"
-                                                            name="./siteURL"/>                                                              
+                                                            name="./siteURL"/>                                                                        
                                                     </items>
                                                 </propColumn>
                                             </items>
