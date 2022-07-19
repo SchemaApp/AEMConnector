@@ -37,8 +37,8 @@ import com.schemaapp.core.util.ConfigurationUtil;
 import com.schemaapp.core.util.Constants;
 
 @Component(service = CDNDataAPIService.class, immediate = true)
-public class  implements CDNDataAPIService {
-CDNDataAPIServiceImpl
+public class CDNDataAPIServiceImpl implements CDNDataAPIService {
+
 	private static final String CQ_CLOUDSERVICECONFIGS = "cq:cloudserviceconfigs";
 
 	private final Logger LOG = LoggerFactory.getLogger(CDNDataAPIServiceImpl.class);
