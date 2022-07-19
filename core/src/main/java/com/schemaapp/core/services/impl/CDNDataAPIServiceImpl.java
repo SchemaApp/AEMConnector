@@ -37,8 +37,8 @@ import com.schemaapp.core.util.ConfigurationUtil;
 import com.schemaapp.core.util.Constants;
 
 @Component(service = CDNDataAPIService.class, immediate = true)
-public class CDNDataAPIServiceImpl implements CDNDataAPIService {
-
+public class  implements CDNDataAPIService {
+CDNDataAPIServiceImpl
 	private static final String CQ_CLOUDSERVICECONFIGS = "cq:cloudserviceconfigs";
 
 	private final Logger LOG = LoggerFactory.getLogger(CDNDataAPIServiceImpl.class);
@@ -81,6 +81,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 						Constants.API_ENDPOINT_CONFIG_PID,
 						configurationAdmin, "");
 				String pagePath = siteURL + child.getPath();
+				LOG.info("CDNDataAPIServiceImpl :: pagepath {}", pagePath);
 				String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
 				URL url = getURL(endpoint, accountId, encodedURL);
 				HttpURLConnection connection = getHttpURLConnection(url);
@@ -94,6 +95,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
 
 				if (StringUtils.isNotBlank(content.toString())) {
+					LOG.info("CDNDataAPIServiceImpl :: Response not blank :: Page :: {}, Response :: {}", pagePath, content.toString());
 					Resource pageResource = child.adaptTo(Resource.class);
 					webhookHandlerService.savenReplicate(content.toString(), resolver, resolver.adaptTo(Session.class), pageResource);
 				}
