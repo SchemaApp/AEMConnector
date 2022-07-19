@@ -83,6 +83,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				String pagePath = siteURL + child.getPath();
 				LOG.info("CDNDataAPIServiceImpl :: pagepath {}", pagePath);
 				String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
+				if (encodedURL != null && encodedURL.contains("=")) {
+					encodedURL = encodedURL.replace("=", "");
+				}
 				URL url = getURL(endpoint, accountId, encodedURL);
 				HttpURLConnection connection = getHttpURLConnection(url);
 				connection.setRequestMethod(HttpConstants.METHOD_GET);
