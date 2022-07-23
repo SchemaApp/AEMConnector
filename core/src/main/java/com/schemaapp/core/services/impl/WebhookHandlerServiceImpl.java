@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.version.VersionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -22,6 +26,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +131,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			Resource urlResource = getPageResource(entity, resolver, session);
 			if (urlResource != null) {
 				LOG.info("WebhookHandlerServiceImpl > updateEntity > URL > {}", urlResource.getPath());
-				savenReplicate(entity.getGraph(), resolver, session, urlResource);
+				savenReplicate(entity.getGraph(), resolver, session, urlResource, null);
 			} else {
 				String errorMessage = "WebhookHandlerServiceImpl :: Unable to find Content URL in AEM "+entity.getId();
 				throw new AEMURLNotFoundException(errorMessage);
@@ -153,16 +158,27 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 
 	@Override
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource)
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource, ValueMap configDetailMap)
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
+			addConfigDetails(configDetailMap, pageNode);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			replicator.replicate(session, ReplicationActionType.ACTIVATE, urlResource.getPath() + "/" +Constants.DATA);
 		}
+	}
+
+
+	private void addConfigDetails(ValueMap configDetailMap, Node pageNode) throws RepositoryException {
+		String accountId = configDetailMap != null ?  (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+		pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
+		String siteURL = configDetailMap != null ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+		pageNode.setProperty(Constants.SITEURL, siteURL + pageNode.getPath());
+		String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
+		pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
 	}
 
 	/**

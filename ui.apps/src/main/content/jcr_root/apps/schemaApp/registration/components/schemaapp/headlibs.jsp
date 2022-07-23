@@ -18,12 +18,14 @@ if(cfgMgr != null) {
 	String apiKey = null;
 	String accountID = null;
 	String siteURL = null;
+	String deploymentMethod = null;
 	Configuration cfg = cfgMgr.getConfiguration("schemaapp", services);
 	if (cfg != null) {
 		accountID = cfg.get("accountID", "");
 		siteURL = cfg.get("siteURL", "");
+		deploymentMethod = cfg.get("deploymentMethod", "");
 	}
-	if (StringUtils.isNotBlank(accountID)) {
+	if (StringUtils.isNotBlank(accountID) && StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals("javaScript")) {
 		%>
 		<script>window.schema_highlighter={output: false, accountId: "<%=accountID%>"}</script>
 		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>

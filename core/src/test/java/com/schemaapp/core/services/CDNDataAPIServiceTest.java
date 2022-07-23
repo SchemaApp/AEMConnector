@@ -103,7 +103,7 @@ class CDNDataAPIServiceTest {
 		mockConnection();
 
 		cdnDataAPIServiceImpl.readCDNData();
-		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any());
+		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any());
 	}
 
 	private void mockResource() {
@@ -139,7 +139,7 @@ class CDNDataAPIServiceTest {
 
 		HttpURLConnection connection = mock(HttpURLConnection.class);
 		URL url = new URL("https://data.schemaapp.com");
-		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
+		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString(), anyString());
 		doReturn(connection).when(cdnDataAPIServiceImpl).getHttpURLConnection(any());
 
 		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));

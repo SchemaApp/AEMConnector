@@ -86,6 +86,35 @@
                                                             fieldLabel="Website URL"
 															required="{Boolean}true"
                                                             name="./siteURL"/> 
+                                                        <radiogroupA
+									                        jcr:primaryType="nt:unstructured"
+									                        sling:resourceType="granite/ui/components/foundation/form/radiogroup"
+									                        required="{Boolean}true"
+									                        text="Select Method :"
+									                        fieldLabel="Method">
+									                        <items jcr:primaryType="nt:unstructured">
+									                            <option1
+									                                jcr:primaryType="nt:unstructured"
+									                                sling:resourceType="granite/ui/components/foundation/form/radio"
+									                                name="./deploymentMethod"
+									                                text="Crawler"
+									                                value="crawler"/>
+									                            <option2
+									                                jcr:primaryType="nt:unstructured"
+									                                sling:resourceType="granite/ui/components/foundation/form/radio"
+									                                name="./deploymentMethod"
+									                                text="JavaScript"
+									                                value="javaScript"/>
+																<radioDefaultValue jcr:primaryType="nt:unstructured"
+														            name="./deploymentMethod@DefaultValue"
+														            value="crawler"
+														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
+														        <radioDefaultWhenMissing jcr:primaryType="nt:unstructured"
+														            name="./deploymentMethod@UseDefaultWhenMissing"
+														            value="true"
+														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
+									                        </items>
+									                    </radiogroupA>
                                                         <connect
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/button"

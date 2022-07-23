@@ -72,8 +72,10 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	 */
 	private void getSchemaAppCDNData(ResourceResolver resolver, Page page) {
 		try {
-			String accountId = geAccountId(resolver, page);
-			String siteURL = geSiteURL(resolver, page);
+			ValueMap configDetailMap = getConfigNodeValueMap(resolver, page);
+			String accountId = configDetailMap != null ?  (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+			String siteURL = configDetailMap != null ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+			String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
 			while (childPages.hasNext()) {
 				final Page child = childPages.next();
@@ -86,7 +88,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				if (encodedURL != null && encodedURL.contains("=")) {
 					encodedURL = encodedURL.replace("=", "");
 				}
-				URL url = getURL(endpoint, accountId, encodedURL);
+				URL url = getURL(endpoint, accountId, encodedURL, deploymentMethod);
 				HttpURLConnection connection = getHttpURLConnection(url);
 				connection.setRequestMethod(HttpConstants.METHOD_GET);
 				connection.setConnectTimeout(5 * 1000);
@@ -100,7 +102,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				if (StringUtils.isNotBlank(content.toString())) {
 					LOG.info("CDNDataAPIServiceImpl :: Response not blank :: Page :: {}, Response :: {}", pagePath, content.toString());
 					Resource pageResource = child.adaptTo(Resource.class);
-					webhookHandlerService.savenReplicate(content.toString(), resolver, resolver.adaptTo(Session.class), pageResource);
+					webhookHandlerService.savenReplicate(content.toString(), resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
 				}
 
 				bufferedReader.close();
@@ -111,13 +113,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		}
 	}
 
-	/**
-	 * @param resolver
-	 * @param page
-	 * @return
-	 */
-	private String geAccountId(ResourceResolver resolver, Page page) {
-		String accountId = null;
+	private ValueMap getConfigNodeValueMap(ResourceResolver resolver, Page page) {
 		ValueMap valueMap = page.getProperties();
 		if (valueMap.containsKey(CQ_CLOUDSERVICECONFIGS)) {
 			String[] cloudserviceconfigs = (String[]) valueMap.get(CQ_CLOUDSERVICECONFIGS);
@@ -125,41 +121,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				if (cloudserviceconfig.startsWith("/etc/cloudservices/schemaapp/")) {
 					Resource configResource = resolver.getResource(cloudserviceconfig + "/jcr:content");
 					if (configResource != null) {
-						accountId = (String) configResource.getValueMap().get("accountID");
-
-						if (accountId != null && accountId.lastIndexOf('/') > 0) {
-							int index = accountId.lastIndexOf('/');
-							accountId = accountId.substring(index, accountId.length());
-						}
+						return configResource.getValueMap();
 					}
 				}
 			}
 		}
 
-		return accountId;
-	}
-
-	/**
-	 * @param resolver
-	 * @param page
-	 * @return
-	 */
-	private String geSiteURL(ResourceResolver resolver, Page page) {
-		String siteURL = null;
-		ValueMap valueMap = page.getProperties();
-		if (valueMap.containsKey(CQ_CLOUDSERVICECONFIGS)) {
-			String[] cloudserviceconfigs = (String[]) valueMap.get(CQ_CLOUDSERVICECONFIGS);
-			for (String cloudserviceconfig : cloudserviceconfigs) {
-				if (cloudserviceconfig.startsWith("/etc/cloudservices/schemaapp/")) {
-					Resource configResource = resolver.getResource(cloudserviceconfig + "/jcr:content");
-					if (configResource != null) {
-						siteURL = (String) configResource.getValueMap().get("siteURL");
-					}
-				}
-			}
-		}
-
-		return siteURL;
+		return null;
 	}
 
 	/**
@@ -189,8 +157,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		return rootpages;
 	}
 
-	public URL getURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
-		return new URL(endpoint + accountId + "/" +encodedURL);
+	public URL getURL(String endpoint, String accountId, String encodedURL, String deploymentMethod) throws MalformedURLException {
+		if (deploymentMethod != null && deploymentMethod.equals("javaScript")) {
+			return new URL(endpoint + accountId + "/__highlighter_js/" +encodedURL);
+		} else {
+			return new URL(endpoint + accountId + "/" +encodedURL);
+		}
+		
 	}
 
 	/**

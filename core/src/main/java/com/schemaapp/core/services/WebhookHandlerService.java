@@ -7,6 +7,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.json.JSONException;
 
 import com.day.cq.replication.ReplicationException;
@@ -55,6 +56,6 @@ public interface WebhookHandlerService {
 	 * @throws PersistenceException
 	 * @throws ReplicationException
 	 */
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource) throws RepositoryException, JsonProcessingException, JSONException, PersistenceException, ReplicationException;
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource, ValueMap configDetailMap) throws RepositoryException, JsonProcessingException, JSONException, PersistenceException, ReplicationException;
 	
 }
