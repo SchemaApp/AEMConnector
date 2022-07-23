@@ -82,8 +82,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
 						Constants.API_ENDPOINT_CONFIG_PID,
 						configurationAdmin, "");
+				LOG.info("CDNDataAPIServiceImpl :: endpoint: {}", endpoint);
 				String pagePath = siteURL + child.getPath();
-				LOG.info("CDNDataAPIServiceImpl :: pagepath {}", pagePath);
+				LOG.info("CDNDataAPIServiceImpl :: pagepath: {}", pagePath);
 				String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
 				if (encodedURL != null && encodedURL.contains("=")) {
 					encodedURL = encodedURL.replace("=", "");
@@ -109,7 +110,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				connection.disconnect();
 			}
 		} catch (Exception e) {
-			LOG.error("Error in fetching details from API ,Error :: {}", e.getMessage());
+			LOG.error("Error in fetching details from API ,Error :: {}", e);
 		}
 	}
 
