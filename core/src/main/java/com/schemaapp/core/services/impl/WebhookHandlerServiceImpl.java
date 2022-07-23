@@ -13,10 +13,6 @@ import java.util.stream.Collectors;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.ValueFormatException;
-import javax.jcr.lock.LockException;
-import javax.jcr.nodetype.ConstraintViolationException;
-import javax.jcr.version.VersionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -164,7 +160,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, pageNode);
+			addConfigDetails(configDetailMap, dataNode);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			replicator.replicate(session, ReplicationActionType.ACTIVATE, urlResource.getPath() + "/" +Constants.DATA);
