@@ -173,12 +173,14 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 
 
 	private void addConfigDetails(ValueMap configDetailMap, Node pageNode) throws RepositoryException {
-		String accountId = configDetailMap != null ?  (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
-		pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
-		String siteURL = configDetailMap != null ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-		pageNode.setProperty(Constants.SITEURL, siteURL + pageNode.getPath());
-		String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
-		pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+		if (configDetailMap != null) {
+			String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
+			String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + pageNode.getPath());
+			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+		}
 	}
 
 	/**
