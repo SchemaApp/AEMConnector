@@ -63,7 +63,7 @@ public class SchemaAppDataAPIScheduler {
 
 		final Runnable autoSuggestSchedulerJob = () -> {
 			LOG.error(" :: SchemaAppDataAPIScheduler Runnable ::");
-			if(enabled && isPublish()) {
+			if(enabled) {
 				schedulerJob();
 			}
 		};
