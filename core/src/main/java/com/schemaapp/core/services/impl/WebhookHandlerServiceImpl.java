@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
@@ -163,7 +162,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			addConfigDetails(configDetailMap, dataNode);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
-			replicator.replicate(session, ReplicationActionType.ACTIVATE, urlResource.getPath() + "/" +Constants.DATA);
+			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
 		}
 	}
 

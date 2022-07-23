@@ -1,5 +1,7 @@
 package com.schemaapp.core.services.impl;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNDataAPIService;
 import com.schemaapp.core.services.WebhookHandlerService;
 import com.schemaapp.core.util.ConfigurationUtil;
@@ -51,6 +54,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
+	
+	private static ObjectMapper mapperObject = new ObjectMapper().configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
 	@Override
 	public void readCDNData() {
@@ -78,39 +83,49 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 			String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
 			while (childPages.hasNext()) {
-				final Page child = childPages.next();
-				String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
-						Constants.API_ENDPOINT_CONFIG_PID,
-						configurationAdmin, "");
-				LOG.info("CDNDataAPIServiceImpl :: endpoint: {}", endpoint);
-				String pagePath = siteURL + child.getPath();
-				LOG.info("CDNDataAPIServiceImpl :: pagepath: {}", pagePath);
-				String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
-				if (encodedURL != null && encodedURL.contains("=")) {
-					encodedURL = encodedURL.replace("=", "");
-				}
-				URL url = getURL(endpoint, accountId, encodedURL, deploymentMethod);
-				HttpURLConnection connection = getHttpURLConnection(url);
-				connection.setRequestMethod(HttpConstants.METHOD_GET);
-				connection.setConnectTimeout(5 * 1000);
-				connection.setReadTimeout(7 * 1000);
-
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				String inputLine;
-				StringBuilder content = new StringBuilder();
-				while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
-
-				if (StringUtils.isNotBlank(content.toString())) {
-					LOG.info("CDNDataAPIServiceImpl :: Response not blank :: Page :: {}, Response :: {}", pagePath, content.toString());
-					Resource pageResource = child.adaptTo(Resource.class);
-					webhookHandlerService.savenReplicate(content.toString(), resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
-				}
-
-				bufferedReader.close();
-				connection.disconnect();
+				processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages);
 			}
 		} catch (Exception e) {
-			LOG.error("Error in fetching details from API ,Error :: {}", e);
+			LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
+		}
+	}
+
+	private void processPage(ResourceResolver resolver, ValueMap configDetailMap, String accountId, String siteURL,
+			String deploymentMethod, Iterator<Page> childPages) {
+		try {
+			final Page child = childPages.next();
+			String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
+					Constants.API_ENDPOINT_CONFIG_PID,
+					configurationAdmin, "");
+			LOG.info("CDNDataAPIServiceImpl :: endpoint: {}", endpoint);
+			String pagePath = siteURL + child.getPath();
+			LOG.info("CDNDataAPIServiceImpl :: pagepath: {}", pagePath);
+			String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
+			if (encodedURL != null && encodedURL.contains("=")) {
+				encodedURL = encodedURL.replace("=", "");
+			}
+			URL url = getURL(endpoint, accountId, encodedURL, deploymentMethod);
+			HttpURLConnection connection = getHttpURLConnection(url);
+			connection.setRequestMethod(HttpConstants.METHOD_GET);
+			connection.setConnectTimeout(5 * 1000);
+			connection.setReadTimeout(7 * 1000);
+
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String inputLine;
+			StringBuilder content = new StringBuilder();
+			while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
+
+			if (StringUtils.isNotBlank(content.toString())) {
+				Object jsonObject = mapperObject.readValue(content.toString(), Object.class);
+				LOG.info(String.format("CDNDataAPIServiceImpl :: Response not blank :: Page :: {}, Response :: {}", pagePath, content.toString()));
+				Resource pageResource = child.adaptTo(Resource.class);
+				webhookHandlerService.savenReplicate(jsonObject, resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
+			}
+
+			bufferedReader.close();
+			connection.disconnect();
+		} catch (Exception e) {
+			LOG.error("Error while reading and processing CDN URL", e);
 		}
 	}
 
