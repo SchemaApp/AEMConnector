@@ -73,7 +73,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	private void getSchemaAppCDNData(ResourceResolver resolver, Page page) {
 		try {
 			ValueMap configDetailMap = getConfigNodeValueMap(resolver, page);
-			String accountId = configDetailMap != null ?  (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+			String accountId = getAccountId(configDetailMap);
 			String siteURL = configDetailMap != null ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
 			String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
@@ -112,6 +112,15 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		} catch (Exception e) {
 			LOG.error("Error in fetching details from API ,Error :: {}", e);
 		}
+	}
+
+	private String getAccountId(ValueMap configDetailMap) {
+		String accountId = configDetailMap != null ?  (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+		if (accountId != null && accountId.lastIndexOf('/') > 0) {
+			int index = accountId.lastIndexOf('/');
+			accountId = accountId.substring(index, accountId.length());
+		}
+		return accountId;
 	}
 
 	private ValueMap getConfigNodeValueMap(ResourceResolver resolver, Page page) {
