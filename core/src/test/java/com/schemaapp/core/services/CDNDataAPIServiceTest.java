@@ -1,7 +1,5 @@
 package com.schemaapp.core.services;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -47,9 +45,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.impl.CDNDataAPIServiceImpl;
 
 import junitx.util.PrivateAccessor;

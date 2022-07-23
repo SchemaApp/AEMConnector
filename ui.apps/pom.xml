@@ -30,9 +30,9 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>schemaApp.ui.apps</artifactId>
+    <artifactId>schemaapp.connector</artifactId>
     <packaging>content-package</packaging>
-    <name>SchemaApp - UI apps</name>
+    <name>AEM SchemaApp - Connector</name>
     <description>UI apps package for SchemaApp</description>
 
     <!-- ====================================================================== -->
@@ -69,7 +69,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <group>com.schemaApp</group>
-                    <name>schemaApp.ui.apps</name>
+                    <name>schemaapp.connector</name>
                     <packageType>application</packageType>
                     <accessControlHandling>merge</accessControlHandling>
                      <repositoryStructurePackages>

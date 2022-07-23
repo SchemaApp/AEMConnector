@@ -82,8 +82,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 			String siteURL = configDetailMap != null ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
 			String deploymentMethod = configDetailMap != null ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
+			String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
+					Constants.API_ENDPOINT_CONFIG_PID,
+					configurationAdmin, "");
 			while (childPages.hasNext()) {
-				processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages);
+				processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages, endpoint);
 			}
 		} catch (Exception e) {
 			LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
@@ -91,19 +94,15 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	}
 
 	private void processPage(ResourceResolver resolver, ValueMap configDetailMap, String accountId, String siteURL,
-			String deploymentMethod, Iterator<Page> childPages) {
+			String deploymentMethod, Iterator<Page> childPages, String endpoint) {
 		try {
 			final Page child = childPages.next();
-			String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
-					Constants.API_ENDPOINT_CONFIG_PID,
-					configurationAdmin, "");
-			LOG.info("CDNDataAPIServiceImpl :: endpoint: {}", endpoint);
 			String pagePath = siteURL + child.getPath();
-			LOG.info("CDNDataAPIServiceImpl :: pagepath: {}", pagePath);
 			String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
 			if (encodedURL != null && encodedURL.contains("=")) {
 				encodedURL = encodedURL.replace("=", "");
 			}
+			LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", endpoint, pagePath, encodedURL));
 			URL url = getURL(endpoint, accountId, encodedURL, deploymentMethod);
 			HttpURLConnection connection = getHttpURLConnection(url);
 			connection.setRequestMethod(HttpConstants.METHOD_GET);
@@ -117,7 +116,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
 			if (StringUtils.isNotBlank(content.toString())) {
 				Object jsonObject = mapperObject.readValue(content.toString(), Object.class);
-				LOG.info(String.format("CDNDataAPIServiceImpl :: Response not blank :: Page :: {}, Response :: {}", pagePath, content.toString()));
+				LOG.info("CDNDataAPIServiceImpl :: Response not blank :: Page ::" +pagePath+ " Response ::" + content.toString());
 				Resource pageResource = child.adaptTo(Resource.class);
 				webhookHandlerService.savenReplicate(jsonObject, resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
 			}
