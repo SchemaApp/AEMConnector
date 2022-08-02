@@ -95,7 +95,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		} else {
 			JSONObject graphJsonObject = new JSONObject(graphData);
 			wellFormedJson = JsonSanitizer.sanitize(graphJsonObject.toString());
-
 		}	
 		pageNode.setProperty(Constants.ENTITY, wellFormedJson);
 	}

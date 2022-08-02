@@ -106,6 +106,22 @@ class CDNDataAPIServiceTest {
 		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any());
 	}
 	
+	@Test
+	void testReadCDNDatawithJavaScript() throws NoSuchFieldException, LoginException, IOException, RepositoryException, JSONException, ReplicationException {
+		mockResolver();
+		when(valueMap.get("deploymentMethod")).thenReturn("javaScript");
+		PrivateAccessor.setField(cdnDataAPIServiceImpl, "webhookHandlerService", webhookHandlerService);
+		when(resolver.getResource(anyString())).thenReturn(resource);
+		mockResource();
+		mockValueMap();
+		when(resource.adaptTo(Page.class)).thenReturn(page);
+		mockPage();
+		mockConnection();
+
+		cdnDataAPIServiceImpl.readCDNData();
+		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any());
+	}
+	
 	private void mockResource() {
 		when(resource.listChildren()).thenReturn(childResourceIterator);
 		when(childResourceIterator.hasNext()).thenReturn(true, false);
@@ -139,7 +155,7 @@ class CDNDataAPIServiceTest {
 
 		HttpURLConnection connection = mock(HttpURLConnection.class);
 		URL url = new URL("https://data.schemaapp.com");
-		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString(), anyString());
+		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
 		doReturn(connection).when(cdnDataAPIServiceImpl).getHttpURLConnection(any());
 
 		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));

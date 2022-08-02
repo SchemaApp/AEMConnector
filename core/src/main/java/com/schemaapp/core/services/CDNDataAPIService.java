@@ -9,7 +9,7 @@ public interface CDNDataAPIService {
 
 	void readCDNData();
 	
-	URL getURL(String endpoint, String accountId, String encodedURL, String deploymentMethod) throws MalformedURLException;
+	URL getURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException;
 	
 	HttpURLConnection getHttpURLConnection(URL url) throws IOException;
 }

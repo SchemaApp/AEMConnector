@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,9 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -95,6 +99,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
 	private void processPage(ResourceResolver resolver, ValueMap configDetailMap, String accountId, String siteURL,
 			String deploymentMethod, Iterator<Page> childPages, String endpoint) {
+
+		Object graphJsonData = null;
 		try {
 			final Page child = childPages.next();
 			String pagePath = siteURL + child.getPath();
@@ -103,29 +109,91 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				encodedURL = encodedURL.replace("=", "");
 			}
 			LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", endpoint, pagePath, encodedURL));
-			URL url = getURL(endpoint, accountId, encodedURL, deploymentMethod);
-			HttpURLConnection connection = getHttpURLConnection(url);
-			connection.setRequestMethod(HttpConstants.METHOD_GET);
-			connection.setConnectTimeout(5 * 1000);
-			connection.setReadTimeout(7 * 1000);
+			URL url = getURL(endpoint, accountId, encodedURL);
+			StringBuilder content = httpGet(url);
 
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String inputLine;
-			StringBuilder content = new StringBuilder();
-			while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
+			String response = content.toString();
+			if (StringUtils.isNotBlank(response)) {
+				if (response.startsWith("[")) {
+					graphJsonData = new JSONArray(response);
+				} else {
+					graphJsonData = new JSONObject(response);
+				}	
+				LOG.info(String.format("CDN data response:: crawler :: %s",response));
+			}
+			
+			graphJsonData = readJavaScriptCDNData(accountId, deploymentMethod, endpoint, graphJsonData, encodedURL);
 
-			if (StringUtils.isNotBlank(content.toString())) {
-				Object jsonObject = mapperObject.readValue(content.toString(), Object.class);
-				LOG.info("CDNDataAPIServiceImpl :: Response not blank :: Page ::" +pagePath+ " Response ::" + content.toString());
+			if (graphJsonData != null) {
+				graphJsonData = mapperObject.readValue(graphJsonData.toString(), Object.class);
 				Resource pageResource = child.adaptTo(Resource.class);
-				webhookHandlerService.savenReplicate(jsonObject, resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
+				webhookHandlerService.savenReplicate(graphJsonData, resolver, resolver.adaptTo(Session.class), pageResource, configDetailMap);
 			}
 
-			bufferedReader.close();
-			connection.disconnect();
 		} catch (Exception e) {
 			LOG.error("Error while reading and processing CDN URL", e);
 		}
+	}
+
+	private Object readJavaScriptCDNData(String accountId, String deploymentMethod, String endpoint,
+			Object graphJsonData, String encodedURL)
+			throws IOException, JSONException {
+		URL url;
+		StringBuilder content;
+		String response;
+		if (StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals("javaScript")) {
+			url = getHighlighterURL(endpoint, accountId, encodedURL);
+			content = httpGet(url);
+			response = content.toString();
+			if (StringUtils.isNotBlank(response)) {
+				if (response.startsWith("[")) {
+					JSONArray graphJsonDataArray = new JSONArray(response);
+					if (graphJsonData instanceof JSONArray) {
+						JSONArray array = (JSONArray)graphJsonData;
+						for(int i = 0; i < array.length(); i++) {
+							graphJsonDataArray.put(array.getJSONObject(i));
+						}
+					} else {
+						graphJsonDataArray.put(graphJsonData);
+					}
+					LOG.info(String.format("CDN data response:: javascript :: %s",response));
+					return graphJsonDataArray;
+				} else {
+					JSONArray graphJsonDataArray = new JSONArray();
+					JSONObject graphJsonDataObject = new JSONObject(response);
+					if (graphJsonData instanceof JSONArray) {
+						JSONArray array = (JSONArray)graphJsonData;
+						for(int i = 0; i < array.length(); i++) {
+							graphJsonDataArray.put(array.getJSONObject(i));
+						}
+						graphJsonDataArray.put(graphJsonDataObject);
+					} else {
+						graphJsonDataArray.put(graphJsonDataObject);
+						graphJsonDataArray.put(graphJsonData);
+					}
+					LOG.info(String.format("CDN data response:: javascript :: %s",response));
+					return graphJsonDataArray;
+				}	
+
+			}
+		}
+		return graphJsonData;
+	}
+
+	private StringBuilder httpGet(URL url) throws IOException, ProtocolException {
+		HttpURLConnection connection = getHttpURLConnection(url);
+		connection.setRequestMethod(HttpConstants.METHOD_GET);
+		connection.setConnectTimeout(5 * 1000);
+		connection.setReadTimeout(7 * 1000);
+
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		String inputLine;
+		StringBuilder content = new StringBuilder();
+		while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
+
+		bufferedReader.close();
+		connection.disconnect();
+		return content;
 	}
 
 	private String getAccountId(ValueMap configDetailMap) {
@@ -181,13 +249,12 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		return rootpages;
 	}
 
-	public URL getURL(String endpoint, String accountId, String encodedURL, String deploymentMethod) throws MalformedURLException {
-		if (deploymentMethod != null && deploymentMethod.equals("javaScript")) {
-			return new URL(endpoint + accountId + "/__highlighter_js/" +encodedURL);
-		} else {
-			return new URL(endpoint + accountId + "/" +encodedURL);
-		}
-		
+	public URL getURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
+		return new URL(endpoint + accountId + "/" +encodedURL);
+	}
+	
+	public URL getHighlighterURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
+		return new URL(endpoint + accountId + "/__highlighter_js/" +encodedURL);
 	}
 
 	/**
