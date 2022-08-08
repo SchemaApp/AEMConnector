@@ -7,7 +7,14 @@
 
 Include conf.d/rewrites/default_rewrite.rules
 
-# rewrite for root redirect
+#insurance
+RewriteRule ^/schemaapp-rewrite.html$ /content/${CONTENT_FOLDER_NAME}/en/article/sample-article-3.html [L,R=301]
+
+# remove any trailing slash, if it's there.
+RewriteRule ^(.+)/$ $1
+
+RewriteRule ^/content/${CONTENT_FOLDER_NAME}/(.*).html$ $1.html [R,L]
+
 RewriteRule ^/?$ /content/${CONTENT_FOLDER_NAME}/en/home.html [PT,L]
 
 RewriteCond %{REQUEST_URI} !^/apps
@@ -22,3 +29,5 @@ RewriteCond %{REQUEST_URI} !^/tmp
 RewriteCond %{REQUEST_URI} !^/var
 RewriteCond %{REQUEST_URI} (.html|.jpe?g|.png|.svg)$
 RewriteRule ^/(.*)$ /content/${CONTENT_FOLDER_NAME}/$1 [PT,L]
+
+
