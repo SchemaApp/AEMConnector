@@ -154,7 +154,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 							graphJsonDataArray.put(array.getJSONObject(i));
 						}
 					} else {
-						graphJsonDataArray.put(graphJsonData);
+						if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
 					}
 					LOG.info(String.format("CDN data response:: javascript :: %s",response));
 					return graphJsonDataArray;
@@ -169,7 +169,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 						graphJsonDataArray.put(graphJsonDataObject);
 					} else {
 						graphJsonDataArray.put(graphJsonDataObject);
-						graphJsonDataArray.put(graphJsonData);
+						if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
 					}
 					LOG.info(String.format("CDN data response:: javascript :: %s",response));
 					return graphJsonDataArray;
