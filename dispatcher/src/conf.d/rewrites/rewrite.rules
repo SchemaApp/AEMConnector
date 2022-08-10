@@ -15,8 +15,6 @@ RewriteRule ^(.+)/$ $1
 
 RewriteRule ^/content/${CONTENT_FOLDER_NAME}/(.*).html$ $1.html [R,L]
 
-RewriteRule ^/content/${CONTENT_FOLDER_NAME}/(.*).json$ $1.json [R,L]
-
 RewriteRule ^/?$ /content/${CONTENT_FOLDER_NAME}/en/home.html [PT,L]
 
 RewriteCond %{REQUEST_URI} !^/apps
