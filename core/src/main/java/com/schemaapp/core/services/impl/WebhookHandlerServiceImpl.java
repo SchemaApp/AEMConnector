@@ -162,7 +162,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, dataNode);
+			addConfigDetails(configDetailMap, dataNode, urlResource);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
@@ -170,12 +170,12 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	}
 
 
-	private void addConfigDetails(ValueMap configDetailMap, Node pageNode) throws RepositoryException {
+	private void addConfigDetails(ValueMap configDetailMap, Node pageNode, Resource urlResource) throws RepositoryException {
 		if (configDetailMap != null) {
 			String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
 			String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + pageNode.getPath());
+			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
 			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
 		}
