@@ -82,8 +82,4 @@ public class SchemaAppDataAPIScheduler {
 		return enabled;
 
 	}
-	
-	private boolean isPublish() {
-        return this.slingSettingsService.getRunModes().contains("publish");
-    }
 }
