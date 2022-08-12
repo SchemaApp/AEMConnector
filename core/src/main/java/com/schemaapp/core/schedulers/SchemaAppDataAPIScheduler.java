@@ -2,7 +2,6 @@ package com.schemaapp.core.schedulers;
 
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -28,9 +27,6 @@ public class SchemaAppDataAPIScheduler {
 	@Reference
 	private CDNDataAPIService cdnDataAPIService;
 	
-	@Reference
-    private SlingSettingsService slingSettingsService;
-
 	boolean enabled;
 	String schedulerExpression;
 	boolean schedulerConcurrent;

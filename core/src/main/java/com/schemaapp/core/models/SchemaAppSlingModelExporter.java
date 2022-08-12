@@ -56,12 +56,6 @@ import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
  */
 public class SchemaAppSlingModelExporter {
 
-	@Self
-    private SlingHttpServletRequest request;
-
-    @Self
-    private Resource resource;
-    
     // Inject a fields whose property name DOES match the model field name
     @ValueMapValue
     @Optional

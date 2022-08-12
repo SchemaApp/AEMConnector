@@ -4,10 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,9 +19,6 @@ class SchemaAppSlingModelExporterTest {
 	@Rule
 	public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
-	@InjectMocks
-	private SchemaAppSlingModelExporter schemaAppSlingModelExporter;
-
 	@BeforeEach
 	public void setup() throws NoSuchMethodException {
 		MockitoAnnotations.initMocks(this);
@@ -31,9 +27,9 @@ class SchemaAppSlingModelExporterTest {
 	}
 
 	@Test
-	void test_entitydata() {
+	void testentitydata() {
 		context.currentResource("/content/schemaapp");
-		schemaAppSlingModelExporter = context.request().adaptTo(SchemaAppSlingModelExporter.class);
+		SchemaAppSlingModelExporter schemaAppSlingModelExporter = context.request().adaptTo(SchemaAppSlingModelExporter.class);
 		String actual = schemaAppSlingModelExporter.getEntity();
 
 		assertEquals("test", actual);
