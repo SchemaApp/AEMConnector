@@ -22,6 +22,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.api.resource.ValueMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +49,8 @@ import com.schemaapp.core.util.QueryHelper;
 
 @Component(service = WebhookHandlerService.class, immediate = true)
 public class WebhookHandlerServiceImpl implements WebhookHandlerService {
+
+	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
 
 	private static ObjectMapper mapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -110,6 +113,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		Node dataNode = null;
 		if (!node.hasNode(Constants.DATA)) {
 			dataNode = node.addNode(Constants.DATA, JcrConstants.NT_UNSTRUCTURED);
+			dataNode.setProperty(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, SCHEMA_APP_COMPONENTS_RESOURCE_TYPE);
 		} else {
 			dataNode = node.getNode(Constants.DATA);
 		}
@@ -158,7 +162,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, dataNode);
+			addConfigDetails(configDetailMap, dataNode, urlResource);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
@@ -166,12 +170,12 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	}
 
 
-	private void addConfigDetails(ValueMap configDetailMap, Node pageNode) throws RepositoryException {
+	private void addConfigDetails(ValueMap configDetailMap, Node pageNode, Resource urlResource) throws RepositoryException {
 		if (configDetailMap != null) {
 			String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
 			String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + pageNode.getPath());
+			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
 			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
 		}
