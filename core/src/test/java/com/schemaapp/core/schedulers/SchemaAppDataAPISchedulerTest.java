@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.apache.sling.settings.SlingSettingsService;
 import org.apache.sling.testing.mock.sling.junit5.SlingContext;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,9 +50,6 @@ class SchemaAppDataAPISchedulerTest {
 	@Mock
 	private Scheduler mockScheduler;
 	
-	@Mock
-	private SlingSettingsService slingSettingsService;
-	
 	Map<String, Object> parameters = new HashMap<>();
 
 	@BeforeEach
@@ -62,7 +58,6 @@ class SchemaAppDataAPISchedulerTest {
 		context.registerService(SchemaAppDataAPIScheduler.class, schemaAppDataAPIScheduler);
 		context.registerService(CDNDataAPIService.class, cdnDataAPIService);
 		context.registerService(Scheduler.class, mockScheduler);
-		context.registerService(SlingSettingsService.class, slingSettingsService);
 		
 		ScheduleOptions mockScheduleOptions = mock(ScheduleOptions.class);
 		lenient().when(mockScheduler.EXPR(anyString())).thenReturn(mockScheduleOptions);
@@ -74,7 +69,6 @@ class SchemaAppDataAPISchedulerTest {
         parameters.put("scheduler.expression", "0 */30 * ? * *");
         parameters.put("scheduler.concurrent", false);
         context.registerInjectActivateService(schemaAppDataAPIScheduler, parameters);
-        PrivateAccessor.setField(schemaAppDataAPIScheduler, "slingSettingsService", slingSettingsService);
 
         assertTrue(schemaAppDataAPIScheduler.enabled);
         assertEquals("0 */30 * ? * *", schemaAppDataAPIScheduler.schedulerExpression);
