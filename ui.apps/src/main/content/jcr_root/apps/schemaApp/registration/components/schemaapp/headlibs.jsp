@@ -27,8 +27,17 @@ if(cfgMgr != null) {
 	}
 	if (StringUtils.isNotBlank(accountID) && StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals("javaScript")) {
 		%>
-		<script>window.schema_highlighter={output: false, accountId: "<%=accountID%>"}</script>
-		<script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
+		<script type="text/javascript">
+		    (function () {
+		    	window.schema_highlighter='{output: false, accountId: "<%=accountID%>"}';
+		    	var schema = document.createElement('script');
+		    	schema.type = 'text/javascript';
+		    	schema.async = true;
+		    	schema.src = 'https://cdn.schemaapp.com/javascript/highlight.js';
+		        document.getElementsByTagName('head')[0].appendChild(schema);
+		    	
+		    })();
+		 </script>
 		<%
 	}
 }
