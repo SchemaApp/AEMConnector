@@ -17,5 +17,11 @@ public final class Constants {
 	public static final String ENTITY = "entity";
 	public static final CharSequence SLASH = "/";
 	public static final Object DOT = ".";
+	public static final String ACCOUNT_ID = "accountId";
+	public static final String SITEURL = "siteURL";
+	public static final String DEPLOYMENTMETHOD = "deploymentMethod";
+
+	public static final String API_ENDPOINT_CONFIG_PID = "com.schemaapp.core.APIEndpointConfig";
+	public static final String SCHEMAAPP_DATA_API_ENDPOINT_KEY = "SchemaAppCDNDataAPIEndpoint";
 	private Constants() {}
 }

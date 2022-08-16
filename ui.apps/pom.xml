@@ -23,16 +23,16 @@
     <parent>
         <groupId>com.schemaApp</groupId>
         <artifactId>schemaApp</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>schemaApp.ui.apps</artifactId>
+    <artifactId>schemaapp.connector</artifactId>
     <packaging>content-package</packaging>
-    <name>SchemaApp - UI apps</name>
+    <name>AEM SchemaApp - Connector</name>
     <description>UI apps package for SchemaApp</description>
 
     <!-- ====================================================================== -->
@@ -69,7 +69,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <group>com.schemaApp</group>
-                    <name>schemaApp.ui.apps</name>
+                    <name>schemaapp.connector</name>
                     <packageType>application</packageType>
                     <accessControlHandling>merge</accessControlHandling>
                      <repositoryStructurePackages>

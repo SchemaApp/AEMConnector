@@ -18,23 +18,34 @@ if(cfgMgr != null) {
 	String apiKey = null;
 	String accountID = null;
 	String siteURL = null;
+	String deploymentMethod = null;
 	Configuration cfg = cfgMgr.getConfiguration("schemaapp", services);
 	if (cfg != null) {
-		apiKey = cfg.get("apiKey", "");
 		accountID = cfg.get("accountID", "");
 		siteURL = cfg.get("siteURL", "");
+		deploymentMethod = cfg.get("deploymentMethod", "");
 	}
-	if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(accountID)) {
+	if (StringUtils.isNotBlank(accountID) && StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals("javaScript")) {
 		%>
-		<script>window.schema_highlighter={output: false, key:"<%=apiKey%>", accountId: "<%=accountID%>"}</script>
-		<script async src="/etc.clientlibs/schemaApp/clientlibs/highlight/resources/js/highlight.js"></script>
+		<script type="text/javascript">
+		    (function () {
+		    	window.schema_highlighter='{output: false, accountId: "<%=accountID%>"}';
+		    	var schema = document.createElement('script');
+		    	schema.type = 'text/javascript';
+		    	schema.async = true;
+		    	schema.src = 'https://cdn.schemaapp.com/javascript/highlight.js';
+		        document.getElementsByTagName('head')[0].appendChild(schema);
+		    	
+		    })();
+		 </script>
 		<%
 	}
 }
-
+%>
+<meta data-page-path="<%=request.getScheme()+"://"+request.getServerName()+currentPage.getPath()%>">
+<%
 
 String pageURL = request.getRequestURL().toString();
-
 
 String graphData = schemaAppJSONReader.getPageData(pageURL);
 if (graphData != null) {

@@ -1,0 +1,8 @@
+{
+ "schemaapp":{
+  		":type": "schemaApp/components/content/entitydata",
+      "sling:resourceType": "schemaApp/components/content/entitydata",
+      "jcr:primaryType": "nt:unstructured",
+	  "entity": "test"
+}
+}
