@@ -12,8 +12,6 @@ import org.json.JSONException;
 
 import com.day.cq.replication.ReplicationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.schemaapp.core.exception.AEMURLNotFoundException;
-import com.schemaapp.core.exception.InvalidWebHookJsonDataException;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 
@@ -25,15 +23,6 @@ import com.schemaapp.core.models.WebhookEntityResult;
  *
  */
 public interface WebhookHandlerService {
-	
-	/**
-	 * Schema App Update Entity Webhook. When markup for a page is updated.
-	 * 
-	 * @param entiry
-	 * @return
-	 * @throws LoginException, AEMURLNotFoundException
-	 */
-	public WebhookEntityResult updateEntity(WebhookEntity entity) throws LoginException, AEMURLNotFoundException, InvalidWebHookJsonDataException;
 	
 	/**
 	 * Schema App Delete Entity Webhook. When markup for a page is deleted.

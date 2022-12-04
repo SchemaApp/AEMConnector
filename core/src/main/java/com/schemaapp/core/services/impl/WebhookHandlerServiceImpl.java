@@ -22,8 +22,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,8 +37,6 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schemaapp.core.exception.AEMURLNotFoundException;
-import com.schemaapp.core.exception.InvalidWebHookJsonDataException;
 import com.schemaapp.core.models.WebhookEntity;
 import com.schemaapp.core.models.WebhookEntityResult;
 import com.schemaapp.core.services.FlushService;
@@ -118,40 +116,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 			dataNode = node.getNode(Constants.DATA);
 		}
 		return dataNode;
-	}
-
-	@Override
-	public WebhookEntityResult updateEntity(WebhookEntity entity) throws AEMURLNotFoundException, InvalidWebHookJsonDataException {
-
-		try {
-			ResourceResolver resolver = getResourceResolver();
-			Session session = resolver.adaptTo(Session.class);
-			Resource urlResource = getPageResource(entity, resolver, session);
-			if (urlResource != null) {
-				LOG.info("WebhookHandlerServiceImpl > updateEntity > URL > {}", urlResource.getPath());
-				savenReplicate(entity.getGraph(), resolver, session, urlResource, null);
-			} else {
-				String errorMessage = "WebhookHandlerServiceImpl :: Unable to find Content URL in AEM "+entity.getId();
-				throw new AEMURLNotFoundException(errorMessage);
-			}
-		} catch (RepositoryException | LoginException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (JsonProcessingException | JSONException | PersistenceException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (ReplicationException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during Replicating Schema App data  ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (Exception e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during processing Schema App data  ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} 
-		return WebhookEntityResult.prepareSucessResponse(entity);
 	}
 
 
