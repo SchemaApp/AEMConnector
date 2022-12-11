@@ -3,7 +3,7 @@ package com.schemaapp.core.util;
 import org.apache.commons.lang3.StringUtils;
 
 import com.schemaapp.core.exception.AEMURLNotFoundException;
-import com.schemaapp.core.models.WebhookEntity;
+import com.schemaapp.core.models.CDNEntity;
 
 /**
  * The <code>Validator</code> class to use validation related functions.
@@ -22,7 +22,7 @@ public final class Validator {
 	 * @return
 	 * @throws AEMURLNotFoundException
 	 */
-	public static boolean validateEntity(WebhookEntity entity) throws AEMURLNotFoundException {
+	public static boolean validateEntity(CDNEntity entity) throws AEMURLNotFoundException {
 		if (entity == null) throw new AEMURLNotFoundException("Missing Required Attributes ");
 		if (StringUtils.isBlank(entity.getType())) throw new AEMURLNotFoundException("Missing Required Attribute -> Type ");
 		if (StringUtils.isBlank(entity.getId())) throw new AEMURLNotFoundException("Missing Required Attribute -> Id ");

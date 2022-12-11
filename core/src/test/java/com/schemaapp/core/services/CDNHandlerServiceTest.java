@@ -31,11 +31,11 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
-import com.schemaapp.core.models.WebhookEntity;
-import com.schemaapp.core.services.impl.WebhookHandlerServiceImpl;
+import com.schemaapp.core.models.CDNEntity;
+import com.schemaapp.core.services.impl.CDNHandlerServiceImpl;
 
 @ExtendWith({ MockitoExtension.class})
-class WebhookHandlerServiceTest {
+class CDNHandlerServiceTest {
 
 	@Mock
 	private ResourceResolver resolver;
@@ -47,7 +47,7 @@ class WebhookHandlerServiceTest {
 	private Resource resource, entityResource;
 
 	@Mock
-	private WebhookEntity entity;
+	private CDNEntity entity;
 	
 	@Mock
 	private QueryBuilder queryBuilder;
@@ -71,7 +71,7 @@ class WebhookHandlerServiceTest {
 	private Replicator replicator;
 	
 	@InjectMocks
-	private final WebhookHandlerServiceImpl webhookHandlerService = new WebhookHandlerServiceImpl();
+	private final CDNHandlerServiceImpl webhookHandlerService = new CDNHandlerServiceImpl();
 
 	@Test
 	void deleteEntityTest() throws Exception {

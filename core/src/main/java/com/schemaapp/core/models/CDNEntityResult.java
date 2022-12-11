@@ -8,19 +8,19 @@ import com.google.common.base.Objects;
  * @author nikhil
  *
  */
-public class WebhookEntityResult {
+public class CDNEntityResult {
 
-	public static WebhookEntityResult prepareSucessResponse(WebhookEntity entiry) {
+	public static CDNEntityResult prepareSucessResponse(CDNEntity entiry) {
 		return new WebhookEntitySucessResult(entiry.getId(), entiry.getType());
 	}
 
-	public static WebhookEntityResult prepareError(String errorMessage) {
+	public static CDNEntityResult prepareError(String errorMessage) {
 		return new WebhookEntityErrorResult(errorMessage);
 	}
 	
 }
 
-class WebhookEntitySucessResult extends WebhookEntityResult {
+class WebhookEntitySucessResult extends CDNEntityResult {
 
 	private static final String TYPE_CONSTANT = "type";
 	private static final String ID_CONSTANT = "id";
@@ -59,7 +59,7 @@ class WebhookEntitySucessResult extends WebhookEntityResult {
 	}
 }
 
-class WebhookEntityErrorResult extends WebhookEntityResult {
+class WebhookEntityErrorResult extends CDNEntityResult {
 
 	private static final String ERROR_MESSAGE = "errorMessage";
 

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WebhookEntity {
+public class CDNEntity {
 
 	@JsonProperty(value="@context", required = true)
 	private Context context;
@@ -32,7 +32,7 @@ public class WebhookEntity {
 	private Object graph;
 
 	@JsonCreator
-	public WebhookEntity(@JsonProperty(value="@context", required = true) Context context, 
+	public CDNEntity(@JsonProperty(value="@context", required = true) Context context, 
 			@JsonProperty(value="@type", required = true) String type,
 			@JsonProperty(value="@id", required = true) String id,
 			@JsonProperty(value="base64encode", required = true) String base64encode,

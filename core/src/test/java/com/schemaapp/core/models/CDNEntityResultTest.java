@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith({ MockitoExtension.class})
-class WebhookEntityResultTest {
+class CDNEntityResultTest {
 
 	private static final String ID = "https://dell.ca/products/monitors/dellultra30";
 
@@ -18,11 +18,11 @@ class WebhookEntityResultTest {
 	private static final String TEST_ERROR_MESSAGE = "Test Error Message";
 
 	@Mock
-	private WebhookEntity entity;
+	private CDNEntity entity;
 
 	@Test
 	void prepareErrorTest() throws Exception {
-		WebhookEntityErrorResult result = (WebhookEntityErrorResult) WebhookEntityResult.prepareError(TEST_ERROR_MESSAGE);
+		WebhookEntityErrorResult result = (WebhookEntityErrorResult) CDNEntityResult.prepareError(TEST_ERROR_MESSAGE);
 		assertEquals(TEST_ERROR_MESSAGE, result.getErrorMessage());
 	}
 
@@ -30,7 +30,7 @@ class WebhookEntityResultTest {
 	void prepareResultTest() throws Exception {
 		when(entity.getId()).thenReturn(new String(ID));
 		when(entity.getType()).thenReturn(new String(TYPE));
-		WebhookEntitySucessResult result = (WebhookEntitySucessResult) WebhookEntityResult.prepareSucessResponse(entity);
+		WebhookEntitySucessResult result = (WebhookEntitySucessResult) CDNEntityResult.prepareSucessResponse(entity);
 		assertEquals(TYPE, result.getType());
 		assertEquals(ID, result.getId());
 		assertEquals("WebhookEntitySucessResult{id=https://dell.ca/products/monitors/dellultra30, type=created, message=Successfully, request completed!}", result.toString());

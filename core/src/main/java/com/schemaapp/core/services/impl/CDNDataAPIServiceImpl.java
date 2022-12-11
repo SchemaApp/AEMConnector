@@ -39,7 +39,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNDataAPIService;
-import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.services.CDNHandlerService;
 import com.schemaapp.core.util.ConfigurationUtil;
 import com.schemaapp.core.util.Constants;
 
@@ -54,7 +54,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	private ConfigurationAdmin configurationAdmin;
 
 	@Reference
-	private WebhookHandlerService webhookHandlerService;
+	private CDNHandlerService webhookHandlerService;
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
