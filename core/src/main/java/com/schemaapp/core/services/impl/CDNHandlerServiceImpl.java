@@ -22,8 +22,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,24 +37,22 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schemaapp.core.exception.AEMURLNotFoundException;
-import com.schemaapp.core.exception.InvalidWebHookJsonDataException;
-import com.schemaapp.core.models.WebhookEntity;
-import com.schemaapp.core.models.WebhookEntityResult;
+import com.schemaapp.core.models.CDNEntity;
+import com.schemaapp.core.models.CDNEntityResult;
 import com.schemaapp.core.services.FlushService;
-import com.schemaapp.core.services.WebhookHandlerService;
+import com.schemaapp.core.services.CDNHandlerService;
 import com.schemaapp.core.util.Constants;
 import com.schemaapp.core.util.JsonSanitizer;
 import com.schemaapp.core.util.QueryHelper;
 
-@Component(service = WebhookHandlerService.class, immediate = true)
-public class WebhookHandlerServiceImpl implements WebhookHandlerService {
+@Component(service = CDNHandlerService.class, immediate = true)
+public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
 
 	private static ObjectMapper mapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebhookHandlerServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CDNHandlerServiceImpl.class);
 
 	@Reference
 	ResourceResolverFactory resolverFactory;
@@ -120,40 +118,6 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		return dataNode;
 	}
 
-	@Override
-	public WebhookEntityResult updateEntity(WebhookEntity entity) throws AEMURLNotFoundException, InvalidWebHookJsonDataException {
-
-		try {
-			ResourceResolver resolver = getResourceResolver();
-			Session session = resolver.adaptTo(Session.class);
-			Resource urlResource = getPageResource(entity, resolver, session);
-			if (urlResource != null) {
-				LOG.info("WebhookHandlerServiceImpl > updateEntity > URL > {}", urlResource.getPath());
-				savenReplicate(entity.getGraph(), resolver, session, urlResource, null);
-			} else {
-				String errorMessage = "WebhookHandlerServiceImpl :: Unable to find Content URL in AEM "+entity.getId();
-				throw new AEMURLNotFoundException(errorMessage);
-			}
-		} catch (RepositoryException | LoginException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during updating Schema App Entity Node into the AEM Instance ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (JsonProcessingException | JSONException | PersistenceException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during parsing JSONL-D graph data ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (ReplicationException e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during Replicating Schema App data  ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} catch (Exception e) {
-			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during processing Schema App data  ";
-			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
-		} 
-		return WebhookEntityResult.prepareSucessResponse(entity);
-	}
-
 
 	@Override
 	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource, ValueMap configDetailMap)
@@ -189,7 +153,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	 * @param session
 	 * @return
 	 */
-	private Resource getPageResource(WebhookEntity entity, ResourceResolver resolver, Session session) {
+	private Resource getPageResource(CDNEntity entity, ResourceResolver resolver, Session session) {
 
 		String id = getPath(entity);
 		Resource urlResource = resolver.resolve(id);
@@ -217,7 +181,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	private List<Resource> findSchemaAppConfigUsingSiteDomain(WebhookEntity entity, Session session)
+	private List<Resource> findSchemaAppConfigUsingSiteDomain(CDNEntity entity, Session session)
 			throws MalformedURLException {
 
 		String siteDomain = getWebsiteDomain(entity);
@@ -288,7 +252,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		return null;
 	}
 
-	private String getWebsiteDomain(WebhookEntity entity) throws MalformedURLException {
+	private String getWebsiteDomain(CDNEntity entity) throws MalformedURLException {
 		URL aURL = new URL(entity.getId());
 		return String.format("%s://%s", aURL.getProtocol(), aURL.getAuthority());
 	}
@@ -298,7 +262,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	 * @param entity
 	 * @return
 	 */
-	private String getPath(WebhookEntity entity) {
+	private String getPath(CDNEntity entity) {
 		
 		URL aURL;
 		try {
@@ -319,7 +283,7 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 	 * This method used to delete entity 
 	 */
 	@Override
-	public WebhookEntityResult deleteEntity(WebhookEntity entity) throws LoginException, PersistenceException {
+	public CDNEntityResult deleteEntity(CDNEntity entity) throws LoginException, PersistenceException {
 		
 		ResourceResolver resolver = getResourceResolver();
 		Session session = resolver.adaptTo(Session.class);
@@ -332,9 +296,9 @@ public class WebhookHandlerServiceImpl implements WebhookHandlerService {
 		} catch (PersistenceException e) {
 			String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 			LOG.error(errorMessage, e);
-			return WebhookEntityResult.prepareError(errorMessage);
+			return CDNEntityResult.prepareError(errorMessage);
 		}
-		return WebhookEntityResult.prepareSucessResponse(entity);
+		return CDNEntityResult.prepareSucessResponse(entity);
 	}
 
 }

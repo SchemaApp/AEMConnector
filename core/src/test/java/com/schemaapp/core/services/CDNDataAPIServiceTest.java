@@ -63,7 +63,7 @@ class CDNDataAPIServiceTest {
 	private Resource resource;
 
 	@Mock
-	private WebhookHandlerService webhookHandlerService;
+	private CDNHandlerService webhookHandlerService;
 
 	@Mock
 	private Iterator<Resource> childResourceIterator;
