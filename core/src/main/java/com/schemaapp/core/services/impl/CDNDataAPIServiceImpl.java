@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +44,10 @@ import com.schemaapp.core.util.Constants;
 
 @Component(service = CDNDataAPIService.class, immediate = true)
 public class CDNDataAPIServiceImpl implements CDNDataAPIService {
+
+	private static final String BODY = "body";
+
+	private static final String JAVA_SCRIPT = "javaScript";
 
 	private static final String CQ_CLOUDSERVICECONFIGS = "cq:cloudserviceconfigs";
 
@@ -110,9 +113,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 			}
 			LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", endpoint, pagePath, encodedURL));
 			URL url = getURL(endpoint, accountId, encodedURL);
-			StringBuilder content = httpGet(url);
-
-			String response = content.toString();
+			Map<String, Object> responseMap = httpGet(url);
+			String response = responseMap.containsKey(BODY) ? responseMap.get(BODY).toString() : "";
+			String eTag = responseMap.containsKey(Constants.E_TAG) ? responseMap.get(Constants.E_TAG).toString() : "";
+			String eTagNodeValue = configDetailMap.containsKey(Constants.E_TAG) ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;		
+			if (eTagNodeValue.equals(eTag)) {return;}
+			configDetailMap.put(Constants.E_TAG, eTag);
+			
 			if (StringUtils.isNotBlank(response)) {
 				if (response.startsWith("[")) {
 					graphJsonData = new JSONArray(response);
@@ -121,8 +128,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 				}	
 				LOG.info(String.format("CDN data response:: crawler :: %s",response));
 			}
-			
-			graphJsonData = readJavaScriptCDNData(accountId, deploymentMethod, endpoint, graphJsonData, encodedURL);
+
+			graphJsonData = readJavaScriptCDNData(deploymentMethod, graphJsonData, response);
 
 			if (graphJsonData != null) {
 				graphJsonData = mapperObject.readValue(graphJsonData.toString(), Object.class);
@@ -135,65 +142,65 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 		}
 	}
 
-	private Object readJavaScriptCDNData(String accountId, String deploymentMethod, String endpoint,
-			Object graphJsonData, String encodedURL)
-			throws IOException, JSONException {
-		URL url;
-		StringBuilder content;
-		String response;
-		if (StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals("javaScript")) {
-			url = getHighlighterURL(endpoint, accountId, encodedURL);
-			content = httpGet(url);
-			response = content.toString();
-			if (StringUtils.isNotBlank(response)) {
-				if (response.startsWith("[")) {
-					JSONArray graphJsonDataArray = new JSONArray(response);
-					if (graphJsonData instanceof JSONArray) {
-						JSONArray array = (JSONArray)graphJsonData;
-						for(int i = 0; i < array.length(); i++) {
-							graphJsonDataArray.put(array.getJSONObject(i));
-						}
-					} else {
-						if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
+	private Object readJavaScriptCDNData(String deploymentMethod,
+			Object graphJsonData, String response)
+					throws JSONException {
+		if (StringUtils.isNotBlank(deploymentMethod) && deploymentMethod.equals(JAVA_SCRIPT) && StringUtils.isNotBlank(response)) {
+			if (response.startsWith("[")) {
+				JSONArray graphJsonDataArray = new JSONArray(response);
+				if (graphJsonData instanceof JSONArray) {
+					JSONArray array = (JSONArray)graphJsonData;
+					for(int i = 0; i < array.length(); i++) {
+						graphJsonDataArray.put(array.getJSONObject(i));
 					}
-					LOG.info(String.format("CDN data response:: javascript :: %s",response));
-					return graphJsonDataArray;
 				} else {
-					JSONArray graphJsonDataArray = new JSONArray();
-					JSONObject graphJsonDataObject = new JSONObject(response);
-					if (graphJsonData instanceof JSONArray) {
-						JSONArray array = (JSONArray)graphJsonData;
-						for(int i = 0; i < array.length(); i++) {
-							graphJsonDataArray.put(array.getJSONObject(i));
-						}
-						graphJsonDataArray.put(graphJsonDataObject);
-					} else {
-						graphJsonDataArray.put(graphJsonDataObject);
-						if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
+					if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
+				}
+				LOG.info(String.format("CDN data response:: javascript :: %s",response));
+				return graphJsonDataArray;
+			} else {
+				JSONArray graphJsonDataArray = new JSONArray();
+				JSONObject graphJsonDataObject = new JSONObject(response);
+				if (graphJsonData instanceof JSONArray) {
+					JSONArray array = (JSONArray)graphJsonData;
+					for(int i = 0; i < array.length(); i++) {
+						graphJsonDataArray.put(array.getJSONObject(i));
 					}
-					LOG.info(String.format("CDN data response:: javascript :: %s",response));
-					return graphJsonDataArray;
-				}	
-
-			}
+					graphJsonDataArray.put(graphJsonDataObject);
+				} else {
+					graphJsonDataArray.put(graphJsonDataObject);
+					if (graphJsonData != null) graphJsonDataArray.put(graphJsonData);
+				}
+				LOG.info(String.format("CDN data response:: javascript :: %s",response));
+				return graphJsonDataArray;
+			}	
 		}
 		return graphJsonData;
 	}
 
-	private StringBuilder httpGet(URL url) throws IOException, ProtocolException {
+	private Map<String, Object> httpGet(URL url) throws IOException {
+
+		Map<String, Object> responseMap = new HashMap<>();
 		HttpURLConnection connection = getHttpURLConnection(url);
 		connection.setRequestMethod(HttpConstants.METHOD_GET);
 		connection.setConnectTimeout(5 * 1000);
 		connection.setReadTimeout(7 * 1000);
+		int status = connection.getResponseCode();
 
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		String inputLine;
-		StringBuilder content = new StringBuilder();
-		while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
+		if (status == HttpURLConnection.HTTP_OK) {
+			String eTag = connection.getHeaderField("ETag");
 
-		bufferedReader.close();
+			responseMap.put(Constants.E_TAG, eTag);
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String inputLine;
+			StringBuilder content = new StringBuilder();
+			while ((inputLine = bufferedReader.readLine()) != null) { content.append(inputLine); }
+			bufferedReader.close();
+			responseMap.put(BODY, content);
+		}
+		
 		connection.disconnect();
-		return content;
+		return responseMap;
 	}
 
 	private String getAccountId(ValueMap configDetailMap) {

@@ -142,6 +142,8 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
 			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+			String eTag = configDetailMap.containsKey(Constants.E_TAG) ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.E_TAG, eTag);
 		}
 	}
 
