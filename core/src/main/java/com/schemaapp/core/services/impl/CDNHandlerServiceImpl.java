@@ -87,7 +87,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @throws RepositoryException
 	 */
 	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
-		
+
 		String graphData = mapper.writeValueAsString(jsonGraphData);
 		String wellFormedJson = null;
 		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
@@ -142,6 +142,8 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
 			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+			String eTag = configDetailMap.containsKey(Constants.E_TAG) ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.E_TAG, eTag);
 		}
 	}
 
@@ -263,7 +265,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @return
 	 */
 	private String getPath(CDNEntity entity) {
-		
+
 		URL aURL;
 		try {
 			aURL = new URL(entity.getId());
@@ -284,7 +286,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 */
 	@Override
 	public CDNEntityResult deleteEntity(CDNEntity entity) throws LoginException, PersistenceException {
-		
+
 		ResourceResolver resolver = getResourceResolver();
 		Session session = resolver.adaptTo(Session.class);
 		Resource urlResource = getPageResource(entity, resolver, session);
