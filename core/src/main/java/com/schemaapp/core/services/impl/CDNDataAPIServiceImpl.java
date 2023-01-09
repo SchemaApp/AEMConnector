@@ -61,7 +61,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
 	@Reference
 	transient ResourceResolverFactory resolverFactory;
-	
+
 	private static ObjectMapper mapperObject = new ObjectMapper().configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
 	@Override
@@ -119,7 +119,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 			String eTagNodeValue = configDetailMap.containsKey(Constants.E_TAG) ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;		
 			if (eTagNodeValue.equals(eTag)) {return;}
 			configDetailMap.put(Constants.E_TAG, eTag);
-			
+
 			if (StringUtils.isNotBlank(response)) {
 				if (response.startsWith("[")) {
 					graphJsonData = new JSONArray(response);
@@ -198,7 +198,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 			bufferedReader.close();
 			responseMap.put(BODY, content);
 		}
-		
+
 		connection.disconnect();
 		return responseMap;
 	}
@@ -259,7 +259,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 	public URL getURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
 		return new URL(endpoint + accountId + "/" +encodedURL);
 	}
-	
+
 	public URL getHighlighterURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
 		return new URL(endpoint + accountId + "/__highlighter_js/" +encodedURL);
 	}
