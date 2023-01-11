@@ -245,7 +245,8 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
         for (Resource rootpathRes : rootpathResources) {
 
             String contentRootPath = getParentResourcePath(rootpathRes);
-            LOG.debug("WebhookHandlerServiceImpl > updateEntity -> AEM Author Site Content Root Path {} ",
+            LOG.debug("WebhookHandlerServiceImpl > updateEntity -> "
+                    + "AEM Author Site Content Root Path {} ",
                     contentRootPath);
 
             contentRootPath = getContentRootPathUsingLocationlevel(locationLevel, contentRootPath);

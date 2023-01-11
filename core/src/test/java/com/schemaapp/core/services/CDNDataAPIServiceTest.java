@@ -154,13 +154,13 @@ class CDNDataAPIServiceTest {
 
 		HttpURLConnection connection = mock(HttpURLConnection.class);
 		URL url = new URL("https://data.schemaapp.com");
-		//doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
 		when(cdnDataAPIServiceImpl.getURL("https://data.schemaapp.com", "account132", "test")).thenReturn(url);
 		when(cdnDataAPIServiceImpl.getHttpURLConnection(any())).thenReturn(connection);
 
 		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));
 		InputStream inputStream = new ByteArrayInputStream(json);
-		when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+		when(connection.getResponseCode())
+		.thenReturn(HttpURLConnection.HTTP_OK);
 		when(connection.getInputStream()).thenReturn(inputStream);
 		when(connection.getHeaderField("ETag")).thenReturn("testEtag");
 	}

@@ -16,10 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -34,8 +36,12 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNDataAPIService;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -143,22 +149,35 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 LOG.info(String.format("CDN data response:: crawler :: %s", response));
             }
 
-            graphJsonData = readJavaScriptCDNData(deploymentMethod, 
-                    graphJsonData, response);
-
-            if (graphJsonData != null) {
-                graphJsonData = mapperObject.readValue(graphJsonData.toString(), Object.class);
-                Resource pageResource = child.adaptTo(Resource.class);
-                webhookHandlerService.savenReplicate(graphJsonData, resolver, resolver.adaptTo(Session.class),
-                        pageResource, configDetailMap);
-            }
+            processGraphJsonData(resolver, configDetailMap, deploymentMethod,
+                    graphJsonData, child, response);
 
         } catch (Exception e) {
             LOG.error("Error while reading and processing CDN URL", e);
         }
     }
 
-    private Object readJavaScriptCDNData(String deploymentMethod, Object graphJsonData, String response)
+    private void processGraphJsonData(ResourceResolver resolver,
+            ValueMap configDetailMap, String deploymentMethod,
+            Object graphJsonData, final Page child, String response)
+            throws JSONException, IOException,
+            RepositoryException,  
+            ReplicationException {
+        graphJsonData = readJavaScriptCDNData(deploymentMethod, 
+                graphJsonData, response);
+
+        if (graphJsonData != null) {
+            graphJsonData = mapperObject.readValue(graphJsonData.toString(), Object.class);
+            Resource pageResource = child.adaptTo(Resource.class);
+            webhookHandlerService.savenReplicate(graphJsonData, resolver, resolver.adaptTo(Session.class),
+                    pageResource, configDetailMap);
+        }
+    }
+
+    private Object readJavaScriptCDNData(
+            String deploymentMethod, 
+            Object graphJsonData, 
+            String response)
             throws JSONException {
         if (StringUtils.isNotBlank(deploymentMethod) 
                 && deploymentMethod.equals(JAVA_SCRIPT)
