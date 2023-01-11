@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.version.VersionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -87,7 +91,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @throws RepositoryException
 	 */
 	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
-		
+
 		String graphData = mapper.writeValueAsString(jsonGraphData);
 		String wellFormedJson = null;
 		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
@@ -134,16 +138,49 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	}
 
 
-	private void addConfigDetails(ValueMap configDetailMap, Node pageNode, Resource urlResource) throws RepositoryException {
-		if (configDetailMap != null) {
-			String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
-			String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
-			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
-		}
-	}
+    private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
+            Resource urlResource) throws RepositoryException {
+        if (configDetailMap != null) {
+
+            setAccountIdProperty(configDetailMap, pageNode);
+
+            setSiteURLProperty(configDetailMap, pageNode, urlResource);
+
+            String deploymentMethod = setDeploymentMethodProperty(
+                    configDetailMap, pageNode);
+
+            String eTag = configDetailMap.containsKey(Constants.E_TAG)
+                    ? (String) configDetailMap.get(Constants.E_TAG)
+                    : StringUtils.EMPTY;
+            if (StringUtils.isNotEmpty(deploymentMethod))
+                pageNode.setProperty(Constants.E_TAG, eTag);
+        }
+    }
+
+
+    private String setDeploymentMethodProperty(ValueMap configDetailMap,
+            Node pageNode) throws ValueFormatException, VersionException,
+            LockException, ConstraintViolationException, RepositoryException {
+        String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+        return deploymentMethod;
+    }
+
+
+    private void setSiteURLProperty(ValueMap configDetailMap, Node pageNode,
+            Resource urlResource) throws ValueFormatException, VersionException,
+            LockException, ConstraintViolationException, RepositoryException {
+        String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
+    }
+
+
+    private void setAccountIdProperty(ValueMap configDetailMap, Node pageNode)
+            throws ValueFormatException, VersionException, LockException,
+            ConstraintViolationException, RepositoryException {
+        String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
+    }
 
 	/**
 	 * This method used to get Page Resource Object.
@@ -190,36 +227,38 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 		return QueryHelper.getSchemaAppConfig(siteDomain, builder, session);
 	}
 
-	/**
-	 * This method used to Resolve Entity Path from Config data.
-	 * 
-	 * @param resolver
-	 * @param session
-	 * @param id
-	 * @param configPath
-	 * @return
-	 */
-	private Resource resolveEntityPathfromConfig(ResourceResolver resolver, Session session, String id,
-			String configPath) {
+    /**
+     * This method used to Resolve Entity Path from Config data.
+     * 
+     * @param resolver
+     * @param session
+     * @param id
+     * @param configPath
+     * @return
+     */
+    private Resource resolveEntityPathfromConfig(ResourceResolver resolver, Session session, String id,
+            String configPath) {
 
-		Resource urlResource;
-		int locationLevel = 3;
-		List<Resource> rootpathResources = QueryHelper.getContentRootPath(configPath, builder, session);
-		for (Resource rootpathRes : rootpathResources) {
+        Resource urlResource;
+        int locationLevel = 3;
+        List<Resource> rootpathResources = QueryHelper.getContentRootPath(configPath, builder, session);
+        for (Resource rootpathRes : rootpathResources) {
 
-			String contentRootPath= getParentResourcePath(rootpathRes); 
-			LOG.debug("WebhookHandlerServiceImpl > updateEntity -> AEM Author Site Content Root Path {} ", contentRootPath);
+            String contentRootPath = getParentResourcePath(rootpathRes);
+            LOG.debug("WebhookHandlerServiceImpl > updateEntity -> "
+                    + "AEM Author Site Content Root Path {} ",
+                    contentRootPath);
 
-			contentRootPath = getContentRootPathUsingLocationlevel(locationLevel, contentRootPath);
-			urlResource = resolver.resolve(contentRootPath + "/" + id);
+            contentRootPath = getContentRootPathUsingLocationlevel(locationLevel, contentRootPath);
+            urlResource = resolver.resolve(contentRootPath + "/" + id);
 
-			if (!ResourceUtil.isNonExistingResource(urlResource)) {
-				LOG.debug("WebhookHandlerServiceImpl > updateEntity -> Entity Path {} ", urlResource.getPath());
-				return urlResource;
-			}
-		}
-		return null;
-	}
+            if (!ResourceUtil.isNonExistingResource(urlResource)) {
+                LOG.debug("WebhookHandlerServiceImpl > updateEntity -> Entity Path {} ", urlResource.getPath());
+                return urlResource;
+            }
+        }
+        return null;
+    }
 
 	/**
 	 * @param locationLevel
@@ -263,7 +302,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @return
 	 */
 	private String getPath(CDNEntity entity) {
-		
+
 		URL aURL;
 		try {
 			aURL = new URL(entity.getId());
@@ -284,7 +323,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 */
 	@Override
 	public CDNEntityResult deleteEntity(CDNEntity entity) throws LoginException, PersistenceException {
-		
+
 		ResourceResolver resolver = getResourceResolver();
 		Session session = resolver.adaptTo(Session.class);
 		Resource urlResource = getPageResource(entity, resolver, session);
