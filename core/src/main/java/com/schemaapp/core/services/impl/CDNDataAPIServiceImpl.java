@@ -21,7 +21,6 @@ import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -39,9 +38,6 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNDataAPIService;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -68,7 +64,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
     @Reference
     transient ResourceResolverFactory resolverFactory;
 
-    private static ObjectMapper mapperObject = new ObjectMapper().configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+    private static ObjectMapper mapperObject = new ObjectMapper()
+            .configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
     @Override
     public void readCDNData() {
@@ -80,7 +77,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 getSchemaAppCDNData(resolver, page);
             }
         } catch (Exception e) {
-            LOG.error("Error occurs while read CDN data, Error :: {}", e.getMessage());
+            LOG.error("Error occurs while read CDN data, Error :: {}"
+                    , e.getMessage());
         }
     }
 
@@ -92,7 +90,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         try {
             ValueMap configDetailMap = getConfigNodeValueMap(resolver, page);
             String accountId = getAccountId(configDetailMap);
-            String siteURL = configDetailMap != null ? (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+            String siteURL = configDetailMap != null ? 
+                    (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
             String deploymentMethod = configDetailMap != null 
                     ? (String) configDetailMap.get("deploymentMethod")
                     : StringUtils.EMPTY;
@@ -123,7 +122,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (encodedURL != null && encodedURL.contains("=")) {
                 encodedURL = encodedURL.replace("=", "");
             }
-            LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", 
+            LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, "
+                    + "pagepath ::%s, encodedURL ::%s", 
                     endpoint,
                     pagePath, encodedURL));
             URL url = getURL(endpoint, accountId, encodedURL);
@@ -146,7 +146,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 } else {
                     graphJsonData = new JSONObject(response);
                 }
-                LOG.info(String.format("CDN data response:: crawler :: %s", response));
+                LOG.info(String.format("CDN data response:: crawler :: %s", 
+                        response));
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
@@ -160,17 +161,20 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
     private void processGraphJsonData(ResourceResolver resolver,
             ValueMap configDetailMap, String deploymentMethod,
             Object graphJsonData, final Page child, String response)
-            throws JSONException, IOException,
-            RepositoryException,  
+            throws JSONException, IOException, RepositoryException,
             ReplicationException {
-        graphJsonData = readJavaScriptCDNData(deploymentMethod, 
-                graphJsonData, response);
+        readJavaScriptCDNData(deploymentMethod, graphJsonData,
+                response);
 
         if (graphJsonData != null) {
-            graphJsonData = mapperObject.readValue(graphJsonData.toString(), Object.class);
+            graphJsonData = mapperObject.readValue(graphJsonData.toString(),
+                    Object.class);
             Resource pageResource = child.adaptTo(Resource.class);
-            webhookHandlerService.savenReplicate(graphJsonData, resolver, resolver.adaptTo(Session.class),
-                    pageResource, configDetailMap);
+            webhookHandlerService.savenReplicate(graphJsonData, 
+                    resolver,
+                    resolver.adaptTo(Session.class), 
+                    pageResource,
+                    configDetailMap);
         }
     }
 
@@ -193,7 +197,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     if (graphJsonData != null)
                         graphJsonDataArray.put(graphJsonData);
                 }
-                LOG.info(String.format("CDN data response:: javascript :: %s", response));
+                LOG.info(String.format("CDN data response:: javascript :: %s", 
+                        response));
                 return graphJsonDataArray;
             } else {
                 JSONArray graphJsonDataArray = new JSONArray();
@@ -246,7 +251,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
     }
 
     private String getAccountId(ValueMap configDetailMap) {
-        String accountId = configDetailMap != null ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+        String accountId = configDetailMap != null ? 
+                (String) configDetailMap.get("accountID") : 
+                    StringUtils.EMPTY;
         if (accountId != null && accountId.lastIndexOf('/') > 0) {
             int index = accountId.lastIndexOf('/');
             accountId = accountId.substring(index, accountId.length());
