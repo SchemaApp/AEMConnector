@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.version.VersionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -134,20 +138,49 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	}
 
 
-	private void addConfigDetails(ValueMap configDetailMap, Node pageNode, Resource urlResource) throws RepositoryException {
-		if (configDetailMap != null) {
-			String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
-			String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
-			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
-			String eTag = configDetailMap.containsKey(Constants.E_TAG) 
-			        ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(deploymentMethod)) 
-			    pageNode.setProperty(Constants.E_TAG, eTag);
-		}
-	}
+    private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
+            Resource urlResource) throws RepositoryException {
+        if (configDetailMap != null) {
+
+            setAccountIdProperty(configDetailMap, pageNode);
+
+            setSiteURLProperty(configDetailMap, pageNode, urlResource);
+
+            String deploymentMethod = setDeploymentMethodProperty(
+                    configDetailMap, pageNode);
+
+            String eTag = configDetailMap.containsKey(Constants.E_TAG)
+                    ? (String) configDetailMap.get(Constants.E_TAG)
+                    : StringUtils.EMPTY;
+            if (StringUtils.isNotEmpty(deploymentMethod))
+                pageNode.setProperty(Constants.E_TAG, eTag);
+        }
+    }
+
+
+    private String setDeploymentMethodProperty(ValueMap configDetailMap,
+            Node pageNode) throws ValueFormatException, VersionException,
+            LockException, ConstraintViolationException, RepositoryException {
+        String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
+        return deploymentMethod;
+    }
+
+
+    private void setSiteURLProperty(ValueMap configDetailMap, Node pageNode,
+            Resource urlResource) throws ValueFormatException, VersionException,
+            LockException, ConstraintViolationException, RepositoryException {
+        String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
+    }
+
+
+    private void setAccountIdProperty(ValueMap configDetailMap, Node pageNode)
+            throws ValueFormatException, VersionException, LockException,
+            ConstraintViolationException, RepositoryException {
+        String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
+        if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
+    }
 
 	/**
 	 * This method used to get Page Resource Object.

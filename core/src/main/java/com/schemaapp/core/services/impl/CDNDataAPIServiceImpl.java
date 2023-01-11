@@ -87,7 +87,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             ValueMap configDetailMap = getConfigNodeValueMap(resolver, page);
             String accountId = getAccountId(configDetailMap);
             String siteURL = configDetailMap != null ? (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-            String deploymentMethod = configDetailMap != null ? (String) configDetailMap.get("deploymentMethod")
+            String deploymentMethod = configDetailMap != null 
+                    ? (String) configDetailMap.get("deploymentMethod")
                     : StringUtils.EMPTY;
             Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
             String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
@@ -100,8 +101,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         }
     }
 
-    private void processPage(ResourceResolver resolver, ValueMap configDetailMap, String accountId, String siteURL,
-            String deploymentMethod, Iterator<Page> childPages, String endpoint) {
+    private void processPage(ResourceResolver resolver, 
+            ValueMap configDetailMap, 
+            String accountId, 
+            String siteURL,
+            String deploymentMethod, 
+            Iterator<Page> childPages, 
+            String endpoint) {
 
         Object graphJsonData = null;
         try {
@@ -111,7 +117,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (encodedURL != null && encodedURL.contains("=")) {
                 encodedURL = encodedURL.replace("=", "");
             }
-            LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", endpoint,
+            LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, pagepath ::%s, encodedURL ::%s", 
+                    endpoint,
                     pagePath, encodedURL));
             URL url = getURL(endpoint, accountId, encodedURL);
             Map<String, Object> responseMap = httpGet(url);
@@ -254,17 +261,19 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         Resource contentResource = resolver.getResource("/content");
         if (contentResource == null)
             return rootpages;
-        Iterator<Resource> childResourceIterator = contentResource.listChildren();
+        Iterator<Resource> childResourceIterator = contentResource
+                .listChildren();
         while (childResourceIterator.hasNext()) {
             final Resource child = childResourceIterator.next();
             if (child != null && child.getResourceType().equals("cq:Page")) {
                 Resource jcrcontentResource = child.getChild("jcr:content");
-                if (jcrcontentResource != null
-                        && jcrcontentResource.getValueMap().get(CQ_CLOUDSERVICECONFIGS) != null) {
-                    String[] cloudserviceconfigs = (String[]) jcrcontentResource.getValueMap()
-                            .get(CQ_CLOUDSERVICECONFIGS);
+                if (jcrcontentResource != null && jcrcontentResource
+                        .getValueMap().get(CQ_CLOUDSERVICECONFIGS) != null) {
+                    String[] cloudserviceconfigs = (String[]) jcrcontentResource
+                            .getValueMap().get(CQ_CLOUDSERVICECONFIGS);
                     boolean contains = Arrays.stream(cloudserviceconfigs)
-                            .anyMatch(s -> s.startsWith("/etc/cloudservices/schemaapp"));
+                            .anyMatch(s -> s.startsWith(
+                                    "/etc/cloudservices/schemaapp"));
 
                     if (contains) {
                         Page page = child.adaptTo(Page.class);
