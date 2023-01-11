@@ -3,7 +3,6 @@ package com.schemaapp.core.services;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -155,12 +154,15 @@ class CDNDataAPIServiceTest {
 
 		HttpURLConnection connection = mock(HttpURLConnection.class);
 		URL url = new URL("https://data.schemaapp.com");
-		doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
-		doReturn(connection).when(cdnDataAPIServiceImpl).getHttpURLConnection(any());
+		//doReturn(url).when(cdnDataAPIServiceImpl).getURL(anyString(), anyString(), anyString());
+		when(cdnDataAPIServiceImpl.getURL("https://data.schemaapp.com", "account132", "test")).thenReturn(url);
+		when(cdnDataAPIServiceImpl.getHttpURLConnection(any())).thenReturn(connection);
 
 		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));
 		InputStream inputStream = new ByteArrayInputStream(json);
+		when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
 		when(connection.getInputStream()).thenReturn(inputStream);
+		when(connection.getHeaderField("ETag")).thenReturn("testEtag");
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {

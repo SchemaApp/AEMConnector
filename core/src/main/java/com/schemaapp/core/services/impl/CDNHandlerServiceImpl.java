@@ -142,8 +142,10 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
 			String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
 			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
-			String eTag = configDetailMap.containsKey(Constants.E_TAG) ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;
-			if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.E_TAG, eTag);
+			String eTag = configDetailMap.containsKey(Constants.E_TAG) 
+			        ?  (String) configDetailMap.get(Constants.E_TAG) : StringUtils.EMPTY;
+			if (StringUtils.isNotEmpty(deploymentMethod)) 
+			    pageNode.setProperty(Constants.E_TAG, eTag);
 		}
 	}
 
@@ -192,36 +194,37 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 		return QueryHelper.getSchemaAppConfig(siteDomain, builder, session);
 	}
 
-	/**
-	 * This method used to Resolve Entity Path from Config data.
-	 * 
-	 * @param resolver
-	 * @param session
-	 * @param id
-	 * @param configPath
-	 * @return
-	 */
-	private Resource resolveEntityPathfromConfig(ResourceResolver resolver, Session session, String id,
-			String configPath) {
+    /**
+     * This method used to Resolve Entity Path from Config data.
+     * 
+     * @param resolver
+     * @param session
+     * @param id
+     * @param configPath
+     * @return
+     */
+    private Resource resolveEntityPathfromConfig(ResourceResolver resolver, Session session, String id,
+            String configPath) {
 
-		Resource urlResource;
-		int locationLevel = 3;
-		List<Resource> rootpathResources = QueryHelper.getContentRootPath(configPath, builder, session);
-		for (Resource rootpathRes : rootpathResources) {
+        Resource urlResource;
+        int locationLevel = 3;
+        List<Resource> rootpathResources = QueryHelper.getContentRootPath(configPath, builder, session);
+        for (Resource rootpathRes : rootpathResources) {
 
-			String contentRootPath= getParentResourcePath(rootpathRes); 
-			LOG.debug("WebhookHandlerServiceImpl > updateEntity -> AEM Author Site Content Root Path {} ", contentRootPath);
+            String contentRootPath = getParentResourcePath(rootpathRes);
+            LOG.debug("WebhookHandlerServiceImpl > updateEntity -> AEM Author Site Content Root Path {} ",
+                    contentRootPath);
 
-			contentRootPath = getContentRootPathUsingLocationlevel(locationLevel, contentRootPath);
-			urlResource = resolver.resolve(contentRootPath + "/" + id);
+            contentRootPath = getContentRootPathUsingLocationlevel(locationLevel, contentRootPath);
+            urlResource = resolver.resolve(contentRootPath + "/" + id);
 
-			if (!ResourceUtil.isNonExistingResource(urlResource)) {
-				LOG.debug("WebhookHandlerServiceImpl > updateEntity -> Entity Path {} ", urlResource.getPath());
-				return urlResource;
-			}
-		}
-		return null;
-	}
+            if (!ResourceUtil.isNonExistingResource(urlResource)) {
+                LOG.debug("WebhookHandlerServiceImpl > updateEntity -> Entity Path {} ", urlResource.getPath());
+                return urlResource;
+            }
+        }
+        return null;
+    }
 
 	/**
 	 * @param locationLevel
