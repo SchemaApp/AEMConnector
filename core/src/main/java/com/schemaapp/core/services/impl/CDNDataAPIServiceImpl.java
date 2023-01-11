@@ -167,7 +167,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 response);
 
         if (graphJsonData != null) {
-            graphJsonData = mapperObject.readValue(graphJsonData.toString(),
+            mapperObject.readValue(graphJsonData.toString(),
                     Object.class);
             Resource pageResource = child.adaptTo(Resource.class);
             webhookHandlerService.savenReplicate(graphJsonData, 

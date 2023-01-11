@@ -145,25 +145,32 @@ class CDNDataAPIServiceTest {
 		when(page.getProperties()).thenReturn(valueMap);
 	}
 
-	private void mockConnection() throws NoSuchFieldException, IOException, MalformedURLException {
-		PrivateAccessor.setField(cdnDataAPIServiceImpl, "configurationAdmin", configurationAdmin);
-		Dictionary<String, Object> configurationProperties = new Hashtable<>();
-		configurationProperties.put("SchemaAppCDNDataAPIEndpoint", "https://data.schemaapp.com");
-		when(configurationAdmin.getConfiguration(anyString())).thenReturn(configuration);
-		when(configuration.getProperties()).thenReturn(configurationProperties);
+    private void mockConnection()
+            throws NoSuchFieldException, IOException, MalformedURLException {
+        PrivateAccessor.setField(cdnDataAPIServiceImpl, "configurationAdmin",
+                configurationAdmin);
+        Dictionary<String, Object> configurationProperties = new Hashtable<>();
+        configurationProperties.put("SchemaAppCDNDataAPIEndpoint",
+                "https://data.schemaapp.com");
+        when(configurationAdmin.getConfiguration(anyString()))
+                .thenReturn(configuration);
+        when(configuration.getProperties()).thenReturn(configurationProperties);
 
-		HttpURLConnection connection = mock(HttpURLConnection.class);
-		URL url = new URL("https://data.schemaapp.com");
-		when(cdnDataAPIServiceImpl.getURL("https://data.schemaapp.com", "account132", "test")).thenReturn(url);
-		when(cdnDataAPIServiceImpl.getHttpURLConnection(any())).thenReturn(connection);
+        HttpURLConnection connection = mock(HttpURLConnection.class);
+        URL url = new URL("https://data.schemaapp.com");
+        when(cdnDataAPIServiceImpl.getURL("https://data.schemaapp.com",
+                "account132", "test")).thenReturn(url);
+        when(cdnDataAPIServiceImpl.getHttpURLConnection(any()))
+                .thenReturn(connection);
 
-		byte[] json = Files.readAllBytes(Paths.get("src/test/resources/AEM/core/services/jsonld.json"));
-		InputStream inputStream = new ByteArrayInputStream(json);
-		when(connection.getResponseCode())
-		.thenReturn(HttpURLConnection.HTTP_OK);
-		when(connection.getInputStream()).thenReturn(inputStream);
-		when(connection.getHeaderField("ETag")).thenReturn("testEtag");
-	}
+        byte[] json = Files.readAllBytes(
+                Paths.get("src/test/resources/AEM/core/services/jsonld.json"));
+        InputStream inputStream = new ByteArrayInputStream(json);
+        when(connection.getResponseCode())
+                .thenReturn(HttpURLConnection.HTTP_OK);
+        when(connection.getInputStream()).thenReturn(inputStream);
+        when(connection.getHeaderField("ETag")).thenReturn("testEtag");
+    }
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {
 		Map<String, Object> param = new HashMap<>();
