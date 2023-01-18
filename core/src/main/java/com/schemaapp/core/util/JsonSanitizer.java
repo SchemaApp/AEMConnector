@@ -121,7 +121,6 @@ public final class JsonSanitizer {
 	   *
 	   * @param jsonish JSON-like content.
 	   * @param maximumNestingDepth maximum nesting depth.
-	   * @return embeddable JSON
 	   */
 	public JsonSanitizer(final String jsonish, final int maximumNestingDepth) {
 		this.maximumNestingDepth = Math.min(Math.max(1, maximumNestingDepth), 4096);

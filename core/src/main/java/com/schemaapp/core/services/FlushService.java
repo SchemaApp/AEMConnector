@@ -5,8 +5,7 @@ public interface FlushService {
 	/**
 	 * Override invalidatePageJson method of FlushParentPageJsonService
 	 *
-	 * @param String the pageUrl
+	 * @param pageUrl
 	 */
-	void invalidatePageJson(String pageUrl);
-
+	void invalidatePageJson(String pageUrl); 
 }

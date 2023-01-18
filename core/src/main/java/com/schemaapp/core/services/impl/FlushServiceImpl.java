@@ -38,8 +38,7 @@ public class FlushServiceImpl implements FlushService {
 	/**
 	 * Override invalidatePageJson method of FlushParentPageJsonService
 	 *
-	 * @param String the pageUrl
-	 * @throws org.apache.sling.api.resource.LoginException 
+	 * @param pageUrl
 	 */
 	@Override
 	public void invalidatePageJson(String pageUrl) {
