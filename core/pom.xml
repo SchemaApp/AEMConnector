@@ -18,12 +18,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.schemaApp</groupId>
-        <artifactId>schemaApp</artifactId>
+        <groupId>com.schemaapp</groupId>
+        <artifactId>schemaapp-aem</artifactId>
         <version>1.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>schemaApp.core</artifactId>
+    <artifactId>schemaapp.core</artifactId>
     <name>SchemaApp - Core</name>
     <description>Core bundle for SchemaApp</description>
     <build>
