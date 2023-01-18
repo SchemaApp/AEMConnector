@@ -10,7 +10,6 @@
     <url>https://www.schemaapp.com</url>
     <description>A connector to enable local caching of Schema Markup produced by Schema App.</description>
     <name>Schema App connector</name>  
-  	<url>http://www.schemaapp.com</url>  
     <licenses>
         <license>
             <name>MIT License</name>
