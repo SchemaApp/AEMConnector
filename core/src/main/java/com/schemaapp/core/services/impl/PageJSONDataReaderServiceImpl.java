@@ -42,7 +42,7 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 	/**
 	 * Get Page Data method used to get page specific JSON data String.
 	 * 
-	 * @param pageURL
+	 * @param pageUrl
 	 * @return
 	 */
 	@Override

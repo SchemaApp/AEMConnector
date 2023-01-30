@@ -27,7 +27,7 @@ public interface CDNHandlerService {
 	/**
 	 * Schema App Delete Entity Webhook. When markup for a page is deleted.
 	 * 
-	 * @param entiry
+	 * @param entity
 	 * @return
 	 * @throws LoginException
 	 * @throws PersistenceException
@@ -35,7 +35,6 @@ public interface CDNHandlerService {
 	public CDNEntityResult deleteEntity(CDNEntity entity) throws LoginException, PersistenceException;
 	
 	/**
-	 * @param entity
 	 * @param resolver
 	 * @param session
 	 * @param urlResource
