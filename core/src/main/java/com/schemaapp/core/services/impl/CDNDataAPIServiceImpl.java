@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
@@ -129,16 +128,22 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             URL url = getURL(endpoint, accountId, encodedURL);
             Map<String, Object> responseMap = httpGet(url);
             String response = responseMap.containsKey(BODY) 
-                    ? responseMap.get(BODY).toString() : "";
+                    ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
+            
+            if (StringUtils.isBlank(response)) {
+                webhookHandlerService.deleteEntity(child, resolver);
+                return;
+            }
+                
             String eTag = responseMap.containsKey(Constants.E_TAG) 
-                    ? responseMap.get(Constants.E_TAG).toString() : "";
+                    ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
             String eTagNodeValue = configDetailMap.containsKey(Constants.E_TAG)
                     ? (String) configDetailMap.get(Constants.E_TAG)
                     : StringUtils.EMPTY;
+            
             if (eTagNodeValue.equals(eTag)) {
                 return;
             }
-            configDetailMap.put(Constants.E_TAG, eTag);
 
             if (StringUtils.isNotBlank(response)) {
                 if (response.startsWith("[")) {
@@ -151,7 +156,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
-                    graphJsonData, child, response);
+                    graphJsonData, child, response, eTag);
 
         } catch (Exception e) {
             LOG.error("Error while reading and processing CDN URL", e);
@@ -160,7 +165,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
     private void processGraphJsonData(ResourceResolver resolver,
             ValueMap configDetailMap, String deploymentMethod,
-            Object graphJsonData, final Page child, String response)
+            Object graphJsonData, final Page child, String response, String eTag)
             throws JSONException, IOException, RepositoryException,
             ReplicationException {
         readJavaScriptCDNData(deploymentMethod, graphJsonData,
@@ -172,7 +177,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             Resource pageResource = child.adaptTo(Resource.class);
             webhookHandlerService.savenReplicate(graphJsonData, 
                     resolver,
-                    resolver.adaptTo(Session.class), 
+                    eTag, 
                     pageResource,
                     configDetailMap);
         }

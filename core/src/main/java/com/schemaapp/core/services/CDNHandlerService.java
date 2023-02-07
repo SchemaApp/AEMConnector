@@ -1,7 +1,6 @@
 package com.schemaapp.core.services;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -11,9 +10,8 @@ import org.apache.sling.api.resource.ValueMap;
 import org.json.JSONException;
 
 import com.day.cq.replication.ReplicationException;
+import com.day.cq.wcm.api.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.schemaapp.core.models.CDNEntity;
-import com.schemaapp.core.models.CDNEntityResult;
 
 /**
  * 
@@ -27,16 +25,16 @@ public interface CDNHandlerService {
 	/**
 	 * Schema App Delete Entity Webhook. When markup for a page is deleted.
 	 * 
-	 * @param entity
-	 * @return
+	 * @param page
+	 * @param resolver
 	 * @throws LoginException
 	 * @throws PersistenceException
 	 */
-	public CDNEntityResult deleteEntity(CDNEntity entity) throws LoginException, PersistenceException;
+    public void deleteEntity(Page page, ResourceResolver resolver) throws LoginException, PersistenceException;
 	
 	/**
 	 * @param resolver
-	 * @param session
+	 * @param eTag
 	 * @param urlResource
 	 * @throws RepositoryException
 	 * @throws JsonProcessingException
@@ -44,6 +42,6 @@ public interface CDNHandlerService {
 	 * @throws PersistenceException
 	 * @throws ReplicationException
 	 */
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Session session, Resource urlResource, ValueMap configDetailMap) throws RepositoryException, JsonProcessingException, JSONException, PersistenceException, ReplicationException;
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, String eTag, Resource urlResource, ValueMap configDetailMap) throws RepositoryException, JsonProcessingException, JSONException, PersistenceException, ReplicationException;
 	
 }
