@@ -153,9 +153,6 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 }
                 LOG.info(String.format("CDN data response:: crawler :: %s", 
                         response));
-                
-                LOG.info(String.format("CDN data response:: graphJsonData :: %s", 
-                        graphJsonData));
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
@@ -173,9 +170,6 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             ReplicationException {
         readJavaScriptCDNData(deploymentMethod, graphJsonData,
                 response);
-        
-        LOG.info(String.format("CDN data response:: graphJsonData 111:: %s", 
-                graphJsonData));
 
         if (graphJsonData != null) {
             mapperObject.readValue(graphJsonData.toString(),

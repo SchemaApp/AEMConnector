@@ -26,6 +26,8 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.api.Page;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -66,8 +68,8 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 */
 	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
 
+	    mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		String graphData = mapper.writeValueAsString(jsonGraphData);
-		LOG.info("jsonGraphData --"+graphData);
 		String wellFormedJson = null;
 		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
 			JSONArray obj = new JSONArray(graphData);
