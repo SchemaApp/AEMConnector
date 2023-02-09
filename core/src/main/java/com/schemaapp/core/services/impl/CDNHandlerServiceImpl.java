@@ -67,6 +67,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
 
 		String graphData = mapper.writeValueAsString(jsonGraphData);
+		LOG.info("jsonGraphData --"+graphData);
 		String wellFormedJson = null;
 		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
 			JSONArray obj = new JSONArray(graphData);
@@ -174,7 +175,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	            resolver.commit();
 	        }
 	    } catch (PersistenceException | RepositoryException e) {
-	        String errorMessage = "WebhookHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
+	        String errorMessage = "CDNHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 	        LOG.error(errorMessage, e);
 	    }
 	}

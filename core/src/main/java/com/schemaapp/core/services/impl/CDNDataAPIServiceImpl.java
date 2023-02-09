@@ -130,7 +130,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String response = responseMap.containsKey(BODY) 
                     ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
             
-            if (StringUtils.isBlank(response)) {
+            if (response == null || StringUtils.isBlank(response) ) {
                 webhookHandlerService.deleteEntity(child, resolver);
                 return;
             }
@@ -153,6 +153,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 }
                 LOG.info(String.format("CDN data response:: crawler :: %s", 
                         response));
+                
+                LOG.info(String.format("CDN data response:: graphJsonData :: %s", 
+                        graphJsonData));
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
@@ -170,6 +173,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             ReplicationException {
         readJavaScriptCDNData(deploymentMethod, graphJsonData,
                 response);
+        
+        LOG.info(String.format("CDN data response:: graphJsonData 111:: %s", 
+                graphJsonData));
 
         if (graphJsonData != null) {
             mapperObject.readValue(graphJsonData.toString(),
