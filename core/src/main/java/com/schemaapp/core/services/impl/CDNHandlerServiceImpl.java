@@ -26,8 +26,6 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.api.Page;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -66,10 +64,9 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @throws JSONException
 	 * @throws RepositoryException
 	 */
-	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JsonProcessingException, JSONException, RepositoryException {
+	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JSONException, RepositoryException {
 
-	    mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		String graphData = mapper.writeValueAsString(jsonGraphData);
+		String graphData = getGraphDataString(jsonGraphData);
 		String wellFormedJson = null;
 		if (!StringUtils.isBlank(graphData) && graphData.startsWith("[")) {
 			JSONArray obj = new JSONArray(graphData);
@@ -80,6 +77,22 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 		}	
 		pageNode.setProperty(Constants.ENTITY, wellFormedJson);
 	}
+	
+	/**
+	 * Get Graph data string.
+	 * 
+	 * @param jsonGraphData
+	 * @return graphData
+	 */
+	private String getGraphDataString(Object jsonGraphData) {
+        String graphData;
+        try {
+            graphData = mapper.writeValueAsString(jsonGraphData);
+        } catch (JsonProcessingException e) {
+            graphData = jsonGraphData.toString();
+        }
+        return graphData;
+    }
 
 	/**
 	 * This method used to create data node.

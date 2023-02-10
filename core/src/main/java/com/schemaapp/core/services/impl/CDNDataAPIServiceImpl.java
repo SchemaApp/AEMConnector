@@ -121,10 +121,10 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (encodedURL != null && encodedURL.contains("=")) {
                 encodedURL = encodedURL.replace("=", "");
             }
-            LOG.info(String.format("CDNDataAPIServiceImpl :: endpoint ::%s, "
-                    + "pagepath ::%s, encodedURL ::%s", 
+            LOG.debug("CDNDataAPIServiceImpl :: endpoint ::{}, "
+                    + "pagepath ::{}, encodedURL ::{}", 
                     endpoint,
-                    pagePath, encodedURL));
+                    pagePath, encodedURL);
             URL url = getURL(endpoint, accountId, encodedURL);
             Map<String, Object> responseMap = httpGet(url);
             String response = responseMap.containsKey(BODY) 
@@ -151,8 +151,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 } else {
                     graphJsonData = new JSONObject(response);
                 }
-                LOG.info(String.format("CDN data response:: crawler :: %s", 
-                        response));
+                LOG.debug("CDN data response:: crawler :: {}", 
+                        response);
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
