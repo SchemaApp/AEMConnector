@@ -88,8 +88,10 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
         String graphData;
         try {
             graphData = mapper.writeValueAsString(jsonGraphData);
+            LOG.info("graphData 1111 >> "+graphData);
         } catch (JsonProcessingException e) {
             graphData = jsonGraphData.toString();
+            LOG.info("graphData 2222 >> "+graphData);
         }
         return graphData;
     }
