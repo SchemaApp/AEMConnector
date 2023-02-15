@@ -65,19 +65,28 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
     private static ObjectMapper mapperObject = new ObjectMapper()
             .configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+    
 
     @Override
     public void readCDNData() {
 
+        ResourceResolver resolver = getResourceResolver();
         try {
-            ResourceResolver resolver = getResourceResolver();
-            List<Page> rootpages = getSiteRootPages(resolver);
-            for (Page page : rootpages) {
-                getSchemaAppCDNData(resolver, page);
+            if (resolver != null) {
+                List<Page> rootpages = getSiteRootPages(resolver);
+                for (Page page : rootpages) {
+                    updateSchemaAppCDNData(resolver, page);
+                }
+            } else {
+                LOG.debug("Error occurs while getting ResourceResolver");
             }
         } catch (Exception e) {
             LOG.error("Error occurs while read CDN data, Error :: {}"
                     , e.getMessage());
+        } finally {
+            if (resolver != null && resolver.isLive()) {
+                resolver.close();
+            }
         }
     }
 
@@ -85,20 +94,22 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
      * @param resolver
      * @param page
      */
-    private void getSchemaAppCDNData(ResourceResolver resolver, Page page) {
+    private void updateSchemaAppCDNData(ResourceResolver resolver, Page page) {
         try {
             ValueMap configDetailMap = getConfigNodeValueMap(resolver, page);
-            String accountId = getAccountId(configDetailMap);
-            String siteURL = configDetailMap != null ? 
-                    (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-            String deploymentMethod = configDetailMap != null 
-                    ? (String) configDetailMap.get("deploymentMethod")
-                    : StringUtils.EMPTY;
-            Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
-            String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
-                    Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
-            while (childPages.hasNext()) {
-                processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages, endpoint);
+            if (configDetailMap != null) {
+                String accountId = getAccountId(configDetailMap);
+                String siteURL = configDetailMap.get("siteURL") != null ? 
+                        (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
+                String deploymentMethod = configDetailMap.get("deploymentMethod") != null 
+                        ? (String) configDetailMap.get("deploymentMethod")
+                                : StringUtils.EMPTY;
+                Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
+                String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
+                        Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
+                while (childPages.hasNext()) {
+                    processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages, endpoint);
+                }
             }
         } catch (Exception e) {
             LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
@@ -151,8 +162,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 } else {
                     graphJsonData = new JSONObject(response);
                 }
-                LOG.debug("CDN data response:: crawler :: {}", 
-                        response);
+                LOG.debug("CDN data response:: {}", response);
             }
 
             processGraphJsonData(resolver, configDetailMap, deploymentMethod,
@@ -202,8 +212,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     if (graphJsonData != null)
                         graphJsonDataArray.put(graphJsonData);
                 }
-                LOG.info(String.format("CDN data response:: javascript :: %s", 
-                        response));
+                LOG.info("CDN data response:: javascript :: {}", 
+                        response);
                 return graphJsonDataArray;
             } else {
                 JSONArray graphJsonDataArray = new JSONArray();
@@ -219,7 +229,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     if (graphJsonData != null)
                         graphJsonDataArray.put(graphJsonData);
                 }
-                LOG.info(String.format("CDN data response:: javascript :: %s", response));
+                LOG.info("CDN data response:: javascript :: {}", response);
                 return graphJsonDataArray;
             }
         }
@@ -267,8 +277,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
     }
 
     private ValueMap getConfigNodeValueMap(ResourceResolver resolver, Page page) {
-        ValueMap valueMap = page.getProperties();
-        if (valueMap.containsKey(CQ_CLOUDSERVICECONFIGS)) {
+        ValueMap valueMap = page != null ? page.getProperties() : null;
+        if (valueMap != null && valueMap.containsKey(CQ_CLOUDSERVICECONFIGS)) {
             String[] cloudserviceconfigs = (String[]) valueMap.get(CQ_CLOUDSERVICECONFIGS);
             for (String cloudserviceconfig : cloudserviceconfigs) {
                 if (cloudserviceconfig.startsWith("/etc/cloudservices/schemaapp/")) {
@@ -328,12 +338,16 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
      * This method Get Resource Resolver instance
      * 
      * @return
-     * @throws LoginException
      */
-    public ResourceResolver getResourceResolver() throws LoginException {
+    public ResourceResolver getResourceResolver() {
         Map<String, Object> param = new HashMap<>();
         param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
-        return resolverFactory.getServiceResourceResolver(param);
+        try {
+            return resolverFactory.getServiceResourceResolver(param);
+        } catch (LoginException e) {
+            LOG.error("getResourceResolver :: {}", e.getMessage());
+        }
+        return null;
     }
 
     @Override

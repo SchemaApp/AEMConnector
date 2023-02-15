@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.jcr.Node;
+import javax.jcr.Session;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -45,6 +46,9 @@ class CDNHandlerServiceTest {
 	@Mock
 	private Replicator replicator;
 	
+	@Mock
+    private Session session;
+	
 	@InjectMocks
 	private final CDNHandlerServiceImpl webhookHandlerService = new CDNHandlerServiceImpl();
 
@@ -54,10 +58,11 @@ class CDNHandlerServiceTest {
 	    when(page.adaptTo(Node.class)).thenReturn(node);
 	    when(node.hasNode(Constants.DATA)).thenReturn(true);
 	    when(node.getNode(Constants.DATA)).thenReturn(node);
+	    when(resolver.adaptTo(Session.class)).thenReturn(session);
 
 		webhookHandlerService.deleteEntity(page, resolver);
 		verify(node, times(1)).remove();
-		verify(resolver, times(1)).commit();
+		verify(session, times(1)).save();
 	}
 
 }

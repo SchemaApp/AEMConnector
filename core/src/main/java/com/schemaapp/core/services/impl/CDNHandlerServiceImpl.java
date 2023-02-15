@@ -1,9 +1,8 @@
 package com.schemaapp.core.services.impl;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -27,7 +26,6 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.api.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.services.CDNHandlerService;
 import com.schemaapp.core.services.FlushService;
 import com.schemaapp.core.util.Constants;
@@ -37,8 +35,6 @@ import com.schemaapp.core.util.JsonSanitizer;
 public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
-
-	private static ObjectMapper mapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private static final Logger LOG = LoggerFactory.getLogger(CDNHandlerServiceImpl.class);
 
@@ -75,6 +71,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			JSONObject graphJsonObject = new JSONObject(graphData);
 			wellFormedJson = JsonSanitizer.sanitize(graphJsonObject.toString());
 		}	
+		
 		pageNode.setProperty(Constants.ENTITY, wellFormedJson);
 	}
 	
@@ -85,15 +82,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @return graphData
 	 */
 	private String getGraphDataString(Object jsonGraphData) {
-        String graphData;
-        try {
-            graphData = mapper.writeValueAsString(jsonGraphData);
-            LOG.info("graphData 1111 >> "+graphData);
-        } catch (JsonProcessingException e) {
-            graphData = jsonGraphData.toString();
-            LOG.info("graphData 2222 >> "+graphData);
-        }
-        return graphData;
+	    return jsonGraphData.toString();
     }
 
 	/**
@@ -125,11 +114,13 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
 		Node pageNode = urlResource.adaptTo(Node.class);
+		Session session = resolver.adaptTo(Session.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
 			addConfigDetails(configDetailMap, dataNode, urlResource, eTag);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
+			if (session != null) session.save();
 			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
 		}
 	}
@@ -185,13 +176,14 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	public void deleteEntity(Page page, ResourceResolver resolver) throws LoginException, PersistenceException {
 
 	    Node pageNode = page.adaptTo(Node.class);
+	    Session session = resolver.adaptTo(Session.class);
 	    try {
 	        if (pageNode != null && pageNode.hasNode(Constants.DATA)) {
 	            Node dataNode = getDataNode(pageNode);
 	            if (dataNode != null) dataNode.remove();
-	            resolver.commit();
+	            if (session != null) session.save();
 	        }
-	    } catch (PersistenceException | RepositoryException e) {
+	    } catch (RepositoryException e) {
 	        String errorMessage = "CDNHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
 	        LOG.error(errorMessage, e);
 	    }
