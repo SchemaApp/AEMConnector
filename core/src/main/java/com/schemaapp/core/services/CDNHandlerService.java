@@ -30,7 +30,8 @@ public interface CDNHandlerService {
 	 * @throws LoginException
 	 * @throws PersistenceException
 	 */
-    public void deleteEntity(Page page, ResourceResolver resolver) throws LoginException, PersistenceException;
+    public void deleteEntity(Page page, ResourceResolver resolver) 
+            throws LoginException, PersistenceException;
 	
 	/**
 	 * @param resolver
@@ -42,6 +43,13 @@ public interface CDNHandlerService {
 	 * @throws PersistenceException
 	 * @throws ReplicationException
 	 */
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, String eTag, Resource urlResource, ValueMap configDetailMap) throws RepositoryException, JsonProcessingException, JSONException, PersistenceException, ReplicationException;
+	public void savenReplicate(Object jsonGraphData, 
+	        ResourceResolver resolver, 
+	        String eTag, 
+	        Resource urlResource, 
+	        ValueMap configDetailMap) throws RepositoryException, 
+	                JsonProcessingException, 
+	                JSONException, PersistenceException, 
+	                ReplicationException;
 	
 }
