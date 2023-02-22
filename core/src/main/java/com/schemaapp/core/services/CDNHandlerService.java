@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public interface CDNHandlerService {
 	
 	/**
-	 * Schema App Delete Entity Webhook. When markup for a page is deleted.
+	 *     Schema App Delete Entity Webhook. When markup for a page is deleted.
 	 * 
 	 * @param page
 	 * @param resolver

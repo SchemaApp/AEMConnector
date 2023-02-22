@@ -148,12 +148,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
             String eTagNodeValue = StringUtils.EMPTY;
             
-            if (schemaAppRes != null) {
-                ValueMap vMap = schemaAppRes.getValueMap();
-                eTagNodeValue = vMap.get(Constants.E_TAG) != null
-                        ? (String) vMap.get(Constants.E_TAG)
-                                : StringUtils.EMPTY;
-            }
+            eTagNodeValue = getETagNodeValue(schemaAppRes, eTagNodeValue);
             LOG.debug("CDN API page path :: {}, eTag request header:: {}, page node eTag :: {}", pagePath, eTag, eTagNodeValue);
             if (eTagNodeValue.equals(eTag) && !deploymentMethod.equals(JAVA_SCRIPT)) {
                 return;
@@ -162,14 +157,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             etagMap = new HashMap<>();
             etagMap.put(Constants.E_TAG, eTag);
             
-            if (StringUtils.isNotBlank(response)) {
-                if (response.startsWith("[")) {
-                    graphJsonData = new JSONArray(response);
-                } else {
-                    graphJsonData = new JSONObject(response);
-                }
-                LOG.debug("CDN API page path :: {}, response data:: {}", pagePath, response);
-            }
+            graphJsonData = convertStringtoJson(graphJsonData, pagePath,
+                    response);
 
             if (StringUtils.isNotBlank(deploymentMethod) 
                     && deploymentMethod.equals(JAVA_SCRIPT)) {
@@ -182,12 +171,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                         ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
                 String eTagNodeValueJavascript = StringUtils.EMPTY;
                 
-                if (schemaAppRes != null) {
-                    ValueMap vMap = schemaAppRes.getValueMap();
-                    eTagNodeValueJavascript =  vMap.get(Constants.E_TAG_JAVASCRIPT) != null
-                            ? (String) vMap.get(Constants.E_TAG_JAVASCRIPT)
-                                    : StringUtils.EMPTY;
-                }
+                eTagNodeValueJavascript = getETagNodeValueJavascript(
+                        schemaAppRes, eTagNodeValueJavascript);
                 if (eTagNodeValue.equals(eTag) && eTagNodeValueJavascript.equals(eTagJavascript) ) {
                     return;
                 }
@@ -207,6 +192,41 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         } catch (Exception e) {
             LOG.error("Error while reading and processing CDN URL", e);
         }
+    }
+
+    private String getETagNodeValue(Resource schemaAppRes,
+            String eTagNodeValue) {
+        if (schemaAppRes != null) {
+            ValueMap vMap = schemaAppRes.getValueMap();
+            eTagNodeValue = vMap.get(Constants.E_TAG) != null
+                    ? (String) vMap.get(Constants.E_TAG)
+                            : StringUtils.EMPTY;
+        }
+        return eTagNodeValue;
+    }
+
+    private String getETagNodeValueJavascript(Resource schemaAppRes,
+            String eTagNodeValueJavascript) {
+        if (schemaAppRes != null) {
+            ValueMap vMap = schemaAppRes.getValueMap();
+            eTagNodeValueJavascript =  vMap.get(Constants.E_TAG_JAVASCRIPT) != null
+                    ? (String) vMap.get(Constants.E_TAG_JAVASCRIPT)
+                            : StringUtils.EMPTY;
+        }
+        return eTagNodeValueJavascript;
+    }
+
+    private Object convertStringtoJson(Object graphJsonData, String pagePath,
+            String response) throws JSONException {
+        if (StringUtils.isNotBlank(response)) {
+            if (response.startsWith("[")) {
+                graphJsonData = new JSONArray(response);
+            } else {
+                graphJsonData = new JSONObject(response);
+            }
+            LOG.debug("CDN API page path :: {}, response data:: {}", pagePath, response);
+        }
+        return graphJsonData;
     }
 
     private void save(ResourceResolver resolver,
