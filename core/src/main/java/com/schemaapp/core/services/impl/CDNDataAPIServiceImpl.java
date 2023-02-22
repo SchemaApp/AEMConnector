@@ -157,7 +157,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             etagMap = new HashMap<>();
             etagMap.put(Constants.E_TAG, eTag);
             
-            graphJsonData = convertStringtoJson(graphJsonData, pagePath,
+            graphJsonData = convertStringtoJson(pagePath,
                     response);
 
             if (StringUtils.isNotBlank(deploymentMethod) 
@@ -198,7 +198,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String eTagNodeValue) {
         if (schemaAppRes != null) {
             ValueMap vMap = schemaAppRes.getValueMap();
-            eTagNodeValue = vMap.get(Constants.E_TAG) != null
+            return vMap.get(Constants.E_TAG) != null
                     ? (String) vMap.get(Constants.E_TAG)
                             : StringUtils.EMPTY;
         }
@@ -209,15 +209,17 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String eTagNodeValueJavascript) {
         if (schemaAppRes != null) {
             ValueMap vMap = schemaAppRes.getValueMap();
-            eTagNodeValueJavascript =  vMap.get(Constants.E_TAG_JAVASCRIPT) != null
+            return vMap.get(Constants.E_TAG_JAVASCRIPT) != null
                     ? (String) vMap.get(Constants.E_TAG_JAVASCRIPT)
                             : StringUtils.EMPTY;
         }
         return eTagNodeValueJavascript;
     }
 
-    private Object convertStringtoJson(Object graphJsonData, String pagePath,
+    private Object convertStringtoJson(String pagePath,
             String response) throws JSONException {
+        
+        Object graphJsonData = null;
         if (StringUtils.isNotBlank(response)) {
             if (response.startsWith("[")) {
                 graphJsonData = new JSONArray(response);
