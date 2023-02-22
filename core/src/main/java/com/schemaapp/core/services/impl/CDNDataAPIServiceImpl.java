@@ -125,8 +125,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String endpoint) {
 
         Object graphJsonData = null;
+        Map<String, String> etagMap = null;
         try {
             final Page child = childPages.next();
+            Resource pageResource = child.adaptTo(Resource.class);
+            Resource schemaAppRes = resolver.getResource(Constants.DATA);
             String pagePath = siteURL + child.getPath();
             String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
             if (encodedURL != null && encodedURL.contains("=")) {
@@ -141,99 +144,138 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String response = responseMap.containsKey(BODY) 
                     ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
             
-            if (response == null || StringUtils.isBlank(response) ) {
-                webhookHandlerService.deleteEntity(child, resolver);
-                return;
-            }
-                
             String eTag = responseMap.containsKey(Constants.E_TAG) 
                     ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
-            String eTagNodeValue = configDetailMap.containsKey(Constants.E_TAG)
-                    ? (String) configDetailMap.get(Constants.E_TAG)
-                    : StringUtils.EMPTY;
+            String eTagNodeValue = StringUtils.EMPTY;
             
-            if (eTagNodeValue.equals(eTag)) {
+            if (schemaAppRes != null) {
+                ValueMap vMap = schemaAppRes.getValueMap();
+                eTagNodeValue = vMap.get(Constants.E_TAG) != null
+                        ? (String) vMap.get(Constants.E_TAG)
+                                : StringUtils.EMPTY;
+            }
+            LOG.debug("CDN API page path :: {}, eTag request header:: {}, page node eTag :: {}", pagePath, eTag, eTagNodeValue);
+            if (eTagNodeValue.equals(eTag) && !deploymentMethod.equals(JAVA_SCRIPT)) {
                 return;
             }
-
+            
+            etagMap = new HashMap<>();
+            etagMap.put(Constants.E_TAG, eTag);
+            
             if (StringUtils.isNotBlank(response)) {
                 if (response.startsWith("[")) {
                     graphJsonData = new JSONArray(response);
                 } else {
                     graphJsonData = new JSONObject(response);
                 }
-                LOG.debug("CDN data response:: {}", response);
+                LOG.debug("CDN API page path :: {}, response data:: {}", pagePath, response);
             }
 
-            processGraphJsonData(resolver, configDetailMap, deploymentMethod,
-                    graphJsonData, child, response, eTag);
+            if (StringUtils.isNotBlank(deploymentMethod) 
+                    && deploymentMethod.equals(JAVA_SCRIPT)) {
+
+                url = getHighlighterURL(endpoint, accountId, encodedURL);
+                responseMap = httpGet(url);
+                response = responseMap.containsKey(BODY) 
+                        ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
+                String eTagJavascript = responseMap.containsKey(Constants.E_TAG) 
+                        ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
+                String eTagNodeValueJavascript = StringUtils.EMPTY;
+                
+                if (schemaAppRes != null) {
+                    ValueMap vMap = schemaAppRes.getValueMap();
+                    eTagNodeValueJavascript =  vMap.get(Constants.E_TAG_JAVASCRIPT) != null
+                            ? (String) vMap.get(Constants.E_TAG_JAVASCRIPT)
+                                    : StringUtils.EMPTY;
+                }
+                if (eTagNodeValue.equals(eTag) && eTagNodeValueJavascript.equals(eTagJavascript) ) {
+                    return;
+                }
+                
+                if (!eTagNodeValueJavascript.equals(eTagJavascript)) {
+                    graphJsonData = processJavaScriptCDNData(response, graphJsonData);
+                    etagMap.put(Constants.E_TAG_JAVASCRIPT, eTagJavascript);
+                }
+            }
+            if (graphJsonData == null) {
+                webhookHandlerService.deleteEntity(child, resolver);
+                return;
+            }
+            save(resolver, configDetailMap,
+                    graphJsonData, pageResource, etagMap);
 
         } catch (Exception e) {
             LOG.error("Error while reading and processing CDN URL", e);
         }
     }
 
-    private void processGraphJsonData(ResourceResolver resolver,
-            ValueMap configDetailMap, String deploymentMethod,
-            Object graphJsonData, final Page child, String response, String eTag)
+    private void save(ResourceResolver resolver,
+            ValueMap configDetailMap, 
+            Object graphJsonData, final Resource pageResource, Map<String, String> etagMap)
             throws JSONException, IOException, RepositoryException,
             ReplicationException {
-        readJavaScriptCDNData(deploymentMethod, graphJsonData,
-                response);
 
         if (graphJsonData != null) {
             mapperObject.readValue(graphJsonData.toString(),
                     Object.class);
-            Resource pageResource = child.adaptTo(Resource.class);
             webhookHandlerService.savenReplicate(graphJsonData, 
                     resolver,
-                    eTag, 
+                    etagMap, 
                     pageResource,
                     configDetailMap);
         }
     }
 
-    private Object readJavaScriptCDNData(
-            String deploymentMethod, 
-            Object graphJsonData, 
-            String response)
-            throws JSONException {
-        if (StringUtils.isNotBlank(deploymentMethod) 
-                && deploymentMethod.equals(JAVA_SCRIPT)
-                && StringUtils.isNotBlank(response)) {
-            if (response.startsWith("[")) {
-                JSONArray graphJsonDataArray = new JSONArray(response);
-                if (graphJsonData instanceof JSONArray) {
-                    JSONArray array = (JSONArray) graphJsonData;
-                    for (int i = 0; i < array.length(); i++) {
-                        graphJsonDataArray.put(array.getJSONObject(i));
-                    }
-                } else {
-                    if (graphJsonData != null)
-                        graphJsonDataArray.put(graphJsonData);
-                }
-                LOG.info("CDN data response:: javascript :: {}", 
+    private Object processJavaScriptCDNData(
+            String response, 
+            Object graphJsonData) {
+        try {
+            if (StringUtils.isNotBlank(response) && response.startsWith("[")) {
+                return processJavascriptArrayData(graphJsonData, response);
+            } else if (StringUtils.isNotBlank(response)) {
+                return processJavascriptSingleJsonObjectData(graphJsonData,
                         response);
-                return graphJsonDataArray;
-            } else {
-                JSONArray graphJsonDataArray = new JSONArray();
-                JSONObject graphJsonDataObject = new JSONObject(response);
-                if (graphJsonData instanceof JSONArray) {
-                    JSONArray array = (JSONArray) graphJsonData;
-                    for (int i = 0; i < array.length(); i++) {
-                        graphJsonDataArray.put(array.getJSONObject(i));
-                    }
-                    graphJsonDataArray.put(graphJsonDataObject);
-                } else {
-                    graphJsonDataArray.put(graphJsonDataObject);
-                    if (graphJsonData != null)
-                        graphJsonDataArray.put(graphJsonData);
-                }
-                LOG.info("CDN data response:: javascript :: {}", response);
-                return graphJsonDataArray;
             }
+        } catch (Exception e) {
+            LOG.error("Error while processing Javascript CDN data", e);
         }
         return graphJsonData;
+    }
+
+    private Object processJavascriptSingleJsonObjectData(Object graphJsonData,
+            String response) throws JSONException {
+        JSONArray graphJsonDataArray = new JSONArray();
+        JSONObject graphJsonDataObject = new JSONObject(response);
+        if (graphJsonData instanceof JSONArray) {
+            JSONArray array = (JSONArray) graphJsonData;
+            for (int i = 0; i < array.length(); i++) {
+                graphJsonDataArray.put(array.getJSONObject(i));
+            }
+            graphJsonDataArray.put(graphJsonDataObject);
+        } else {
+            graphJsonDataArray.put(graphJsonDataObject);
+            if (graphJsonData != null)
+                graphJsonDataArray.put(graphJsonData);
+        }
+        LOG.info("CDN data response:: javascript :: {}", response);
+        return graphJsonDataArray;
+    }
+
+    private Object processJavascriptArrayData(Object graphJsonData,
+            String response) throws JSONException {
+        JSONArray graphJsonDataArray = new JSONArray(response);
+        if (graphJsonData instanceof JSONArray) {
+            JSONArray array = (JSONArray) graphJsonData;
+            for (int i = 0; i < array.length(); i++) {
+                graphJsonDataArray.put(array.getJSONObject(i));
+            }
+        } else {
+            if (graphJsonData != null)
+                graphJsonDataArray.put(graphJsonData);
+        }
+        LOG.info("CDN data response:: javascript array :: {}", 
+                response);
+        return graphJsonDataArray;
     }
 
     private Map<String, Object> httpGet(URL url) throws IOException {

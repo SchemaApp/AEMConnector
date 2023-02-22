@@ -1,5 +1,7 @@
 package com.schemaapp.core.services;
 
+import java.util.Map;
+
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.LoginException;
@@ -35,7 +37,7 @@ public interface CDNHandlerService {
 	
 	/**
 	 * @param resolver
-	 * @param eTag
+	 * @param etagMap
 	 * @param urlResource
 	 * @throws RepositoryException
 	 * @throws JsonProcessingException
@@ -45,7 +47,7 @@ public interface CDNHandlerService {
 	 */
 	public void savenReplicate(Object jsonGraphData, 
 	        ResourceResolver resolver, 
-	        String eTag, 
+	        Map<String, String> etagMap, 
 	        Resource urlResource, 
 	        ValueMap configDetailMap) throws RepositoryException, 
 	                JsonProcessingException, 

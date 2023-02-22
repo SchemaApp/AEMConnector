@@ -1,5 +1,7 @@
 package com.schemaapp.core.services.impl;
 
+import java.util.Map;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -110,14 +112,14 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
 	@Override
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, String eTag, Resource urlResource, ValueMap configDetailMap)
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> etagMap, Resource urlResource, ValueMap configDetailMap)
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		Session session = resolver.adaptTo(Session.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, dataNode, urlResource, eTag);
+			addConfigDetails(configDetailMap, dataNode, urlResource, etagMap);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			if (session != null) session.save();
@@ -127,7 +129,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
     private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
-            Resource urlResource, String eTag) throws RepositoryException {
+            Resource urlResource, Map<String, String> etagMap) throws RepositoryException {
         if (configDetailMap != null) {
 
             setAccountIdProperty(configDetailMap, pageNode);
@@ -136,14 +138,17 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
             setDeploymentMethodProperty(configDetailMap, pageNode);
 
-            setEtagProperty(eTag, pageNode);
+            setEtagProperty(etagMap, pageNode);
         }
     }
 
 
-    private void setEtagProperty(String eTag, Node pageNode)
+    private void setEtagProperty(Map<String, String> etagMap, Node pageNode)
             throws RepositoryException {
+        String eTag = etagMap.containsKey(Constants.E_TAG) ? etagMap.get(Constants.E_TAG) : "";
         if (StringUtils.isNotEmpty(eTag)) pageNode.setProperty(Constants.E_TAG, eTag);
+        String eTagJavascript = etagMap.containsKey(Constants.E_TAG_JAVASCRIPT) ? etagMap.get(Constants.E_TAG_JAVASCRIPT) : "";
+        if (StringUtils.isNotEmpty(eTagJavascript)) pageNode.setProperty(Constants.E_TAG_JAVASCRIPT, eTagJavascript);
     }
 
 

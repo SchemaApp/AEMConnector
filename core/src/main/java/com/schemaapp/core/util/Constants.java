@@ -22,6 +22,7 @@ public final class Constants {
 	public static final String DEPLOYMENTMETHOD = "deploymentMethod";
 	
 	public static final String E_TAG = "eTag";
+	public static final String E_TAG_JAVASCRIPT = "eTagJavascript";
 
 	public static final String API_ENDPOINT_CONFIG_PID = "com.schemaapp.core.APIEndpointConfig";
 	public static final String SCHEMAAPP_DATA_API_ENDPOINT_KEY = "SchemaAppCDNDataAPIEndpoint";
