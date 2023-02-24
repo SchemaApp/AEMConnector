@@ -248,6 +248,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         }
     }
 
+    /**
+     * Process the JavaScript CDN Data.
+     * 
+     * @param response
+     * @param graphJsonData
+     * @return
+     */
     private Object processJavaScriptCDNData(
             String response, 
             Object graphJsonData) {
@@ -264,6 +271,14 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         return graphJsonData;
     }
 
+    /**
+     * Process the Javascript Single data JsonObject.
+     * 
+     * @param graphJsonData
+     * @param response
+     * @return
+     * @throws JSONException
+     */
     private Object processJavascriptSingleJsonObjectData(Object graphJsonData,
             String response) throws JSONException {
         JSONArray graphJsonDataArray = new JSONArray();
