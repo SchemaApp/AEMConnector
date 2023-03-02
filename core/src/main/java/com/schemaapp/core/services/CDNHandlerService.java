@@ -37,7 +37,7 @@ public interface CDNHandlerService {
 	
 	/**
 	 * @param resolver
-	 * @param etagMap
+	 * @param additionalConfigMap
 	 * @param urlResource
 	 * @throws RepositoryException
 	 * @throws JsonProcessingException
@@ -47,7 +47,7 @@ public interface CDNHandlerService {
 	 */
 	public void savenReplicate(Object jsonGraphData, 
 	        ResourceResolver resolver, 
-	        Map<String, String> etagMap, 
+	        Map<String, String> additionalConfigMap, 
 	        Resource urlResource, 
 	        ValueMap configDetailMap) throws RepositoryException, 
 	                JsonProcessingException, 

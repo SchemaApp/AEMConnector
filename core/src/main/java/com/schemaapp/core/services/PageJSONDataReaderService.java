@@ -11,15 +11,28 @@ import org.apache.sling.api.resource.ResourceResolver;
 public interface PageJSONDataReaderService {
 
 	/**
-	 * Get Page Data method used to get page specific JSON data String.
+	 * Init method used to get page specific JSON data String and Source.
 	 * 
-	 * @param pageURL
-	 * @return
+	 * @param pageUrl
 	 */
-	public String getPageData(String pageURL);
+    public void init(String pageUrl);
 	
 	/**
 	 * @return
 	 */
 	public ResourceResolver getResourceResolver() throws LoginException;
+	
+	/**
+	 * Graph Data.
+	 * 
+	 * @return
+	 */
+	public String getGraphData();
+	
+	/**
+	 * Source Header.
+	 * 
+	 * @return
+	 */
+	public String getSource();
 }

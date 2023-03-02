@@ -62,7 +62,7 @@ class PageJSONDataReaderServiceTest {
 	private Node node;
 
 	@Mock
-	private Property entityProperty;
+	private Property entityProperty,sourceProperty;
 
 	@InjectMocks
 	private final PageJSONDataReaderServiceImpl pageJSONDataReaderService = new PageJSONDataReaderServiceImpl();
@@ -76,9 +76,13 @@ class PageJSONDataReaderServiceTest {
 		when(resource.adaptTo(Node.class)).thenReturn(node);
 		when(node.hasProperty("entity")).thenReturn(true);
 		when(node.getProperty("entity")).thenReturn(entityProperty);
+		when(node.hasProperty(Constants.SOURCE_HEADER)).thenReturn(true);
+        when(node.getProperty(Constants.SOURCE_HEADER)).thenReturn(sourceProperty);
 		when(entityProperty.getString()).thenReturn(GRAPH_DATA);
-
-		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getPageData("https://www.demosite.com/test.html"));
+		when(sourceProperty.getString()).thenReturn("Editor");
+		pageJSONDataReaderService.init("https://www.demosite.com/test.html");
+		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getGraphData());
+		assertEquals("Editor", pageJSONDataReaderService.getSource());
 	}
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {

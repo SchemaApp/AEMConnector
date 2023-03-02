@@ -125,7 +125,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             String endpoint) {
 
         Object graphJsonData = null;
-        Map<String, String> etagMap = null;
+        Map<String, String> additionalConfigMap = null;
         try {
             final Page child = childPages.next();
             Resource pageResource = child.adaptTo(Resource.class);
@@ -145,7 +145,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
             
             String eTag = responseMap.containsKey(Constants.E_TAG) 
-                    ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
+                    ? (String) responseMap.get(Constants.E_TAG) : StringUtils.EMPTY;
+            
+            String sourceHeader = responseMap.containsKey(Constants.SOURCE_HEADER) 
+                    ? (String) responseMap.get(Constants.SOURCE_HEADER) : StringUtils.EMPTY;
+            
             String eTagNodeValue = StringUtils.EMPTY;
             
             eTagNodeValue = getETagNodeValue(schemaAppRes, eTagNodeValue);
@@ -154,8 +158,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 return;
             }
             
-            etagMap = new HashMap<>();
-            etagMap.put(Constants.E_TAG, eTag);
+            additionalConfigMap = new HashMap<>();
+            additionalConfigMap.put(Constants.E_TAG, eTag);
+            additionalConfigMap.put(Constants.SOURCE_HEADER, sourceHeader);
             
             graphJsonData = convertStringtoJson(pagePath,
                     response);
@@ -179,7 +184,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 
                 if (!eTagNodeValueJavascript.equals(eTagJavascript)) {
                     graphJsonData = processJavaScriptCDNData(response, graphJsonData);
-                    etagMap.put(Constants.E_TAG_JAVASCRIPT, eTagJavascript);
+                    additionalConfigMap.put(Constants.E_TAG_JAVASCRIPT, eTagJavascript);
                 }
             }
             if (graphJsonData == null) {
@@ -187,7 +192,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 return;
             }
             save(resolver, configDetailMap,
-                    graphJsonData, pageResource, etagMap);
+                    graphJsonData, pageResource, additionalConfigMap);
 
         } catch (Exception e) {
             LOG.error("Error while reading and processing CDN URL", e);
@@ -233,7 +238,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
     private void save(ResourceResolver resolver,
             ValueMap configDetailMap, 
-            Object graphJsonData, final Resource pageResource, Map<String, String> etagMap)
+            Object graphJsonData, final Resource pageResource, Map<String, String> additionalConfigMap)
             throws JSONException, IOException, RepositoryException,
             ReplicationException {
 
@@ -242,7 +247,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     Object.class);
             webhookHandlerService.savenReplicate(graphJsonData, 
                     resolver,
-                    etagMap, 
+                    additionalConfigMap, 
                     pageResource,
                     configDetailMap);
         }
@@ -327,8 +332,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
             if (status == HttpURLConnection.HTTP_OK) {
                 String eTag = connection.getHeaderField("ETag");
-
                 responseMap.put(Constants.E_TAG, eTag);
+                
+                String sourceHeader = connection.getHeaderField("x-amz-meta-source");
+                responseMap.put(Constants.SOURCE_HEADER, sourceHeader);
+                
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
                 StringBuilder content = new StringBuilder();

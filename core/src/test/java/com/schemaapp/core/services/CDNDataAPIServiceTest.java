@@ -45,6 +45,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
 import com.schemaapp.core.services.impl.CDNDataAPIServiceImpl;
+import com.schemaapp.core.util.Constants;
 
 import junitx.util.PrivateAccessor;
 
@@ -170,6 +171,7 @@ class CDNDataAPIServiceTest {
                 .thenReturn(HttpURLConnection.HTTP_OK);
         when(connection.getInputStream()).thenReturn(inputStream);
         when(connection.getHeaderField("ETag")).thenReturn("testEtag");
+        when(connection.getHeaderField(Constants.SOURCE_HEADER)).thenReturn("Editor");
     }
 
 	private void mockResolver() throws NoSuchFieldException, LoginException {
