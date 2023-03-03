@@ -62,7 +62,10 @@ class PageJSONDataReaderServiceTest {
 	private Node node;
 
 	@Mock
-	private Property entityProperty,sourceProperty;
+	private Property entityProperty;
+	
+	@Mock
+    private Property sourceProperty;
 
 	@InjectMocks
 	private final PageJSONDataReaderServiceImpl pageJSONDataReaderService = new PageJSONDataReaderServiceImpl();
