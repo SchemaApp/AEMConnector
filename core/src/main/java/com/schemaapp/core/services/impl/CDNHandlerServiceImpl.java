@@ -112,14 +112,14 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
 	@Override
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> etagMap, Resource urlResource, ValueMap configDetailMap)
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> additionalConfigMap, Resource urlResource, ValueMap configDetailMap)
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
 		Node pageNode = urlResource.adaptTo(Node.class);
 		Session session = resolver.adaptTo(Session.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, dataNode, urlResource, etagMap);
+			addConfigDetails(configDetailMap, dataNode, urlResource, additionalConfigMap);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			if (session != null) session.save();
@@ -129,7 +129,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
     private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
-            Resource urlResource, Map<String, String> etagMap) throws RepositoryException {
+            Resource urlResource, Map<String, String> additionalConfigMap) throws RepositoryException {
         if (configDetailMap != null) {
 
             setAccountIdProperty(configDetailMap, pageNode);
@@ -138,10 +138,19 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
             setDeploymentMethodProperty(configDetailMap, pageNode);
 
-            setEtagProperty(etagMap, pageNode);
+            setEtagProperty(additionalConfigMap, pageNode);
+            
+            setSourceHeaderProperty(additionalConfigMap, pageNode);
         }
     }
 
+
+    private void setSourceHeaderProperty(
+            Map<String, String> additionalConfigMap, Node pageNode)
+                    throws RepositoryException {
+        String sourceHeadear = additionalConfigMap.containsKey(Constants.SOURCE_HEADER) ? additionalConfigMap.get(Constants.SOURCE_HEADER) : "";
+        if (StringUtils.isNotEmpty(sourceHeadear)) pageNode.setProperty(Constants.SOURCE_HEADER, sourceHeadear);
+    }
 
     private void setEtagProperty(Map<String, String> etagMap, Node pageNode)
             throws RepositoryException {

@@ -38,9 +38,10 @@ if(cfgMgr != null) {
 
 String pageURL = request.getRequestURL().toString();
 
-String graphData = schemaAppJSONReader.getPageData(pageURL);
+schemaAppJSONReader.init(pageURL);
+String source = schemaAppJSONReader.getSource();
+String graphData = schemaAppJSONReader.getGraphData();
 if (graphData != null) {
 %>
-<script type="application/ld+json"><%=graphData%></script>
-
+<script type="application/ld+json" data-source="<%=source%>" ><%=graphData%></script>
 <%}%>

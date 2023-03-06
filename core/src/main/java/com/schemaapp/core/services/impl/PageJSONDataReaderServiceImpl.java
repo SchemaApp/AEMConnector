@@ -38,35 +38,44 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 
 	@Reference
 	private QueryBuilder builder;
+	
+	private String graphData;
+	
+	private String source;
 
+    
 	/**
-	 * Get Page Data method used to get page specific JSON data String.
+	 * Initialize and read page data.
 	 * 
 	 * @param pageUrl
-	 * @return
 	 */
 	@Override
-	public String getPageData(String pageUrl) {
+	public void init(String pageUrl) {
 
-		try {
-			ResourceResolver resolver = getResourceResolver();
-			String id = getPath(pageUrl);
-			Resource urlResource = resolver.resolve(id);
-			Resource schemaAppData = urlResource.getChild(Constants.DATA);
-			if (schemaAppData != null) {
-				Node node = schemaAppData.adaptTo(Node.class);
-				if (node != null && node.hasProperty("entity")) {
-					Property entityProperty = node.getProperty("entity");
-					if(entityProperty != null) {
-						return entityProperty.getString();
-					}
-				} 
-			}
-		} catch (RepositoryException | LoginException e) {
+	    try {
+	        ResourceResolver resolver = getResourceResolver();
+	        String id = getPath(pageUrl);
+	        Resource urlResource = resolver.resolve(id);
+	        Resource schemaAppData = urlResource.getChild(Constants.DATA);
+	        if (schemaAppData != null) {
+	            Node node = schemaAppData.adaptTo(Node.class);
+	            if (node != null && node.hasProperty("entity")) {
+	                Property entityProperty = node.getProperty("entity");
+	                if(entityProperty != null) {
+	                    setGraphData(entityProperty.getString());
+	                }
+	            } 
+	            if (node != null && node.hasProperty(Constants.SOURCE_HEADER)) {
+	                Property sourceProperty = node.getProperty(Constants.SOURCE_HEADER);
+	                if(sourceProperty != null) {
+	                    setSource(sourceProperty.getString());
+	                }
+	            }
+	        }
+	    } catch (RepositoryException | LoginException e) {
 			String errorMessage = "PageJSONDataReaderServiceImpl :: Occured error during reading Schema App Entity Node into the AEM Instance ";
 			LOG.error(errorMessage, e);
 		}
-		return null;
 	}
 	
 	/**
@@ -101,4 +110,21 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 		}
 		return pageUrl;
 	}
+	
+
+    public String getGraphData() {
+        return graphData;
+    }
+
+    public void setGraphData(String graphData) {
+        this.graphData = graphData;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
 }
