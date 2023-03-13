@@ -32,7 +32,7 @@
         <sling.password>admin</sling.password>
         <vault.user>admin</vault.user>
         <vault.password>admin</vault.password>
-        <core.wcm.components.version>2.11.1</core.wcm.components.version>
+        <core.wcm.components.version>2.20.8</core.wcm.components.version>
         <bnd.version>5.1.1</bnd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
