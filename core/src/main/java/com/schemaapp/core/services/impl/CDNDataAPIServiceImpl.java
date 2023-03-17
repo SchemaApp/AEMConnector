@@ -171,9 +171,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 url = getHighlighterURL(endpoint, accountId, encodedURL);
                 responseMap = httpGet(url);
                 response = responseMap.containsKey(BODY) 
-                        ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
+                        ? (String) responseMap.get(BODY) : StringUtils.EMPTY;
                 String eTagJavascript = responseMap.containsKey(Constants.E_TAG) 
-                        ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
+                        ? (String) responseMap.get(Constants.E_TAG) : StringUtils.EMPTY;
                 String eTagNodeValueJavascript = StringUtils.EMPTY;
                 
                 eTagNodeValueJavascript = getETagNodeValueJavascript(
