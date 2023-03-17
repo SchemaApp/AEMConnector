@@ -41,6 +41,7 @@
                         <!-- Common overlay roots -->
                         <filter><root>/apps/sling</root></filter>
                         <filter><root>/apps/cq</root></filter>
+                         <filter><root>/conf</root></filter>
                         <filter><root>/apps/dam</root></filter>
                         <filter><root>/apps/wcm</root></filter>
                         <filter><root>/apps/msm</root></filter>
@@ -48,8 +49,6 @@
                         <!-- Immutable context-aware configurations -->
                         <filter><root>/apps/settings</root></filter>
                         
-                        <filter><root>/home/users</root></filter>
-                        <filter><root>/home/users/system</root></filter>
                         <filter><root>/etc/cloudservices</root></filter>
                         <filter><root>/etc/replication/agents.publish</root></filter>
 						<filter><root>/apps/cq/core/content/nav/tools</root></filter>

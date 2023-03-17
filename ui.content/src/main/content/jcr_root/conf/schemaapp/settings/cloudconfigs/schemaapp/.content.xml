@@ -9,7 +9,5 @@
     <jcr:content
         jcr:primaryType="cq:PageContent"
         sling:resourceType="schemaApp/registration/components/schemaapppage"
-        thumbnailPath="/apps/schemaApp/registration/components/schemaapp/thumbnail.png">	
-		
-	</jcr:content>
+        thumbnailPath="/apps/schemaApp/registration/components/schemaapp/thumbnail.png"/>
 </jcr:root>
