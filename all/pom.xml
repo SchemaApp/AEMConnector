@@ -24,7 +24,7 @@
     <parent>
         <groupId>com.schemaapp</groupId>
         <artifactId>schemaapp-aem</artifactId>
-         <version>1.4.2</version>
+         <version>1.0.18-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
