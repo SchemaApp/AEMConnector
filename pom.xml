@@ -6,7 +6,7 @@
     <groupId>com.schemaapp</groupId>
     <artifactId>schemaapp-aem</artifactId>
     <packaging>pom</packaging>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <url>https://www.schemaapp.com</url>
     <description>A connector to enable local caching of Schema Markup produced by Schema App.</description>
     <name>Schema App connector</name>  
@@ -21,6 +21,7 @@
         <module>core</module>
         <module>ui.apps</module>
 		<module>ui.apps.structure</module>
+		<module>ui.content</module>
     </modules>
 
     <properties>
@@ -36,6 +37,7 @@
         <bnd.version>5.1.1</bnd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <aemanalyser.version>1.5.8</aemanalyser.version>
     </properties>
     
 	  <scm>

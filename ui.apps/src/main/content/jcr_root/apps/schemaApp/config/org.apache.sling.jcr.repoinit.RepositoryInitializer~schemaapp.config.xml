@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0" jcr:primaryType="sling:OsgiConfig"
+          references="[]"
+      scripts="[
+        create service user aem-schema-app-service-user with path system/cq:services/schemaapp,
+        set ACL for aem-schema-app-service-user&#010;
+            allow jcr:read on /etc/cloudservices&#010;
+        end,
+		set ACL for aem-schema-app-service-user&#010;
+            allow jcr:read\,jcr:lockManagement\,jcr:versionManagement\,rep:write on /content&#010;
+        end
+      ]"/>

@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -129,7 +132,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         try {
             final Page child = childPages.next();
             Resource pageResource = child.adaptTo(Resource.class);
-            Resource schemaAppRes = resolver.getResource(Constants.DATA);
+            Resource schemaAppRes = resolver.getResource(child.getPath() + "/" +Constants.DATA);
             String pagePath = siteURL + child.getPath();
             String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
             if (encodedURL != null && encodedURL.contains("=")) {
@@ -171,9 +174,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 url = getHighlighterURL(endpoint, accountId, encodedURL);
                 responseMap = httpGet(url);
                 response = responseMap.containsKey(BODY) 
-                        ? responseMap.get(BODY).toString() : StringUtils.EMPTY;
+                        ? (String) responseMap.get(BODY) : StringUtils.EMPTY;
                 String eTagJavascript = responseMap.containsKey(Constants.E_TAG) 
-                        ? responseMap.get(Constants.E_TAG).toString() : StringUtils.EMPTY;
+                        ? (String) responseMap.get(Constants.E_TAG) : StringUtils.EMPTY;
                 String eTagNodeValueJavascript = StringUtils.EMPTY;
                 
                 eTagNodeValueJavascript = getETagNodeValueJavascript(
@@ -344,7 +347,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     content.append(inputLine);
                 }
                 bufferedReader.close();
-                responseMap.put(BODY, content);
+                if (StringUtils.isNotEmpty(content.toString())) {
+                    responseMap.put(BODY, content.toString());
+                }
             }
 
             connection.disconnect();
@@ -414,11 +419,17 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
     }
 
     public URL getURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
-        return new URL(endpoint + accountId + "/" + encodedURL);
+        return new URL(endpoint + accountId + "/" + encodedURL + "?q=" + getDateTime());
     }
 
     public URL getHighlighterURL(String endpoint, String accountId, String encodedURL) throws MalformedURLException {
-        return new URL(endpoint + accountId + "/__highlighter_js/" + encodedURL);
+        return new URL(endpoint + accountId + "/__highlighter_js/" + encodedURL + "?q=" + getDateTime());
+    }
+    
+    private long getDateTime() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        ZonedDateTime zdt = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+        return zdt.toInstant().toEpochMilli();
     }
 
     /**

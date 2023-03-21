@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+     <filter root="/conf" mode="merge">
+      	<include pattern="/conf/schemaapp" mode="merge"/>
+        <include pattern="/conf/schemaapp/settings" mode="merge"/>
+        <include pattern="/conf/schemaapp/settings/cloudconfigs" mode="merge"/>
+        <include pattern="/conf/schemaapp/settings/cloudconfigs/schemaapp" mode="merge"/>
+     </filter>
+</workspaceFilter>
