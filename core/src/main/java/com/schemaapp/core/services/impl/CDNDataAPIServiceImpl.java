@@ -173,14 +173,19 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
                 url = getHighlighterURL(endpoint, accountId, encodedURL);
                 responseMap = httpGet(url);
+                
                 response = responseMap.containsKey(BODY) 
                         ? (String) responseMap.get(BODY) : StringUtils.EMPTY;
+                
                 String eTagJavascript = responseMap.containsKey(Constants.E_TAG) 
                         ? (String) responseMap.get(Constants.E_TAG) : StringUtils.EMPTY;
                 String eTagNodeValueJavascript = StringUtils.EMPTY;
                 
                 eTagNodeValueJavascript = getETagNodeValueJavascript(
                         schemaAppRes, eTagNodeValueJavascript);
+                
+                LOG.debug("CDN API page path Javascript (HighliterJS) :: {}, eTag request header:: {}, page node eTag :: {}, response {}"
+                        , pagePath, eTagJavascript, eTagNodeValueJavascript, response);
                 if (eTagNodeValue.equals(eTag) && eTagNodeValueJavascript.equals(eTagJavascript) ) {
                     return;
                 }
@@ -189,6 +194,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     graphJsonData = processJavaScriptCDNData(response, graphJsonData);
                     additionalConfigMap.put(Constants.E_TAG_JAVASCRIPT, eTagJavascript);
                 }
+                
+                sourceHeader = responseMap.containsKey(Constants.SOURCE_HEADER) 
+                        ? (String) responseMap.get(Constants.SOURCE_HEADER) : StringUtils.EMPTY;
+                
+                additionalConfigMap.put(Constants.SOURCE_HEADER, sourceHeader);
             }
             if (graphJsonData == null) {
                 webhookHandlerService.deleteEntity(child, resolver);
