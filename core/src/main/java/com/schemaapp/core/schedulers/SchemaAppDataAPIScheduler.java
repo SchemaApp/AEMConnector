@@ -1,5 +1,7 @@
 package com.schemaapp.core.schedulers;
 
+import java.util.UUID;
+
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.osgi.service.component.annotations.Activate;
@@ -48,7 +50,7 @@ public class SchemaAppDataAPIScheduler {
 
 	@Activate
 	public void activate(final Config config){
-		LOG.error(" :: SchemaAppDataAPIScheduler activate ::");
+		LOG.debug(" :: SchemaAppDataAPIScheduler activate ::");
 		enabled = config.enabled();
 		schedulerExpression = config.expression();
 		schedulerConcurrent = config.concurrent();
@@ -58,7 +60,6 @@ public class SchemaAppDataAPIScheduler {
 		scheduleOptions.canRunConcurrently(schedulerConcurrent);
 
 		final Runnable autoSuggestSchedulerJob = () -> {
-			LOG.error(" :: SchemaAppDataAPIScheduler Runnable ::");
 			if(enabled) {
 				schedulerJob();
 			}
@@ -73,8 +74,11 @@ public class SchemaAppDataAPIScheduler {
 	}
 
 	public boolean schedulerJob() {
-		LOG.error(" :: SchemaAppDataAPIScheduler start ::");
+	    UUID uuid = UUID.randomUUID();
+        String uuidAsString = uuid.toString();
+		LOG.debug(" :: SchemaAppDataAPIScheduler start :: {} " , uuidAsString);
 		cdnDataAPIService.readCDNData();
+		LOG.debug(" :: SchemaAppDataAPIScheduler end :: {} ", uuidAsString);
 		return enabled;
 
 	}
