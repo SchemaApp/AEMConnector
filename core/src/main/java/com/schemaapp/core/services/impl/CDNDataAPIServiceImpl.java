@@ -129,11 +129,12 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
         Object graphJsonData = null;
         Map<String, String> additionalConfigMap = null;
+        String pagePath = null;
         try {
             final Page child = childPages.next();
             Resource pageResource = child.adaptTo(Resource.class);
             Resource schemaAppRes = resolver.getResource(child.getPath() + "/" +Constants.DATA);
-            String pagePath = siteURL + child.getPath();
+            pagePath = siteURL + child.getPath();
             String encodedURL = Base64.getUrlEncoder().encodeToString(pagePath.getBytes());
             if (encodedURL != null && encodedURL.contains("=")) {
                 encodedURL = encodedURL.replace("=", "");
@@ -200,6 +201,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 
                 additionalConfigMap.put(Constants.SOURCE_HEADER, sourceHeader);
             }
+            
             if (graphJsonData == null) {
                 webhookHandlerService.deleteEntity(child, resolver);
                 return;
@@ -208,7 +210,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     graphJsonData, pageResource, additionalConfigMap);
 
         } catch (Exception e) {
-            LOG.error("Error while reading and processing CDN URL", e);
+            LOG.error("Error while processing the page data, page path :: "+pagePath, e);
         }
     }
 
