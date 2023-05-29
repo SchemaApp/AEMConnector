@@ -112,7 +112,9 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
 	@Override
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> additionalConfigMap, Resource urlResource, ValueMap configDetailMap)
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> additionalConfigMap, Resource urlResource,
+	        ValueMap configDetailMap,
+	        String cacheCleaningRequired)
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
 		Node pageNode = urlResource.adaptTo(Node.class);
@@ -123,7 +125,9 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			if (session != null) session.save();
-			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
+			if (StringUtils.isNotEmpty(cacheCleaningRequired) && cacheCleaningRequired.equalsIgnoreCase("enable")) {
+			    flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
+			}
 		}
 	}
 

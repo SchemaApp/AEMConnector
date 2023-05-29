@@ -49,7 +49,8 @@ public interface CDNHandlerService {
 	        ResourceResolver resolver, 
 	        Map<String, String> additionalConfigMap, 
 	        Resource urlResource, 
-	        ValueMap configDetailMap) throws RepositoryException, 
+	        ValueMap configDetailMap,
+	        String cacheCleaningRequired) throws RepositoryException, 
 	                JsonProcessingException, 
 	                JSONException, PersistenceException, 
 	                ReplicationException;

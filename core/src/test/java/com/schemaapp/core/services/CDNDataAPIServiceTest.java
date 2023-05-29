@@ -103,7 +103,7 @@ class CDNDataAPIServiceTest {
 		mockConnection();
 
 		cdnDataAPIServiceImpl.readCDNData();
-		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any());
+		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any(), any());
 	}
 	
 	@Test
@@ -119,7 +119,7 @@ class CDNDataAPIServiceTest {
 		mockConnection();
 
 		cdnDataAPIServiceImpl.readCDNData();
-		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any());
+		verify(webhookHandlerService, times(1)).savenReplicate(any(), any(), any(), any(), any(), any());
 	}
 	
 	private void mockResource() {
