@@ -119,8 +119,8 @@
 									                        jcr:primaryType="nt:unstructured"
 									                        sling:resourceType="granite/ui/components/foundation/form/radiogroup"
 									                        required="{Boolean}true"
-									                        text="Cache Cleaning Required?"
-									                        fieldLabel="Cache Cleaning Required to clear the dispatcher cache">
+									                        text="Dispatcher Cache Purge?"
+									                        fieldLabel="Dispatcher Cache Purge">
 									                        <items jcr:primaryType="nt:unstructured">
 									                            <option1
 									                                jcr:primaryType="nt:unstructured"
