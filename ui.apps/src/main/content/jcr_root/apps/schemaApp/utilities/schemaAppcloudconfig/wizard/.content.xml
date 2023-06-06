@@ -120,7 +120,7 @@
 									                        sling:resourceType="granite/ui/components/foundation/form/radiogroup"
 									                        required="{Boolean}true"
 									                        text="Dispatcher Cache Purge?"
-									                        fieldLabel="Dispatcher Cache Purge">
+									                        fieldLabel="If enabled page updates will clear dispatcher cache within 30 minutes. If disabled markup is updated but the cache is not purged and only used when there is another cache clearing mechanism">
 									                        <items jcr:primaryType="nt:unstructured">
 									                            <option1
 									                                jcr:primaryType="nt:unstructured"
