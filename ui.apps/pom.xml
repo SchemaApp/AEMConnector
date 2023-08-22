@@ -79,11 +79,6 @@
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
                     <embeddeds>
-                    	<embedded>
-                            <groupId>com.adobe.cq</groupId>
-                            <artifactId>core.wcm.components.core</artifactId>
-                            <target>/apps/schemaApp/install</target>
-                        </embedded>
                         <embedded>
                             <groupId>com.schemaapp</groupId>
                             <artifactId>schemaapp.core</artifactId>

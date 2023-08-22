@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -88,6 +92,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     , e.getMessage());
         } finally {
             if (resolver != null && resolver.isLive()) {
+                LOG.info("readCDNData resolver live");
+                try {
+                    Session session = resolver.adaptTo(Session.class);
+                    resolver.commit();
+                    if (session != null) session.save();
+                } catch (PersistenceException | RepositoryException e) {
+                }
                 resolver.close();
             }
         }
@@ -116,7 +127,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             }
         } catch (Exception e) {
             LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
-        }
+        } 
     }
 
     private void processPage(ResourceResolver resolver, 
@@ -143,6 +154,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     + "pagepath ::{}, encodedURL ::{}", 
                     endpoint,
                     pagePath, encodedURL);
+            String mappedUrl = resolver.map(child.getPath());
+            String fullURL = getMappedURL(mappedUrl, siteURL);
+            LOG.debug("CDNDataAPIServiceImpl :: mappedUrl :: {} ", fullURL);
+            webhookHandlerService.addPagePath(resolver, pageResource, fullURL);
+            
             URL url = getURL(endpoint, accountId, encodedURL);
             Map<String, Object> responseMap = httpGet(url);
             String response = responseMap.containsKey(BODY) 
@@ -212,6 +228,20 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         } catch (Exception e) {
             LOG.error("Error while processing the page data, page path :: "+pagePath, e);
         }
+    }
+    
+    private String getMappedURL(String url, String domain) {
+        String modifiedURL = url;
+        try {
+            URI uri = new URI(url);
+            
+            if (uri.getScheme() == null) {
+                modifiedURL = domain + url;
+            } 
+        } catch (URISyntaxException e) {
+            LOG.error("Invalid URL: {} ", e.getMessage());
+        }
+        return modifiedURL;
     }
 
     private String getETagNodeValue(Resource schemaAppRes,

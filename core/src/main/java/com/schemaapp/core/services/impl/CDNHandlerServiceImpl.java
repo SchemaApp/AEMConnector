@@ -126,6 +126,21 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
 		}
 	}
+	
+	@Override
+    public void addPagePath(ResourceResolver resolver, Resource urlResource, String pagePath)
+            throws RepositoryException, PersistenceException {
+
+	    Session session = resolver.adaptTo(Session.class);
+	    if (session != null) {
+	        Node pageNode =  session.getNode(urlResource.getPath());
+	        if (pageNode != null) {
+	            Node dataNode = createDataNode(pageNode);
+	            setPagePathProperty(pagePath, dataNode);
+	            flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
+	        }
+	    }
+	}
 
 
     private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
@@ -181,6 +196,11 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
         String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
         if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
     }
+    
+    private void setPagePathProperty(String pagePath, Node pageNode) throws RepositoryException {
+        if (StringUtils.isNotEmpty(pagePath)) pageNode.setProperty(Constants.PAGE_PATH, pagePath);
+    }
+
 
 
 	/**

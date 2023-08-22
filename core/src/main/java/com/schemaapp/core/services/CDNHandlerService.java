@@ -54,4 +54,14 @@ public interface CDNHandlerService {
 	                JSONException, PersistenceException, 
 	                ReplicationException;
 	
+	/**
+	 * @param resolver
+	 * @param urlResource
+	 * @param pagePath
+	 * @throws RepositoryException
+	 * @throws PersistenceException
+	 */
+	public void addPagePath(ResourceResolver resolver, Resource urlResource, String pagePath)
+            throws RepositoryException, PersistenceException;
+	
 }
