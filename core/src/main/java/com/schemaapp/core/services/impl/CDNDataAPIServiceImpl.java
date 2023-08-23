@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -124,17 +122,11 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 // Get or create the parent node
                 Resource parentNode = resourceResolver.getResource(parentNodePath);
 
-                // Map the child page's URL
-                String mappedUrl = resourceResolver.map(child.getPath());
-
-                // Generate the full URL
-                String fullURL = getFullURL(mappedUrl, siteURL);
-
                 // Define the node name and properties
                 String nodeName = "schemaapp";
                 ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
                 properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
-                properties.put(Constants.SITEURL, fullURL);
+                properties.put(Constants.SITEURL, siteURL + child.getPath());
 
                 // Create the node
                 resourceResolver.create(parentNode, nodeName, properties);
@@ -143,14 +135,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 ModifiableValueMap map = existingNode.adaptTo(ModifiableValueMap.class);
 
                 if (map != null) {
-                    // Map the child page's URL
-                    String mappedUrl = resourceResolver.map(child.getPath());
-
-                    // Generate the full URL
-                    String fullURL = getFullURL(mappedUrl, siteURL);
-
                     map.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
-                    map.put(Constants.SITEURL, fullURL);
+                    map.put(Constants.SITEURL, siteURL + child.getPath());
                 }
                 
             }
@@ -299,20 +285,6 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         }
     }
     
-    private String getFullURL(String url, String domain) {
-        String modifiedURL = url;
-        try {
-            URI uri = new URI(url);
-            
-            if (uri.getScheme() == null) {
-                modifiedURL = domain + url;
-            } 
-        } catch (URISyntaxException e) {
-            LOG.error("Invalid URL: {} ", e.getMessage());
-        }
-        return modifiedURL;
-    }
-
     private String getETagNodeValue(Resource schemaAppRes,
             String eTagNodeValue) {
         if (schemaAppRes != null) {
