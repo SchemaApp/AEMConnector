@@ -3,7 +3,6 @@ package com.schemaapp.core.services;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;

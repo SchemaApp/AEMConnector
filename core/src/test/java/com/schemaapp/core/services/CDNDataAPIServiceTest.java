@@ -128,7 +128,6 @@ class CDNDataAPIServiceTest {
 		when(childResourceIterator.next()).thenReturn(resource);
 		when(resource.getResourceType()).thenReturn("cq:Page");
 		when(resource.getChild("jcr:content")).thenReturn(resource);
-//		when(resolver.map(anyString())).thenReturn("/content/we-retail/us/en/men");
 	}
 
 	private void mockValueMap() {

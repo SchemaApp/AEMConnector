@@ -96,6 +96,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 try {
                     resolver.commit();
                 } catch (PersistenceException e) {
+                    LOG.error("readCDNData - Error while commiting the resolver: " + e.getMessage(), e);
                 }
                 resolver.close();
             }
