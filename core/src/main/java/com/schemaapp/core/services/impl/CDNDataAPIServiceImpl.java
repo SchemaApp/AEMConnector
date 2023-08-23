@@ -25,12 +25,15 @@ import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +43,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
@@ -122,9 +124,6 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 // Get or create the parent node
                 Resource parentNode = resourceResolver.getResource(parentNodePath);
 
-                // Log the node creation
-                //LOG.info("Creating node at path: " + nodePath);
-
                 // Map the child page's URL
                 String mappedUrl = resourceResolver.map(child.getPath());
 
@@ -134,10 +133,26 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 // Define the node name and properties
                 String nodeName = "schemaapp";
                 ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+                properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
                 properties.put(Constants.SITEURL, fullURL);
 
                 // Create the node
                 resourceResolver.create(parentNode, nodeName, properties);
+            } else {
+                
+                ModifiableValueMap map = existingNode.adaptTo(ModifiableValueMap.class);
+
+                if (map != null) {
+                    // Map the child page's URL
+                    String mappedUrl = resourceResolver.map(child.getPath());
+
+                    // Generate the full URL
+                    String fullURL = getFullURL(mappedUrl, siteURL);
+
+                    map.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
+                    map.put(Constants.SITEURL, fullURL);
+                }
+                
             }
 
         } catch (PersistenceException e) {
