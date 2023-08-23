@@ -127,21 +127,6 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 		}
 	}
 	
-	@Override
-    public void addPagePath(ResourceResolver resolver, Resource urlResource, String pagePath)
-            throws RepositoryException, PersistenceException {
-
-	    Session session = resolver.adaptTo(Session.class);
-	    if (session != null) {
-	        Node pageNode =  session.getNode(urlResource.getPath());
-	        if (pageNode != null) {
-	            Node dataNode = createDataNode(pageNode);
-	            setPagePathProperty(pagePath, dataNode);
-	            flushService.invalidatePageJson(urlResource.getPath() + "/" +Constants.DATA);
-	        }
-	    }
-	}
-
 
     private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
             Resource urlResource, Map<String, String> additionalConfigMap) throws RepositoryException {
@@ -197,11 +182,6 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
         if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
     }
     
-    private void setPagePathProperty(String pagePath, Node pageNode) throws RepositoryException {
-        if (StringUtils.isNotEmpty(pagePath)) pageNode.setProperty(Constants.PAGE_PATH, pagePath);
-    }
-
-
 
 	/**
 	 * This method used to delete entity 

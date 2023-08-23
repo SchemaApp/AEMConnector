@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
@@ -41,6 +40,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
@@ -82,7 +82,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (resolver != null) {
                 List<Page> rootpages = getSiteRootPages(resolver);
                 for (Page page : rootpages) {
-                    updateSchemaAppCDNData(resolver, page);
+                  updateSchemaAppCDNData(resolver, page);
                 }
             } else {
                 LOG.debug("Error occurs while getting ResourceResolver");
@@ -94,16 +94,58 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (resolver != null && resolver.isLive()) {
                 LOG.info("readCDNData resolver live");
                 try {
-                    Session session = resolver.adaptTo(Session.class);
                     resolver.commit();
-                    if (session != null) session.save();
-                } catch (PersistenceException | RepositoryException e) {
+                } catch (PersistenceException e) {
                 }
                 resolver.close();
             }
         }
     }
+    
+    
+    private void createDefaultSchemaNode(Iterator<Page> childPages, ResourceResolver resourceResolver, String siteURL) {
+        try {
+            // Get the next child page
+            final Page child = childPages.next();
+            
+            // Construct the path for the node
+            String nodePath = child.getPath() + "/jcr:content/schemaapp"; // Path to the schemaapp node
 
+            // Check if the node already exists
+            Resource existingNode = resourceResolver.getResource(nodePath);
+
+            if (existingNode == null) {
+                // Construct the path for the node
+                String parentNodePath = child.getPath() + "/jcr:content";
+
+                // Get or create the parent node
+                Resource parentNode = resourceResolver.getResource(parentNodePath);
+
+                // Log the node creation
+                //LOG.info("Creating node at path: " + nodePath);
+
+                // Map the child page's URL
+                String mappedUrl = resourceResolver.map(child.getPath());
+
+                // Generate the full URL
+                String fullURL = getFullURL(mappedUrl, siteURL);
+
+                // Define the node name and properties
+                String nodeName = "schemaapp";
+                ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+                properties.put(Constants.SITEURL, fullURL);
+
+                // Create the node
+                resourceResolver.create(parentNode, nodeName, properties);
+            }
+
+        } catch (PersistenceException e) {
+            // Handle any persistence-related exceptions here
+            LOG.error("Error creating schema node: " + e.getMessage(), e);
+        }
+    }
+
+        
     /**
      * @param resolver
      * @param page
@@ -121,6 +163,13 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
                 String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
                         Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
+                
+                while (childPages.hasNext()) {
+                    createDefaultSchemaNode(childPages, resolver, siteURL);
+                }
+                
+                commit(resolver);
+                
                 while (childPages.hasNext()) {
                     processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages, endpoint);
                 }
@@ -128,6 +177,15 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         } catch (Exception e) {
             LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
         } 
+    }
+
+
+    private void commit(ResourceResolver resolver) {
+        try {
+            resolver.commit();
+        } catch (Exception e) {
+            LOG.error("Error while commiting the resolver: " + e.getMessage(), e);
+        }
     }
 
     private void processPage(ResourceResolver resolver, 
@@ -154,11 +212,6 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     + "pagepath ::{}, encodedURL ::{}", 
                     endpoint,
                     pagePath, encodedURL);
-            String mappedUrl = resolver.map(child.getPath());
-            String fullURL = getMappedURL(mappedUrl, siteURL);
-            LOG.debug("CDNDataAPIServiceImpl :: mappedUrl :: {} ", fullURL);
-            webhookHandlerService.addPagePath(resolver, pageResource, fullURL);
-            
             URL url = getURL(endpoint, accountId, encodedURL);
             Map<String, Object> responseMap = httpGet(url);
             String response = responseMap.containsKey(BODY) 
@@ -230,7 +283,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
         }
     }
     
-    private String getMappedURL(String url, String domain) {
+    private String getFullURL(String url, String domain) {
         String modifiedURL = url;
         try {
             URI uri = new URI(url);
@@ -480,14 +533,16 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
      * @return
      */
     public ResourceResolver getResourceResolver() {
-        Map<String, Object> param = new HashMap<>();
-        param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
+        ResourceResolver resourceResolver = null;
         try {
-            return resolverFactory.getServiceResourceResolver(param);
+            Map<String, Object> serviceUserParams = new HashMap<>();
+            serviceUserParams.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
+            resourceResolver = resolverFactory.getServiceResourceResolver(serviceUserParams);
+            
         } catch (LoginException e) {
             LOG.error("getResourceResolver :: {}", e.getMessage());
         }
-        return null;
+        return resourceResolver;
     }
 
     @Override

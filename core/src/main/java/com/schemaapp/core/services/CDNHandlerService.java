@@ -3,6 +3,7 @@ package com.schemaapp.core.services;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -54,14 +55,5 @@ public interface CDNHandlerService {
 	                JSONException, PersistenceException, 
 	                ReplicationException;
 	
-	/**
-	 * @param resolver
-	 * @param urlResource
-	 * @param pagePath
-	 * @throws RepositoryException
-	 * @throws PersistenceException
-	 */
-	public void addPagePath(ResourceResolver resolver, Resource urlResource, String pagePath)
-            throws RepositoryException, PersistenceException;
 	
 }
