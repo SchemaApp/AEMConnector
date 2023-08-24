@@ -6,7 +6,7 @@
     <groupId>com.schemaapp</groupId>
     <artifactId>schemaapp-aem</artifactId>
     <packaging>pom</packaging>
-    <version>1.4.6</version>
+    <version>1.4.7</version>
     <url>https://www.schemaapp.com</url>
     <description>A connector to enable local caching of Schema Markup produced by Schema App.</description>
     <name>Schema App connector</name>  
@@ -33,7 +33,7 @@
         <sling.password>admin</sling.password>
         <vault.user>admin</vault.user>
         <vault.password>admin</vault.password>
-        <core.wcm.components.version>2.20.8</core.wcm.components.version>
+        <core.wcm.components.version>2.23.2</core.wcm.components.version>
         <bnd.version>5.1.1</bnd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

@@ -23,11 +23,15 @@ import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,7 +82,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             if (resolver != null) {
                 List<Page> rootpages = getSiteRootPages(resolver);
                 for (Page page : rootpages) {
-                    updateSchemaAppCDNData(resolver, page);
+                  updateSchemaAppCDNData(resolver, page);
                 }
             } else {
                 LOG.debug("Error occurs while getting ResourceResolver");
@@ -88,11 +92,62 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     , e.getMessage());
         } finally {
             if (resolver != null && resolver.isLive()) {
+                LOG.info("readCDNData resolver live");
+                try {
+                    resolver.commit();
+                } catch (PersistenceException e) {
+                    LOG.error("readCDNData - Error while commiting the resolver: " + e.getMessage(), e);
+                }
                 resolver.close();
             }
         }
     }
+    
+    
+    private void createDefaultSchemaNode(Iterator<Page> childPages, ResourceResolver resourceResolver, String siteURL) {
+        try {
+            // Get the next child page
+            final Page child = childPages.next();
+            
+            // Construct the path for the node
+            String nodePath = child.getPath() + "/jcr:content/schemaapp"; // Path to the schemaapp node
 
+            // Check if the node already exists
+            Resource existingNode = resourceResolver.getResource(nodePath);
+
+            if (existingNode == null) {
+                // Construct the path for the node
+                String parentNodePath = child.getPath() + "/jcr:content";
+
+                // Get or create the parent node
+                Resource parentNode = resourceResolver.getResource(parentNodePath);
+
+                // Define the node name and properties
+                String nodeName = "schemaapp";
+                ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+                properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
+                properties.put(Constants.SITEURL, siteURL + child.getPath());
+
+                // Create the node
+                resourceResolver.create(parentNode, nodeName, properties);
+            } else {
+                
+                ModifiableValueMap map = existingNode.adaptTo(ModifiableValueMap.class);
+
+                if (map != null) {
+                    map.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
+                    map.put(Constants.SITEURL, siteURL + child.getPath());
+                }
+                
+            }
+
+        } catch (PersistenceException e) {
+            // Handle any persistence-related exceptions here
+            LOG.error("Error creating schema node: " + e.getMessage(), e);
+        }
+    }
+
+        
     /**
      * @param resolver
      * @param page
@@ -110,12 +165,28 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                 Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
                 String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
                         Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
+                
+                while (childPages.hasNext()) {
+                    createDefaultSchemaNode(childPages, resolver, siteURL);
+                }
+                
+                commit(resolver);
+                
                 while (childPages.hasNext()) {
                     processPage(resolver, configDetailMap, accountId, siteURL, deploymentMethod, childPages, endpoint);
                 }
             }
         } catch (Exception e) {
             LOG.error("Error in fetching details from SchemaApp CDN Data API", e);
+        } 
+    }
+
+
+    private void commit(ResourceResolver resolver) {
+        try {
+            resolver.commit();
+        } catch (Exception e) {
+            LOG.error("Error while commiting the resolver: " + e.getMessage(), e);
         }
     }
 
@@ -213,7 +284,7 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
             LOG.error("Error while processing the page data, page path :: "+pagePath, e);
         }
     }
-
+    
     private String getETagNodeValue(Resource schemaAppRes,
             String eTagNodeValue) {
         if (schemaAppRes != null) {
@@ -450,14 +521,16 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
      * @return
      */
     public ResourceResolver getResourceResolver() {
-        Map<String, Object> param = new HashMap<>();
-        param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
+        ResourceResolver resourceResolver = null;
         try {
-            return resolverFactory.getServiceResourceResolver(param);
+            Map<String, Object> serviceUserParams = new HashMap<>();
+            serviceUserParams.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
+            resourceResolver = resolverFactory.getServiceResourceResolver(serviceUserParams);
+            
         } catch (LoginException e) {
             LOG.error("getResourceResolver :: {}", e.getMessage());
         }
-        return null;
+        return resourceResolver;
     }
 
     @Override
