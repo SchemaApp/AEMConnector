@@ -115,6 +115,35 @@
 														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
 									                        </items>
 									                    </radiogroupA>
+									                    <radiogroupB
+									                        jcr:primaryType="nt:unstructured"
+									                        sling:resourceType="granite/ui/components/foundation/form/radiogroup"
+									                        required="{Boolean}true"
+									                        text="Dispatcher Cache Purge?"
+									                        fieldLabel="If enabled page updates will clear dispatcher cache within 30 minutes. If disabled markup is updated but the cache is not purged and only used when there is another cache clearing mechanism">
+									                        <items jcr:primaryType="nt:unstructured">
+									                            <option1
+									                                jcr:primaryType="nt:unstructured"
+									                                sling:resourceType="granite/ui/components/foundation/form/radio"
+									                                name="./cacheCleaningRequired"
+									                                text="Enable"
+									                                value="enable"/>
+									                            <option2
+									                                jcr:primaryType="nt:unstructured"
+									                                sling:resourceType="granite/ui/components/foundation/form/radio"
+									                                name="./cacheCleaningRequired"
+									                                text="Disable"
+									                                value="disable"/>
+																<radioDefaultValue jcr:primaryType="nt:unstructured"
+														            name="./cacheCleaningRequired@DefaultValue"
+														            value="enable"
+														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
+														        <radioDefaultWhenMissing jcr:primaryType="nt:unstructured"
+														            name="./cacheCleaningRequired@UseDefaultWhenMissing"
+														            value="true"
+														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
+									                        </items>
+									                    </radiogroupB>
                                                         <connect
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/button"

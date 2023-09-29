@@ -69,6 +69,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
 
     @Reference
     transient ResourceResolverFactory resolverFactory;
+    
+    private String cacheCleaningRequired = "enable";
 
     private static ObjectMapper mapperObject = new ObjectMapper()
             .configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
@@ -161,6 +163,9 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                         (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
                 String deploymentMethod = configDetailMap.get("deploymentMethod") != null 
                         ? (String) configDetailMap.get("deploymentMethod")
+                                : StringUtils.EMPTY;
+                cacheCleaningRequired = configDetailMap.get("cacheCleaningRequired") != null 
+                        ? (String) configDetailMap.get("cacheCleaningRequired")
                                 : StringUtils.EMPTY;
                 Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
                 String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
@@ -335,7 +340,8 @@ public class CDNDataAPIServiceImpl implements CDNDataAPIService {
                     resolver,
                     additionalConfigMap, 
                     pageResource,
-                    configDetailMap);
+                    configDetailMap,
+                    cacheCleaningRequired);
         }
     }
 
