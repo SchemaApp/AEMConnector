@@ -130,7 +130,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 			}
 		}
 	}
-
+	
 
     private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
             Resource urlResource, Map<String, String> additionalConfigMap) throws RepositoryException {
@@ -185,7 +185,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
         String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
         if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
     }
-
+    
 
 	/**
 	 * This method used to delete entity 

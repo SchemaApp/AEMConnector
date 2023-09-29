@@ -141,7 +141,7 @@ class CDNDataAPIServiceTest {
 	private void mockPage() {
 		when(page.listChildren(any(), anyBoolean())).thenReturn(childPages);
 		when(childPages.next()).thenReturn(page);
-		when(childPages.hasNext()).thenReturn(true, false);
+		when(childPages.hasNext()).thenReturn(false, true, false);
 		when(page.getPath()).thenReturn("/content/we-retail/us/en/men");
 		when(page.getProperties()).thenReturn(valueMap);
 	}

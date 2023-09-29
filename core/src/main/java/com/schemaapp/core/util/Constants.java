@@ -18,6 +18,9 @@ public final class Constants {
 	public static final CharSequence SLASH = "/";
 	public static final Object DOT = ".";
 	public static final String ACCOUNT_ID = "accountId";
+	
+	public static final String PAGE_PATH = "pagePath";
+	
 	public static final String SITEURL = "siteURL";
 	public static final String DEPLOYMENTMETHOD = "deploymentMethod";
 	
