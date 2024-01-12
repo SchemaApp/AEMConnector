@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import com.schemaapp.core.services.CDNDataAPIService;
+import com.schemaapp.core.services.CDNDataProcessor;
 
 import junitx.util.PrivateAccessor;
 
@@ -45,7 +45,7 @@ class SchemaAppDataAPISchedulerTest {
 	Configuration configuration;
 
 	@Mock
-	private CDNDataAPIService cdnDataAPIService;
+	private CDNDataProcessor cndDataProcessor;
 
 	@Mock
 	private Scheduler mockScheduler;
@@ -56,7 +56,7 @@ class SchemaAppDataAPISchedulerTest {
 	public void setup() throws NoSuchMethodException {
 		MockitoAnnotations.initMocks(this);
 		context.registerService(SchemaAppDataAPIScheduler.class, schemaAppDataAPIScheduler);
-		context.registerService(CDNDataAPIService.class, cdnDataAPIService);
+		context.registerService(CDNDataProcessor.class, cndDataProcessor);
 		context.registerService(Scheduler.class, mockScheduler);
 		
 		ScheduleOptions mockScheduleOptions = mock(ScheduleOptions.class);
@@ -77,7 +77,7 @@ class SchemaAppDataAPISchedulerTest {
 
     @Test
     void testSchedulerJob() throws NoSuchFieldException, LoginException {
-        PrivateAccessor.setField(schemaAppDataAPIScheduler, "cdnDataAPIService", cdnDataAPIService);
+        PrivateAccessor.setField(schemaAppDataAPIScheduler, "cndDataProcessor", cndDataProcessor);
 
         boolean result = schemaAppDataAPIScheduler.schedulerJob();
         assertFalse(result);

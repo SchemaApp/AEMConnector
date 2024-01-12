@@ -9,12 +9,18 @@ public class SchemaAppConfig {
     private String deploymentMethod;
 
     private String endpoint;
+    
+    private String apiKey;
 
-    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint) {
+    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint, String apiKey) {
         this.accountId = accountId;
         this.siteURL = siteURL;
         this.deploymentMethod = deploymentMethod;
         this.endpoint = endpoint;
+        this.apiKey = apiKey;
+    }
+
+    public SchemaAppConfig() {
     }
 
     public String getAccountId() {
@@ -47,5 +53,13 @@ public class SchemaAppConfig {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+    
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 }

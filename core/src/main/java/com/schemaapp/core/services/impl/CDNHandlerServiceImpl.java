@@ -1,5 +1,6 @@
 package com.schemaapp.core.services.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Node;
@@ -8,26 +9,23 @@ import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.search.QueryBuilder;
-import com.day.cq.wcm.api.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.CDNHandlerService;
 import com.schemaapp.core.services.FlushService;
 import com.schemaapp.core.util.Constants;
@@ -37,8 +35,6 @@ import com.schemaapp.core.util.JsonSanitizer;
 public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
-
-	private static final Logger LOG = LoggerFactory.getLogger(CDNHandlerServiceImpl.class);
 
 	@Reference
 	ResourceResolverFactory resolverFactory;
@@ -52,17 +48,15 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	@Reference
 	Replicator replicator;
 
-
 	/**
 	 * Save Graph Data to AEM Node
 	 * 
-	 * @param entity
+	 * @param jsonGraphData
 	 * @param pageNode
-	 * @throws JsonProcessingException
 	 * @throws JSONException
 	 * @throws RepositoryException
 	 */
-	private void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JSONException, RepositoryException {
+	public void saveGraphDatatoNode(Object jsonGraphData, Node pageNode) throws JSONException, RepositoryException {
 
 		String graphData = getGraphDataString(jsonGraphData);
 		String wellFormedJson = null;
@@ -94,7 +88,7 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	 * @return
 	 * @throws RepositoryException
 	 */
-	private Node createDataNode(Node node) throws RepositoryException {
+	public Node createDataNode(Node node) throws RepositoryException {
 		Node dataNode = null;
 		if (!node.hasNode(Constants.DATA)) {
 			dataNode = node.addNode(Constants.DATA, JcrConstants.NT_UNSTRUCTURED);
@@ -112,14 +106,15 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 
 
 	@Override
-	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> additionalConfigMap, Resource urlResource, ValueMap configDetailMap)
+	public void savenReplicate(Object jsonGraphData, ResourceResolver resolver, Map<String, String> additionalConfigMap, Resource urlResource, SchemaAppConfig config)
 			throws RepositoryException, JsonProcessingException, JSONException, PersistenceException,
 			ReplicationException {
+	    if (urlResource == null) return;
 		Node pageNode = urlResource.adaptTo(Node.class);
 		Session session = resolver.adaptTo(Session.class);
 		if (pageNode != null) {
 			Node dataNode = createDataNode(pageNode);
-			addConfigDetails(configDetailMap, dataNode, urlResource, additionalConfigMap);
+			addConfigDetails(config, dataNode, urlResource, additionalConfigMap);
 			saveGraphDatatoNode(jsonGraphData, dataNode);
 			resolver.commit();
 			if (session != null) session.save();
@@ -128,22 +123,77 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	}
 	
 
-    private void addConfigDetails(ValueMap configDetailMap, Node pageNode,
+    public void addConfigDetails(SchemaAppConfig config, Node pageNode,
             Resource urlResource, Map<String, String> additionalConfigMap) throws RepositoryException {
-        if (configDetailMap != null) {
+        if (config != null) {
 
-            setAccountIdProperty(configDetailMap, pageNode);
+            setAccountIdProperty(config, pageNode);
 
-            setSiteURLProperty(configDetailMap, pageNode, urlResource);
+            setSiteURLProperty(config, pageNode, urlResource);
 
-            setDeploymentMethodProperty(configDetailMap, pageNode);
+            setDeploymentMethodProperty(config, pageNode);
 
             setEtagProperty(additionalConfigMap, pageNode);
             
             setSourceHeaderProperty(additionalConfigMap, pageNode);
         }
     }
+    
+    /**
+     * Checks if a child node exists under a specified parent node in Adobe Experience Manager (AEM)
+     * and creates it if it doesn't exist.
+     *
+     * @param resolver      The ResourceResolver used to access the AEM repository.
+     * @param parentNodePath The path of the parent node in which the child node will be checked/created.
+     * @param newNodeName    The name of the new child node to be checked/created.
+     */
+    private void checkAndCreateNode(ResourceResolver resolver, String parentNodePath, String newNodeName) {
+        // Construct the path for the child node
+        String childNodePath = parentNodePath + "/" + newNodeName;
 
+        try {
+            // Adapt the resolver to a JCR Session
+            Session session = resolver.adaptTo(Session.class);
+
+            // Check if the child node already exists
+            Resource childNodeResource = resolver.getResource(childNodePath);
+            if (childNodeResource == null) {
+
+                // Ensure the parent node exists
+                Resource parentNode = resolver.getResource(parentNodePath);
+
+                if (parentNode != null) {
+                    // Adapt the parent node to a JCR Node
+                    Node parentNodeJCR = parentNode.adaptTo(Node.class);
+
+                    // Create the child node
+                    parentNodeJCR.addNode(newNodeName, "sling:Folder");
+
+                    // Save the session to persist the changes
+                    session.save();
+                }
+            }
+        } catch (RepositoryException e) {
+            // Handle RepositoryException
+            e.printStackTrace();
+        }
+    }
+
+
+    public void savePagePathsToNode(ResourceResolver resolver, String parentNodePath, List<String> pagePaths) throws PersistenceException {
+        checkAndCreateNode(resolver, parentNodePath, "pagesData");
+        Resource parentNode = resolver.getResource(parentNodePath + "/pagesData");
+
+        if (parentNode != null) {
+            ModifiableValueMap properties = parentNode.adaptTo(ModifiableValueMap.class);
+
+            // Assuming 'pagePaths' is a property of type String[]
+            properties.put("pagePaths", pagePaths.toArray(new String[0]));
+
+            resolver.commit();
+        }
+    }
+    
 
     private void setSourceHeaderProperty(
             Map<String, String> additionalConfigMap, Node pageNode)
@@ -161,46 +211,46 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
     }
 
 
-    private String setDeploymentMethodProperty(ValueMap configDetailMap,
+    private void setDeploymentMethodProperty(SchemaAppConfig config,
             Node pageNode) throws RepositoryException {
-        String deploymentMethod = configDetailMap.containsKey("deploymentMethod") ?  (String) configDetailMap.get("deploymentMethod") : StringUtils.EMPTY;
-        if (StringUtils.isNotEmpty(deploymentMethod)) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, deploymentMethod);
-        return deploymentMethod;
+        if (StringUtils.isNotEmpty(config.getDeploymentMethod())) pageNode.setProperty(Constants.DEPLOYMENTMETHOD, config.getDeploymentMethod());
     }
 
 
-    private void setSiteURLProperty(ValueMap configDetailMap, Node pageNode,
+    private void setSiteURLProperty(SchemaAppConfig config, Node pageNode,
             Resource urlResource) throws RepositoryException {
-        String siteURL = configDetailMap.containsKey("siteURL") ?  (String) configDetailMap.get("siteURL") : StringUtils.EMPTY;
-        if (StringUtils.isNotEmpty(siteURL)) pageNode.setProperty(Constants.SITEURL, siteURL + urlResource.getPath());
+        if (StringUtils.isNotEmpty(config.getSiteURL())) pageNode.setProperty(Constants.SITEURL, config.getSiteURL() + urlResource.getPath());
     }
 
 
-    private void setAccountIdProperty(ValueMap configDetailMap, Node pageNode)
+    private void setAccountIdProperty(SchemaAppConfig config, Node pageNode)
             throws RepositoryException {
-        String accountId = configDetailMap.containsKey("accountID") ? (String) configDetailMap.get("accountID") : StringUtils.EMPTY;
-        if (StringUtils.isNotEmpty(accountId)) pageNode.setProperty(Constants.ACCOUNT_ID, accountId);
+        if (StringUtils.isNotEmpty(config.getAccountId())) pageNode.setProperty(Constants.ACCOUNT_ID, config.getAccountId());
     }
     
 
-	/**
-	 * This method used to delete entity 
-	 */
-	@Override
-	public void deleteEntity(Page page, ResourceResolver resolver) throws LoginException, PersistenceException {
+    public void removeResource(String resourcePath, ResourceResolver resolver) {
+        // Acquire a resource resolver using the service user
+        try {
 
-	    Node pageNode = page.adaptTo(Node.class);
-	    Session session = resolver.adaptTo(Session.class);
-	    try {
-	        if (pageNode != null && pageNode.hasNode(Constants.DATA)) {
-	            Node dataNode = getDataNode(pageNode);
-	            if (dataNode != null) dataNode.remove();
-	            if (session != null) session.save();
-	        }
-	    } catch (RepositoryException e) {
-	        String errorMessage = "CDNHandlerServiceImpl :: Occured error during deleting Schema App Entity Node into the AEM Instance ";
-	        LOG.error(errorMessage, e);
-	    }
-	}
+            // Get the session from the resource resolver
+            Session session = resolver.adaptTo(Session.class);
+
+            // Get the node for the specified resource path
+            Node node = session.getNode(resourcePath+"/jcr:content/schemaapp");
+
+            if (node != null) {
+                // Remove the node
+                node.remove();
+            }
+
+            // Save the session to persist the changes
+            session.save();
+        } catch (Exception e) {
+            // Handle exceptions appropriately
+            e.printStackTrace();
+        }
+    }
+    
 
 }

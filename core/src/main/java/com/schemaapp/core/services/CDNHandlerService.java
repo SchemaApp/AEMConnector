@@ -1,19 +1,18 @@
 package com.schemaapp.core.services;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.json.JSONException;
 
 import com.day.cq.replication.ReplicationException;
-import com.day.cq.wcm.api.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.schemaapp.core.models.SchemaAppConfig;
 
 /**
  * 
@@ -24,16 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public interface CDNHandlerService {
 	
-	/**
-	 *     Schema App Delete Entity Webhook. When markup for a page is deleted.
-	 * 
-	 * @param page
-	 * @param resolver
-	 * @throws LoginException
-	 * @throws PersistenceException
-	 */
-    public void deleteEntity(Page page, ResourceResolver resolver) 
-            throws LoginException, PersistenceException;
+    public void removeResource(String resourcePath, ResourceResolver resolver);
 	
 	/**
 	 * @param resolver
@@ -49,10 +39,12 @@ public interface CDNHandlerService {
 	        ResourceResolver resolver, 
 	        Map<String, String> additionalConfigMap, 
 	        Resource urlResource, 
-	        ValueMap configDetailMap) throws RepositoryException, 
+	        SchemaAppConfig configDetailMap) throws RepositoryException, 
 	                JsonProcessingException, 
 	                JSONException, PersistenceException, 
 	                ReplicationException;
+	
+	public void savePagePathsToNode(ResourceResolver resolver, String parentNodePath, List<String> pagePaths) throws PersistenceException;
 	
 	
 }

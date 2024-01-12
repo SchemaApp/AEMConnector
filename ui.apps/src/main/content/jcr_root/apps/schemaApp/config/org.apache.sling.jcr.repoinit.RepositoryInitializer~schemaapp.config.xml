@@ -9,5 +9,8 @@
         end,
 		set ACL for aem-schema-app-service-user&#010;
             allow jcr:read\,jcr:lockManagement\,jcr:versionManagement\,rep:write on /content&#010;
-        end
+        end,
+        set ACL for aem-schema-app-service-user&#010;
+            allow jcr:read\,rep:write on /conf&#010;
+        end,
       ]"/>
