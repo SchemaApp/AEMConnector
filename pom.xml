@@ -6,7 +6,7 @@
     <groupId>com.schemaapp</groupId>
     <artifactId>schemaapp-aem</artifactId>
     <packaging>pom</packaging>
-    <version>1.4.7</version>
+    <version>2.0.0</version>
     <url>https://www.schemaapp.com</url>
     <description>A connector to enable local caching of Schema Markup produced by Schema App.</description>
     <name>Schema App connector</name>  
@@ -721,6 +721,11 @@
                 <version>${core.wcm.components.version}</version>
             </dependency>
             
+            <dependency>
+			  <groupId>org.apache.httpcomponents</groupId>
+			  <artifactId>httpclient</artifactId>
+			  <version>4.5.14</version>
+			</dependency>
             <!-- Testing -->
             <dependency>
                 <groupId>org.junit</groupId>

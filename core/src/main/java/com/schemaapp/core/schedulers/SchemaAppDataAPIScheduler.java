@@ -13,7 +13,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.schemaapp.core.services.CDNDataAPIService;
+import com.schemaapp.core.services.CDNDataProcessor;
 
 @Designate(ocd = SchemaAppDataAPIScheduler.Config.class)
 @Component
@@ -27,7 +27,7 @@ public class SchemaAppDataAPIScheduler {
 	private Scheduler scheduler;
 
 	@Reference
-	private CDNDataAPIService cdnDataAPIService;
+	private CDNDataProcessor cndDataProcessor;
 	
 	boolean enabled;
 	String schedulerExpression;
@@ -76,9 +76,9 @@ public class SchemaAppDataAPIScheduler {
 	public boolean schedulerJob() {
 	    UUID uuid = UUID.randomUUID();
         String uuidAsString = uuid.toString();
-		LOG.debug(" :: SchemaAppDataAPIScheduler start :: {} " , uuidAsString);
-		cdnDataAPIService.readCDNData();
-		LOG.debug(" :: SchemaAppDataAPIScheduler end :: {} ", uuidAsString);
+		LOG.info(" :: SchemaAppDataAPIScheduler start :: {} " , uuidAsString);
+		cndDataProcessor.processCDNDataAndUpdateSchema();
+		LOG.info(" :: SchemaAppDataAPIScheduler end :: {} ", uuidAsString);
 		return enabled;
 
 	}
