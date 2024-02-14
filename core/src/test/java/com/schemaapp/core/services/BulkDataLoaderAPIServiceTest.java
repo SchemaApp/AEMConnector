@@ -40,7 +40,7 @@ public class BulkDataLoaderAPIServiceTest {
 
 
     @Test
-    void fetchAndProcessPaginatedData_Success() throws Exception {
+    void fetchAndProcessPaginatedDataSuccess() throws Exception {
         // Mock dependencies
         SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
@@ -63,7 +63,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    void fetchAndProcessPaginatedData_withDummyData_Success() throws Exception {
+    void fetchAndProcessPaginatedDataWithDummyDataSuccess() throws Exception {
         // Mock dependencies
         SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
@@ -83,7 +83,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    void fetchAndProcessPaginatedData_Exception() throws Exception {
+    void fetchAndProcessPaginatedDataException() throws Exception {
         // Mock dependencies
         SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
@@ -102,7 +102,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    void executeApiRequest_Exception() throws IOException {
+    void executeApiRequestException() throws IOException {
         // Mock dependencies
         CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
 
