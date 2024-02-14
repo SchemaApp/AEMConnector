@@ -35,6 +35,7 @@ import com.schemaapp.core.util.Constants;
 public class CDNDataProcessorImpl implements CDNDataProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(CDNDataProcessorImpl.class);
+    
     private static final String CQ_CLOUDSERVICECONFIGS = "cq:cloudserviceconfigs";
 
     @Reference
