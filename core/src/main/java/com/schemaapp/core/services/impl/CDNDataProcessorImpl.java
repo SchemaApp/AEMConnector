@@ -1,4 +1,5 @@
 package com.schemaapp.core.services.impl;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +42,7 @@ import com.schemaapp.core.util.Constants;
 public class CDNDataProcessorImpl implements CDNDataProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(CDNDataProcessorImpl.class);
+    
     private static final String CQ_CLOUDSERVICECONFIGS = "cq:cloudserviceconfigs";
 
     @Reference
