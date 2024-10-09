@@ -91,7 +91,7 @@ public class FlushServiceImpl implements FlushService {
 	 * @param dispatcherCacheUrl , Dispatcher cache url page retrieved from publish replication agent
 	 * @return Boolean
 	 */
-	private void invalidateDispatcherCache(String pagePath, String dispatcherCacheUrl) {
+	public void invalidateDispatcherCache(String pagePath, String dispatcherCacheUrl) {
 		
 		if (pagePath != null) {
 			LOGGER.debug("invalidateDispatcherCacheURL :: Parent Page Path {}", pagePath);

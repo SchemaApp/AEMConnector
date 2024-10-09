@@ -95,7 +95,7 @@ public class PageJSONDataReaderServiceImpl implements PageJSONDataReaderService 
 	 * @param pageUrl
 	 * @return
 	 */
-	private String getPath(String pageUrl) {
+	public String getPath(String pageUrl) {
 		
 		URL aURL;
 		try {

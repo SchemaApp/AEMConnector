@@ -1,97 +1,162 @@
 package com.schemaapp.core.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
-import javax.jcr.Session;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
-import com.day.cq.search.result.SearchResult;
 import com.schemaapp.core.services.impl.PageJSONDataReaderServiceImpl;
 import com.schemaapp.core.util.Constants;
 
 @ExtendWith({ MockitoExtension.class})
-class PageJSONDataReaderServiceTest {
+class PageJSONDataReaderServiceImplTest {
 
-	private static final String GRAPH_DATA = "[{\"@context\":\"http://schema.org\",\"@type\":\"Product\",\"@id\":\"https://dell.ca/products/monitors/dellultra30\",\"aggregateRating\":{\"@type\":\"AggregateRating\",\"bestRating\":\"100\",\"ratingCount\":\"24\",\"ratingValue\":\"87\"},\"image\":\"dell-30in-lcd.jpg\",\"name\":\"Dell UltraSharp 30\\\" LCD Monitor\",\"offers\":{\"@type\":\"AggregateOffer\",\"highPrice\":\"$1495\",\"lowPrice\":\"$1250\"}}]";
+    @Mock
+    private ResourceResolverFactory resolverFactory;
 
-	@Mock
-	private ResourceResolver resolver;
+    @Mock
+    private ResourceResolver resourceResolver;
 
-	@Mock
-	private ResourceResolverFactory resolverFactory;
+    @Mock
+    private Resource urlResource;
 
-	@Mock
-	private Resource resource;
+    @Mock
+    private Node schemaAppDataNode;
 
-	@Mock
-	private QueryBuilder queryBuilder;
+    @Mock
+    private Property entityProperty;
 
-	@Mock
-	private Query query;
-
-	@Mock
-	private SearchResult searchResult;
-
-	@Mock
-	private Session session;
-
-	@Mock
-	private Hit hit;
-
-	@Mock
-	private Node node;
-
-	@Mock
-	private Property entityProperty;
-	
-	@Mock
+    @Mock
     private Property sourceProperty;
 
-	@InjectMocks
-	private final PageJSONDataReaderServiceImpl pageJSONDataReaderService = new PageJSONDataReaderServiceImpl();
+    @InjectMocks
+    private PageJSONDataReaderServiceImpl pageJSONDataReaderService;
+    
+    private AutoCloseable closeable;
 
-	@Test
-	void pageDataTest() throws Exception {
+    @BeforeEach
+    void setUp() {
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+    
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();  // Close mock session
+    }
 
-		mockResolver();
-		when(resolver.resolve(anyString())).thenReturn(resource);
-		when(resource.getChild(Constants.DATA)).thenReturn(resource);
-		when(resource.adaptTo(Node.class)).thenReturn(node);
-		when(node.hasProperty("entity")).thenReturn(true);
-		when(node.getProperty("entity")).thenReturn(entityProperty);
-		when(node.hasProperty(Constants.SOURCE_HEADER)).thenReturn(true);
-        when(node.getProperty(Constants.SOURCE_HEADER)).thenReturn(sourceProperty);
-		when(entityProperty.getString()).thenReturn(GRAPH_DATA);
-		when(sourceProperty.getString()).thenReturn("Editor");
-		pageJSONDataReaderService.init("https://www.demosite.com/test.html");
-		assertEquals(GRAPH_DATA, pageJSONDataReaderService.getGraphData());
-		assertEquals("Editor", pageJSONDataReaderService.getSource());
-	}
+    // Test: init() - Happy Path
+    @Test
+    void testInit_Success() throws Exception {
+        String pageUrl = "https://example.com/page.html";
 
-	private void mockResolver() throws NoSuchFieldException, LoginException {
-		Map<String, Object> param = new HashMap<>();
-		param.put(ResourceResolverFactory.SUBSERVICE, "schema-app-service");
-		FieldSetter.setField(pageJSONDataReaderService, pageJSONDataReaderService.getClass().getDeclaredField("resolverFactory"), resolverFactory);
-		when(resolverFactory.getServiceResourceResolver(param)).thenReturn(resolver);
-	}
+        // Mock resolver and resource behavior
+        when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
+        when(resourceResolver.resolve(anyString())).thenReturn(urlResource);
+        when(urlResource.getChild(anyString())).thenReturn(urlResource);
+        when(urlResource.adaptTo(Node.class)).thenReturn(schemaAppDataNode);
+
+        // Mock Node properties
+        when(schemaAppDataNode.hasProperty("entity")).thenReturn(true);
+        when(schemaAppDataNode.getProperty("entity")).thenReturn(entityProperty);
+        when(entityProperty.getString()).thenReturn("mockGraphData");
+
+        when(schemaAppDataNode.hasProperty(Constants.SOURCE_HEADER)).thenReturn(true);
+        when(schemaAppDataNode.getProperty(Constants.SOURCE_HEADER)).thenReturn(sourceProperty);
+        when(sourceProperty.getString()).thenReturn("mockSource");
+
+        // Call the method under test
+        pageJSONDataReaderService.init(pageUrl);
+
+        // Verify the graph data and source have been set correctly
+        assertEquals("mockGraphData", pageJSONDataReaderService.getGraphData());
+        assertEquals("mockSource", pageJSONDataReaderService.getSource());
+    }
+
+    // Test: init() - Resource not found or missing child node
+    @Test
+    void testInit_NoChildNode() throws Exception {
+        String pageUrl = "https://example.com/page.html";
+
+        // Mock resolver and resource behavior
+        when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
+        when(resourceResolver.resolve(anyString())).thenReturn(urlResource);
+        when(urlResource.getChild(anyString())).thenReturn(null);  // No child node found
+
+        // Call the method under test
+        pageJSONDataReaderService.init(pageUrl);
+
+        // Verify that graph data and source remain null
+        assertNull(pageJSONDataReaderService.getGraphData());
+        assertNull(pageJSONDataReaderService.getSource());
+    }
+
+    // Test: getResourceResolver() - Success
+    @Test
+    void testGetResourceResolver_Success() throws Exception {
+        // Mock resolver behavior
+        when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
+
+        // Call the method under test
+        ResourceResolver result = pageJSONDataReaderService.getResourceResolver();
+
+        // Verify the resolver is returned
+        assertNotNull(result);
+        verify(resolverFactory, times(1)).getServiceResourceResolver(anyMap());
+    }
+
+    // Test: getResourceResolver() - LoginException handling
+    @Test
+    void testGetResourceResolver_LoginException() throws Exception {
+        // Simulate LoginException
+        when(resolverFactory.getServiceResourceResolver(anyMap())).thenThrow(new LoginException("Test Exception"));
+
+        // Call the method and expect the exception to be thrown
+        assertThrows(LoginException.class, () -> pageJSONDataReaderService.getResourceResolver());
+    }
+
+    // Test: getPath() - Valid URL
+    @Test
+    void testGetPath_ValidUrl() {
+        String pageUrl = "https://example.com/page.html";
+        String expectedPath = "/page"; // Without the extension
+
+        // Call the method under test
+        String result = pageJSONDataReaderService.getPath(pageUrl);
+
+        // Verify the path is correctly returned without extension
+        assertEquals(expectedPath, result);
+    }
+
+    // Test: getPath() - Malformed URL
+    @Test
+    void testGetPath_MalformedUrl() {
+        String invalidUrl = "htp://invalid-url"; // Invalid protocol
+
+        // Call the method under test
+        String result = pageJSONDataReaderService.getPath(invalidUrl);
+
+        // Verify the result is the same as input for malformed URLs
+        assertEquals(invalidUrl, result);
+    }
 }
