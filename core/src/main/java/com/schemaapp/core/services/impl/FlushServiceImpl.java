@@ -87,9 +87,8 @@ public class FlushServiceImpl implements FlushService {
 	/**
 	 * Method to invalidation Dispatcher cache of page.
 	 *
-	 * @param pageUrl                       , Resource page which is being activated/deactivated
+	 * @param pagePath                       , Resource page which is being activated/deactivated
 	 * @param dispatcherCacheUrl , Dispatcher cache url page retrieved from publish replication agent
-	 * @return Boolean
 	 */
 	public void invalidateDispatcherCache(String pagePath, String dispatcherCacheUrl) {
 		
