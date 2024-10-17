@@ -3,7 +3,6 @@ package com.schemaapp.core.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -82,7 +81,7 @@ public class FlushServiceImplTest {
     }
 
     @Test
-    public void testInvalidatePageJson_Success() throws LoginException {
+    public void testInvalidatePageJsonSuccess() throws LoginException {
         // Arrange
         when(resourceResolver.getResource(anyString())).thenReturn(publishReplicationAgentResource);
         when(publishReplicationAgentResource.adaptTo(Page.class)).thenReturn(publishReplicationAgentPage);
@@ -98,7 +97,7 @@ public class FlushServiceImplTest {
     }
 
     @Test
-    public void testInvalidatePageJson_ResourceNull() throws LoginException {
+    public void testInvalidatePageJsonResourceNull() throws LoginException {
         // Arrange
         when(resourceResolver.getResource(anyString())).thenReturn(null);
 
@@ -111,7 +110,7 @@ public class FlushServiceImplTest {
     }
 
     @Test
-    public void testGetResourceNode_Success() throws RepositoryException {
+    public void testGetResourceNodeSuccess() throws RepositoryException {
         // Arrange
         when(resourceResolver.getResource(anyString())).thenReturn(publishReplicationAgentResource);
         when(publishReplicationAgentResource.adaptTo(Page.class)).thenReturn(publishReplicationAgentPage);
@@ -132,7 +131,7 @@ public class FlushServiceImplTest {
     }
 
     @Test
-    public void testInvalidatePageJson_LoginException() throws LoginException {
+    public void testInvalidatePageJsonLoginException() throws LoginException {
         // Arrange
         when(resolverFactory.getServiceResourceResolver(anyMap())).thenThrow(new LoginException("Login failed"));
 

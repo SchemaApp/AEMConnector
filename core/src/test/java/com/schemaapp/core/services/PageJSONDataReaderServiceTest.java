@@ -67,7 +67,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: init() - Happy Path
     @Test
-    void testInit_Success() throws Exception {
+    void testInitSuccess() throws Exception {
         String pageUrl = "https://example.com/page.html";
 
         // Mock resolver and resource behavior
@@ -95,7 +95,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: init() - Resource not found or missing child node
     @Test
-    void testInit_NoChildNode() throws Exception {
+    void testInitNoChildNode() throws Exception {
         String pageUrl = "https://example.com/page.html";
 
         // Mock resolver and resource behavior
@@ -113,7 +113,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: getResourceResolver() - Success
     @Test
-    void testGetResourceResolver_Success() throws Exception {
+    void testGetResourceResolverSuccess() throws Exception {
         // Mock resolver behavior
         when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
 
@@ -127,7 +127,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: getResourceResolver() - LoginException handling
     @Test
-    void testGetResourceResolver_LoginException() throws Exception {
+    void testGetResourceResolverLoginException() throws Exception {
         // Simulate LoginException
         when(resolverFactory.getServiceResourceResolver(anyMap())).thenThrow(new LoginException("Test Exception"));
 
@@ -150,7 +150,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: getPath() - Malformed URL
     @Test
-    void testGetPath_MalformedUrl() {
+    void testGetPathMalformedUrl() {
         String invalidUrl = "htp://invalid-url"; // Invalid protocol
 
         // Call the method under test

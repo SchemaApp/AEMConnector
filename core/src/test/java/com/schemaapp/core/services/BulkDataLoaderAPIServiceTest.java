@@ -3,6 +3,7 @@ package com.schemaapp.core.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,6 +29,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,12 +66,18 @@ public class BulkDataLoaderAPIServiceTest {
 
     @Mock
     private JsonNode rootNode;
+    
+    @Mock
+    private JSONArray rootNodeArray;
 
     @Mock
-    private JsonNode memberNode;
+    private JsonNode memberNode, pageData;
 
     @Mock
     private ObjectMapper objectMapper;
+    
+    @Mock
+    private Iterator<String> fieldNames;
 
     @BeforeEach
     public void setUp() {
@@ -77,7 +85,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testFetchAndProcessPaginatedData_Success() throws Exception {
+    public void testFetchAndProcessPaginatedDataSuccess() throws Exception {
         // Arrange
         when(resourceResolver.getResource(anyString())).thenReturn(resource);
         when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
@@ -92,7 +100,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testExecuteApiRequest_Success() throws IOException {
+    public void testExecuteApiRequestSuccess() throws IOException {
         // Arrange
         CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
@@ -119,7 +127,7 @@ public class BulkDataLoaderAPIServiceTest {
 
  // Ensure only necessary stubbing is done:
     @Test
-    public void testExecuteApiRequest_Failure() throws IOException {
+    public void testExecuteApiRequestFailure() throws IOException {
         // Arrange: Mock only the necessary part of the test case
         CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
@@ -146,16 +154,39 @@ public class BulkDataLoaderAPIServiceTest {
         // Arrange
         when(rootNode.get("member")).thenReturn(memberNode);
         when(memberNode.isArray()).thenReturn(true);
-        when(memberNode.elements()).thenReturn(mock(Iterator.class));
 
+        when(fieldNames.hasNext()).thenReturn(true, false); // Simulate one element in the array
+        when(fieldNames.next()).thenReturn("https://experience.adobe.com/"); 
+        when(memberNode.fieldNames()).thenReturn(fieldNames);
+        when(memberNode.get("https://experience.adobe.com/")).thenReturn(pageData);
+
+        Iterator<JsonNode> mockIterator = mock(Iterator.class);
+        when(mockIterator.hasNext()).thenReturn(true, false); // Simulate one element
+        when(mockIterator.next()).thenReturn(memberNode); // Provide mock object node
+        when(memberNode.elements()).thenReturn(mockIterator); // Return mock iterator
+
+        
         List<String> newPages = Arrays.asList("/content/testpage");
 
         // Act
         bulkDataLoaderAPIService.processJsonData(rootNode, newPages, resourceResolver, config);
 
         // Assert
-        // Verify that the method processes data correctly, add your assertions based on the logic
+        // Verify that the interactions with mocks occurred as expected
+        verify(rootNode).get("member");
+        verify(memberNode).isArray();
+        verify(memberNode).elements();
+
+        // Add meaningful assertions based on your logic (example)
+        assertNotNull(newPages);
+        assertEquals(1, newPages.size());
+        assertTrue(newPages.contains("/content/testpage"));
+
+        // If the method updates configuration, add assertions to validate those changes
+        // e.g., verify if a method was called on config or resourceResolver mocks.
+        verify(resourceResolver, times(1)).commit(); // Example: Ensure commit is called exactly once
     }
+
 
     @Test
     public void testGetNextPage() {
