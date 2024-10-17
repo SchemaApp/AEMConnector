@@ -1,121 +1,228 @@
 package com.schemaapp.core.services;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.json.JSONArray;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.impl.BulkDataLoaderAPIServiceImpl;
 
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class BulkDataLoaderAPIServiceTest {
+
+    @InjectMocks
+    private BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIService;
 
     @Mock
     private CDNHandlerService cdnDataHandlerService;
 
-    @Spy
-    @InjectMocks
-    private BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIService;
+    @Mock
+    private ResourceResolver resourceResolver;
 
+    @Mock
+    private Resource resource;
 
-    @Test
-    void fetchAndProcessPaginatedDataSuccess() throws Exception {
-        // Mock dependencies
-        SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
-        ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        String response = "{}";
+    @Mock
+    private ValueMap valueMap;
 
-        doReturn(response).when(bulkDataLoaderAPIService).executeApiRequest(anyString(), anyString());
-        doReturn(null).when(bulkDataLoaderAPIService).getNextPage(any(), anyString());
-        doReturn(new ArrayList<>()).when(bulkDataLoaderAPIService).retrievePagePathsFromNode(resourceResolver, "/conf/schemaapp/pagesData");
-        doReturn(new ArrayList<>()).when(bulkDataLoaderAPIService).findMissingPages(anyList(), anyList());
+    @Mock
+    private SchemaAppConfig config;
 
-        // Test the method
-        bulkDataLoaderAPIService.fetchAndProcessPaginatedData(config, resourceResolver);
+    @Mock
+    private JsonNode rootNode;
+    
+    @Mock
+    private JSONArray rootNodeArray;
 
-        // Verify that methods were called
-        verify(bulkDataLoaderAPIService, times(1)).executeApiRequest(anyString(), anyString());
-        verify(bulkDataLoaderAPIService, times(1)).parseJsonResponse(anyString());
-        verify(bulkDataLoaderAPIService, times(1)).processJsonData(any(), anyList(), eq(resourceResolver), eq(config));
-        verify(bulkDataLoaderAPIService, times(1)).retrievePagePathsFromNode(eq(resourceResolver), anyString());
-        verify(cdnDataHandlerService, times(0)).removeResource(anyString(), eq(resourceResolver));
+    @Mock
+    private JsonNode memberNode;
+    
+    @Mock
+    private JsonNode pageData;
+
+    @Mock
+    private ObjectMapper objectMapper;
+    
+    @Mock
+    private Iterator<String> fieldNames;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void fetchAndProcessPaginatedDataWithDummyDataSuccess() throws Exception {
-        // Mock dependencies
-        SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
-        ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        String response = "{\"@context\":{\"@vocab\":\"http://www.w3.org/ns/hydra/core#\",\"schemamodel\":\"http://schemaapp.com/ontology/schemamodel#\"},\"@id\":\"https://api.schemaapp.com/export/NikhilAMETestCompany\",\"@type\":\"Collection\",\"@totalItems\":91,\"member\":[{\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article/sample-article-1\":{\"schemamodel:etag\":\"NULL\",\"schemamodel:source\":\"NULL\",\"aws:lastUpdated\":\"2023-03-17 23:28:41.483709\",\"@graph\":[{\"@type\":[\"Article\"],\"@id\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article/sample-article-1.html#Article\",\"@context\":{\"@vocab\":\"http://schema.org/\",\"kg\":\"http://g.co/kg\"},\"url\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article/sample-article-1.html\",\"about\":[{\"@id\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article\"}],\"archivedAt\":\"New Fixed Property\",\"accessMode\":\"Highlighter JavaScript\",\"identifier\":[{\"@type\":\"PropertyValue\",\"@id\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article/sample-article-1.html#Article_identifier_PropertyValue\",\"name\":\"InternalUrl\",\"value\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article/sample-article-1\"}],\"headline\":\"Subtitle\",\"name\":\"Sample Article 1\",\"description\":\"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis ac pulvinar erat. In nunc orci, tincidunt a enim eu, malesuada pharetra felis. Suspendisse ut lectus id lorem vulputate scelerisque aliquam vel arcu. Aliquam elementum purus ut ornare aliquam. Phasellus rhoncus auctor velit. Etiam sollicitudin enim in tincidunt dignissim. In lacinia vulputate varius. Curabitur et accumsan justo. Pellentesque tristique malesuada risus vitae faucibus. Integer commodo dui nisl, sit amet viverra velit dapibus a.\"},{\"@context\":\"http://schema.org\",\"@type\":\"Thing\",\"name\":\"article2\",\"description\":\"my test data tttt\",\"additionalType\":\"my test data eeee\",\"identifier\":\"my test data uuuu\",\"disambiguatingDescription\":\"my test data yyyy\",\"alternateName\":\"my test data rrrr\",\"@id\":\"https://publish-p62138-e507792.adobeaemcloud.com/content/schemaapp/en/article\"}]}}],\"view\":{\"@id\":\"https://api.schemaapp.com/export/NikhilAMETestCompany\",\"@type\":\"PartialCollectionView\",\"first\":\"/export/NikhilAMETestCompany?page=1&pageSize=15&includeSubAccounts=False\",\"last\":\"/export/NikhilAMETestCompany?page=7&pageSize=15&includeSubAccounts=False\",\"previous\":\"/export/NikhilAMETestCompany?page=6&pageSize=15&includeSubAccounts=False\",\"next\":\"/export/NikhilAMETestCompany?page=7&pageSize=15&includeSubAccounts=False\",\"items\":1,\"page\":7,\"pageSize\":15,\"includeSubAccounts\":false}}";
+    public void testFetchAndProcessPaginatedDataSuccess() throws Exception {
+        // Arrange
+        when(resourceResolver.getResource(anyString())).thenReturn(resource);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        String[] mockedPagePaths = {"path1", "path2"};
+        when(valueMap.get(eq("pagePaths"), any(String[].class))).thenReturn(mockedPagePaths);
 
-        doReturn(response).when(bulkDataLoaderAPIService).executeApiRequest(anyString(), anyString());
-
-        // Test the method
+        // Act
         bulkDataLoaderAPIService.fetchAndProcessPaginatedData(config, resourceResolver);
 
-        // Verify that methods were called
-        verify(bulkDataLoaderAPIService, times(1)).executeApiRequest(anyString(), anyString());
-        verify(bulkDataLoaderAPIService, times(1)).parseJsonResponse(anyString());
-        verify(bulkDataLoaderAPIService, times(1)).processJsonData(any(), anyList(), eq(resourceResolver), eq(config));
-        verify(bulkDataLoaderAPIService, times(1)).retrievePagePathsFromNode(eq(resourceResolver), anyString());
-        verify(cdnDataHandlerService, times(0)).removeResource(anyString(), eq(resourceResolver));
+        // Assert
+        verify(cdnDataHandlerService, times(1)).savePagePathsToNode(eq(resourceResolver), eq("/conf/schemaapp"), anyList());
     }
 
     @Test
-    void fetchAndProcessPaginatedDataException() throws Exception {
-        // Mock dependencies
-        SchemaAppConfig config = new SchemaAppConfig("accountId", "siteURL", "dMethod", "endpoint", "apikey");
-        ResourceResolver resourceResolver = mock(ResourceResolver.class);
-
-        doThrow(IOException.class).when(bulkDataLoaderAPIService).executeApiRequest(config.getApiKey(), "https://api.schemaapp.com/export/accountId");
-
-        // Test the method
-        bulkDataLoaderAPIService.fetchAndProcessPaginatedData(config, resourceResolver);
-
-        // Verify that the error is logged
-        verify(bulkDataLoaderAPIService, times(1)).executeApiRequest(anyString(), anyString());
-        verify(bulkDataLoaderAPIService, times(0)).parseJsonResponse(anyString());
-        verify(bulkDataLoaderAPIService, times(0)).processJsonData(any(), anyList(), eq(resourceResolver), eq(config));
-        verify(bulkDataLoaderAPIService, times(0)).retrievePagePathsFromNode(eq(resourceResolver), anyString());
-        verify(cdnDataHandlerService, times(0)).removeResource(anyString(), eq(resourceResolver));
-    }
-
-    @Test
-    void executeApiRequestException() throws IOException {
-        // Mock dependencies
+    public void testExecuteApiRequestSuccess() throws IOException {
+        // Arrange
         CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        StatusLine statusLine = mock(StatusLine.class);
+        HttpEntity httpEntity = mock(HttpEntity.class);
 
-        doReturn(httpClient).when(bulkDataLoaderAPIService).getClient();
-        when(httpClient.execute(any(HttpGet.class))).thenThrow(IOException.class);
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        when(statusLine.getStatusCode()).thenReturn(200);
+        when(httpResponse.getEntity()).thenReturn(httpEntity);
+        when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream("Success".getBytes()));
 
-        // Test the method
-        assertThrows(IOException.class, () -> bulkDataLoaderAPIService.executeApiRequest("apiKey", "url"));
+        // Mock getClient to return mocked httpClient
+        BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIServiceSpy = spy(bulkDataLoaderAPIService);
+        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient();
 
-        // Verify that the correct HTTP methods were called
-        verify(httpClient, times(1)).execute(any(HttpGet.class));
-        verify(httpClient, times(1)).close();
+        // Act
+        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest("apiKey", "testUrl");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("Success", result);
+    }
+
+ // Ensure only necessary stubbing is done:
+    @Test
+    public void testExecuteApiRequestFailure() throws IOException {
+        // Arrange: Mock only the necessary part of the test case
+        CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        StatusLine statusLine = mock(StatusLine.class);
+
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        when(statusLine.getStatusCode()).thenReturn(404); // Simulate failure
+
+        // Mock getClient to return mocked httpClient
+        BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIServiceSpy = spy(bulkDataLoaderAPIService);
+        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient();
+
+        // Act
+        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest("apiKey", "testUrl");
+
+        // Assert
+        assertNull(result); // Ensure null is returned on failure
     }
 
 
+    @Test
+    public void testProcessJsonData() throws Exception {
+        // Arrange
+        when(rootNode.get("member")).thenReturn(memberNode);
+        when(memberNode.isArray()).thenReturn(true);
+
+        when(fieldNames.hasNext()).thenReturn(true, false); // Simulate one element in the array
+        when(fieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html"); 
+        when(memberNode.fieldNames()).thenReturn(fieldNames);
+        when(memberNode.get("https://experience.adobe.com/content/testpag.html")).thenReturn(pageData);
+
+        when(pageData.get(anyString())).thenReturn(pageData);
+        when(pageData.asText()).thenReturn("testData");
+        Iterator<JsonNode> mockIterator = mock(Iterator.class);
+        when(mockIterator.hasNext()).thenReturn(true, false); // Simulate one element
+        when(mockIterator.next()).thenReturn(memberNode); // Provide mock object node
+        when(memberNode.elements()).thenReturn(mockIterator); // Return mock iterator
+
+        
+        List<String> newPages =  new ArrayList();
+        newPages.add("/content/testpage");
+
+        bulkDataLoaderAPIService.processJsonData(rootNode, newPages, resourceResolver, config);
+
+        // Assert
+        // Verify that the interactions with mocks occurred as expected
+        verify(rootNode).get("member");
+        verify(memberNode).isArray();
+        verify(memberNode).elements();
+
+        // Add meaningful assertions based on your logic (example)
+        assertNotNull(newPages);
+        assertEquals(2, newPages.size());
+        assertTrue(newPages.contains("/content/testpage"));
+
+    }
+
+
+    @Test
+    public void testGetNextPage() {
+        // Mock the behavior of rootNode and viewNode
+        JsonNode viewNode = mock(JsonNode.class);
+        JsonNode nextNode = mock(JsonNode.class);
+        
+        when(rootNode.get("view")).thenReturn(viewNode);
+        when(viewNode.has("next")).thenReturn(true);
+        when(viewNode.get("next")).thenReturn(nextNode);
+        when(nextNode.asText()).thenReturn("nextPage");
+
+        // Act
+        String nextPage = bulkDataLoaderAPIService.getNextPage(rootNode, "https://api.schemaapp.com");
+
+        // Assert
+        assertEquals("https://api.schemaapp.comnextPage", nextPage);
+    }
+
+
+    @Test
+    public void testRetrievePagePathsFromNode() {
+        // Arrange
+        when(resourceResolver.getResource(anyString())).thenReturn(resource);
+        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        when(valueMap.get(anyString(), any(String[].class))).thenReturn(new String[]{"path1", "path2"});
+
+        // Act
+        List<String> pagePaths = bulkDataLoaderAPIService.retrievePagePathsFromNode(resourceResolver, "/conf/schemaapp/pagesData");
+
+        // Assert
+        assertEquals(2, pagePaths.size());
+        assertEquals("path1", pagePaths.get(0));
+        assertEquals("path2", pagePaths.get(1));
+    }
 }

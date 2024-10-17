@@ -17,6 +17,7 @@ import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -51,7 +52,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
     private static final ObjectMapper mapperObject = new ObjectMapper()
             .configure(FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
-    private static final Logger LOG = LoggerFactory.getLogger(BulkDataLoaderAPIServiceImpl.class);
+    public static Logger logger = LoggerFactory.getLogger(BulkDataLoaderAPIServiceImpl.class);
 
     /**
      * Fetches and processes paginated data from a remote API.
@@ -67,6 +68,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
 
             while (nextPage != null) {
                 String response = executeApiRequest(config.getApiKey(), nextPage);
+                if (response == null) break;
                 JsonNode rootNode = parseJsonResponse(response);
 
                 processJsonData(rootNode, newPages, resourceResolver, config);
@@ -81,7 +83,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             missingPages.forEach(path -> cdnDataHandlerService.removeResource(path, resourceResolver));
 
         } catch (IOException | RepositoryException | JSONException | ReplicationException e) {
-            LOG.error("Error fetching and processing paginated data", e);
+            logger.error("Error fetching and processing paginated data", e);
         }
     }
 
@@ -91,9 +93,8 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
      * @param apiKey The API key.
      * @param url    The URL to execute the request.
      * @return The API response as a string.
-     * @throws IOException If an I/O error occurs during the HTTP request.
      */
-    public String executeApiRequest(String apiKey, String url) throws IOException {
+    public String executeApiRequest(String apiKey, String url) {
         try (CloseableHttpClient client = getClient()) {
             HttpGet httpGet = new HttpGet(URI.create(url));
             httpGet.addHeader("x-api-key", apiKey);
@@ -101,14 +102,26 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode != 200) {
-                    throw new HttpResponseException(statusCode, response.getStatusLine().getReasonPhrase());
+                    logger.error("API request failed with status code: {} URL: {} and reason: {}", statusCode, url, response.getStatusLine().getReasonPhrase());
+                    return null;
                 }
 
                 HttpEntity entity = response.getEntity();
                 return EntityUtils.toString(entity, StandardCharsets.UTF_8);
             }
+
+        } catch (HttpResponseException e) {
+            logger.error("HTTP response error: Status code: {}, Reason: {}", e.getStatusCode(), e);
+        } catch (ClientProtocolException e) {
+            logger.error("HTTP protocol error while making API request to URL: {}", url, e);
+        } catch (IOException e) {
+            logger.error("I/O error while making API request to URL: {}", url, e);
+        } catch (Exception e) {
+            logger.error("Unexpected error during API request to URL: {}", url, e);
         }
+        return null; // Return null or appropriate default response
     }
+
 
     public CloseableHttpClient getClient() {
         return HttpClients.createDefault();
@@ -168,10 +181,10 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             try {
                 JsonNode pageData = objectNode.get(pageUri);
 
-                LOG.debug("PAGE_URI: {}", pageUri);
-                LOG.debug("schemamodel:etag: {}", pageData.get("schemamodel:etag"));
-                LOG.debug("schemamodel:source: {}", pageData.get("schemamodel:source"));
-                LOG.debug("aws:lastUpdated: {}", pageData.get("aws:lastUpdated"));
+                logger.debug("PAGE_URI: {}", pageUri);
+                logger.debug("schemamodel:etag: {}", pageData.get("schemamodel:etag"));
+                logger.debug("schemamodel:source: {}", pageData.get("schemamodel:source"));
+                logger.debug("aws:lastUpdated: {}", pageData.get("aws:lastUpdated"));
 
                 String path = getContentPagePath(pageUri);
                 newPages.add(path);
@@ -190,7 +203,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                     }
                 }
             } catch (IOException | RepositoryException | JSONException | ReplicationException e) {
-                LOG.error("Error while processing page data, page url:  {}", pageUri, e);
+                logger.error("Error while processing page data, page url:  {}", pageUri, e);
             }
         }
     }
@@ -220,7 +233,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             mapperObject.readValue(graphNode.toString(), Object.class);
             cdnDataHandlerService.savenReplicate(graphNode, resourceResolver, additionalConfigMap, pageResource, config);
         } catch (IOException | RepositoryException | JSONException | ReplicationException e) {
-            LOG.error("Error processing page data for path: {}", path, e);
+            logger.error("Error processing page data for path: {}", path, e);
         }
     }
 
