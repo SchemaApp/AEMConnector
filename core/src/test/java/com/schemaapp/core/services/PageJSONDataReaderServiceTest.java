@@ -137,7 +137,7 @@ class PageJSONDataReaderServiceImplTest {
 
     // Test: getPath() - Valid URL
     @Test
-    void testGetPath_ValidUrl() {
+    void testGetPathValidUrl() {
         String pageUrl = "https://example.com/page.html";
         String expectedPath = "/page"; // Without the extension
 

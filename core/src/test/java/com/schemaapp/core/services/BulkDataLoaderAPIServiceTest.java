@@ -71,7 +71,10 @@ public class BulkDataLoaderAPIServiceTest {
     private JSONArray rootNodeArray;
 
     @Mock
-    private JsonNode memberNode, pageData;
+    private JsonNode memberNode;
+    
+    @Mock
+    private JsonNode pageData;
 
     @Mock
     private ObjectMapper objectMapper;
