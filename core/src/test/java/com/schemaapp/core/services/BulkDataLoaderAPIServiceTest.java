@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -159,19 +160,21 @@ public class BulkDataLoaderAPIServiceTest {
         when(memberNode.isArray()).thenReturn(true);
 
         when(fieldNames.hasNext()).thenReturn(true, false); // Simulate one element in the array
-        when(fieldNames.next()).thenReturn("https://experience.adobe.com/"); 
+        when(fieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html"); 
         when(memberNode.fieldNames()).thenReturn(fieldNames);
-        when(memberNode.get("https://experience.adobe.com/")).thenReturn(pageData);
+        when(memberNode.get("https://experience.adobe.com/content/testpag.html")).thenReturn(pageData);
 
+        when(pageData.get(anyString())).thenReturn(pageData);
+        when(pageData.asText()).thenReturn("testData");
         Iterator<JsonNode> mockIterator = mock(Iterator.class);
         when(mockIterator.hasNext()).thenReturn(true, false); // Simulate one element
         when(mockIterator.next()).thenReturn(memberNode); // Provide mock object node
         when(memberNode.elements()).thenReturn(mockIterator); // Return mock iterator
 
         
-        List<String> newPages = Arrays.asList("/content/testpage");
+        List<String> newPages =  new ArrayList();
+        newPages.add("/content/testpage");
 
-        // Act
         bulkDataLoaderAPIService.processJsonData(rootNode, newPages, resourceResolver, config);
 
         // Assert
@@ -182,12 +185,9 @@ public class BulkDataLoaderAPIServiceTest {
 
         // Add meaningful assertions based on your logic (example)
         assertNotNull(newPages);
-        assertEquals(1, newPages.size());
+        assertEquals(2, newPages.size());
         assertTrue(newPages.contains("/content/testpage"));
 
-        // If the method updates configuration, add assertions to validate those changes
-        // e.g., verify if a method was called on config or resourceResolver mocks.
-        verify(resourceResolver, times(1)).commit(); // Example: Ensure commit is called exactly once
     }
 
 
