@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.replication.ReplicationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.BulkDataLoaderAPIService;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -65,7 +66,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             String baseUrl = "https://api.schemaapp.com";
             String nextPage = baseUrl + "/export/" + config.getAccountId();
             List<String> newPages = new ArrayList<>();
-
+            existing = false;
             while (nextPage != null) {
                 String response = executeApiRequest(config.getApiKey(), nextPage);
                 if (response == null) break;
@@ -185,7 +186,8 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                 logger.debug("schemamodel:etag: {}", pageData.get("schemamodel:etag"));
                 logger.debug("schemamodel:source: {}", pageData.get("schemamodel:source"));
                 logger.debug("aws:lastUpdated: {}", pageData.get("aws:lastUpdated"));
-
+                logger.debug("is existing :: {}", existing);
+                
                 String path = getContentPagePath(pageUri);
                 newPages.add(path);
 
@@ -196,7 +198,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                     String eTagAEM = schemaappResource != null ? schemaappResource.getValueMap().get(Constants.E_TAG, StringUtils.EMPTY) : StringUtils.EMPTY;
                     String eTag = pageData.get("schemamodel:etag") != null ? pageData.get("schemamodel:etag").asText() : null;
 
-                    if (!eTagAEM.equals(eTag)) {
+                    if (Strings.isNullOrEmpty(eTag) || !eTagAEM.equals(eTag)) {
                         processDifferentETagsPages(pageData, path, resourceResolver, config);
                     } else {
                         existing = true;
