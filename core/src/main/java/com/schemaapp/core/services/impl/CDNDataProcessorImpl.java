@@ -1,11 +1,12 @@
 package com.schemaapp.core.services.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.jcr.Session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
@@ -23,8 +24,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
+import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
+import com.day.cq.wcm.api.PageManager;
 import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.BulkDataLoaderAPIService;
 import com.schemaapp.core.services.CDNDataProcessor;
@@ -82,29 +89,71 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
      *
      * @param resolver The resource resolver.
      * @return A list of root pages.
-     */
+     */ 
     private List<Page> fetchSiteRootPages(ResourceResolver resolver) {
-        List<Page> rootPages = new ArrayList<>();
-        Resource contentResource = resolver.getResource("/content");
-        if (contentResource == null)
-            return rootPages;
-        Iterator<Resource> childResourceIterator = contentResource.listChildren();
-        while (childResourceIterator.hasNext()) {
-            final Resource child = childResourceIterator.next();
-            if (child != null && "cq:Page".equals(child.getResourceType())) {
-                Resource jcrContentResource = child.getChild("jcr:content");
-                if (jcrContentResource != null && jcrContentResource.getValueMap().get(CQ_CLOUDSERVICECONFIGS) != null) {
-                    String[] cloudServiceConfigs = (String[]) jcrContentResource.getValueMap().get(CQ_CLOUDSERVICECONFIGS);
-                    boolean contains = Arrays.stream(cloudServiceConfigs)
-                            .anyMatch(s -> s.startsWith("/etc/cloudservices/schemaapp"));
+        LOG.debug("Schema App fetchSiteRootPages start");
 
-                    if (contains) {
-                        Page page = child.adaptTo(Page.class);
-                        rootPages.add(page);
+        List<Page> rootPages = new ArrayList<>();
+
+        try {
+            // Get the QueryBuilder instance
+            QueryBuilder queryBuilder = resolver.adaptTo(QueryBuilder.class);
+            if (queryBuilder == null) {
+                LOG.error("Could not adapt QueryBuilder");
+                return rootPages;
+            }
+
+            // Define search parameters (without LIKE)
+            Map<String, String> queryMap = new HashMap<>();
+            queryMap.put("path", "/content"); // Search under /content
+            queryMap.put("type", "cq:PageContent"); // Search cq:PageContent nodes
+            queryMap.put("property", CQ_CLOUDSERVICECONFIGS); // Search by cloudserviceconfigs property
+            queryMap.put("property.operation", "exists"); // Check that the property exists
+            queryMap.put("p.limit", "-1"); // No limit on results
+
+            // Create a PredicateGroup using the queryMap
+            PredicateGroup predicateGroup = PredicateGroup.create(queryMap);
+
+            // Create the query
+            Query query = queryBuilder.createQuery(predicateGroup, resolver.adaptTo(Session.class));
+            SearchResult result = query.getResult();
+
+            // Get the PageManager from the resolver
+            PageManager pageManager = resolver.adaptTo(PageManager.class);
+
+            // Process the results and manually filter for /etc/cloudservices/schemaapp
+            for (Hit hit : result.getHits()) {
+                try {
+                    Resource jcrContentResource = hit.getResource();
+                    if (jcrContentResource != null) {
+                        // Get the parent resource (the cq:Page node) of the jcr:content node
+                        Resource pageResource = jcrContentResource.getParent(); 
+                        if (pageResource != null) {
+                            // Adapt the parent resource to a Page object
+                            Page page = pageManager.getContainingPage(pageResource);
+                            if (page != null) {
+                                // Check manually if any value in the multi-valued property starts with /etc/cloudservices/schemaapp
+                                String[] cloudServiceConfigs = jcrContentResource.getValueMap().get(CQ_CLOUDSERVICECONFIGS, new String[0]);
+                                for (String config : cloudServiceConfigs) {
+                                    if (config.startsWith("/etc/cloudservices/schemaapp")) {
+                                        rootPages.add(page);
+                                        LOG.debug("Schema App fetchSiteRootPages found match for page: {}", page.getPath());
+                                        break; // No need to check other values once a match is found
+                                    }
+                                }
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    LOG.error("Error processing hit: ", e);
                 }
             }
+
+        } catch (Exception e) {
+            LOG.error("Error executing query for schema app cloud service: ", e);
         }
+
+        LOG.debug("Schema App fetchSiteRootPages End, rootPages {}", rootPages);
         return rootPages;
     }
 
@@ -116,6 +165,7 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
      */
     private void updateSchemaAppCDNData(ResourceResolver resolver, Page page) {
         try {
+            LOG.debug("Schema App Update Page node page path {}", page.getPath());
             ValueMap configDetailMap = fetchConfigNodeValueMap(resolver, page);
             if (configDetailMap != null) {
                 String accountId = extractAccountId(configDetailMap);
@@ -205,6 +255,7 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
             // Get the next child page
             final Page child = childPages.next();
 
+            LOG.debug("Schema App Create/update node, path {}", child.getPath());
             // Construct the path for the node
             String nodePath = child.getPath() + "/jcr:content/schemaapp"; // Path to the schemaapp node
 
@@ -226,6 +277,8 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
 
                 // Create the node
                 resourceResolver.create(parentNode, nodeName, properties);
+                
+                LOG.debug("Schema App Create node, creating new node nodeName {}", nodeName);
             } else {
 
                 ModifiableValueMap map = existingNode.adaptTo(ModifiableValueMap.class);
@@ -233,6 +286,8 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
                 if (map != null) {
                     map.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
                     map.put(Constants.SITEURL, siteURL + child.getPath());
+                    
+                    LOG.debug("Schema App update node, updating existing node, node path {}", nodePath);
                 }
             }
         } catch (PersistenceException e) {
