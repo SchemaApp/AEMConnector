@@ -189,9 +189,10 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                 logger.debug("is existing :: {}", existing);
                 
                 String path = getContentPagePath(pageUri);
+                if (Strings.isNullOrEmpty(path) || "/".equals(path)) continue;
                 newPages.add(path);
 
-                if (!existing) {
+                //if (!existing) {
                     String nodePath = path + "/jcr:content/schemaapp";
                     Resource schemaappResource = resourceResolver.getResource(nodePath);
 
@@ -203,7 +204,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                     } else {
                         existing = true;
                     }
-                }
+                //}
             } catch (IOException | RepositoryException | JSONException | ReplicationException e) {
                 logger.error("Error while processing page data, page url:  {}", pageUri, e);
             }
@@ -233,6 +234,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
 
         try {
             mapperObject.readValue(graphNode.toString(), Object.class);
+            logger.debug("savenReplicate page data for path: {}", path);
             cdnDataHandlerService.savenReplicate(graphNode, resourceResolver, additionalConfigMap, pageResource, config);
         } catch (IOException | RepositoryException | JSONException | ReplicationException e) {
             logger.error("Error processing page data for path: {}", path, e);
