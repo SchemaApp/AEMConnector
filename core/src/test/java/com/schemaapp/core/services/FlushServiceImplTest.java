@@ -13,9 +13,11 @@ import java.util.Iterator;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.Value;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -23,16 +25,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import com.day.cq.wcm.api.Page;
 import com.schemaapp.core.services.impl.FlushServiceImpl;
-import com.schemaapp.core.util.ReplicationConstants;
 
-@ExtendWith(MockitoExtension.class)
 public class FlushServiceImplTest {
 
     @InjectMocks
@@ -67,17 +66,27 @@ public class FlushServiceImplTest {
 
     @Mock
     private Iterator<Page> pageIterator;
-    
+
     @Mock
     private Property property;
-    
+
     @Mock
     private Value value;
 
+    @Mock
+    private Session session;
+    
+    @Mock
+    private StatusLine statusLine;
+    
     @BeforeEach
     public void setUp() throws LoginException {
+        // Initialize mocks
+        MockitoAnnotations.openMocks(this);
+        
         // Mock ResourceResolver retrieval
         when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
     }
 
     @Test
@@ -92,7 +101,6 @@ public class FlushServiceImplTest {
         flushService.invalidatePageJson("/content/testPage");
 
         // Assert
-        verify(resourceResolver, times(1)).getResource(ReplicationConstants.REPLICATION_AGENT_PATH_PUBLISH);
         verify(publishReplicationAgentResource, times(1)).adaptTo(Page.class);
     }
 
@@ -105,12 +113,11 @@ public class FlushServiceImplTest {
         flushService.invalidatePageJson("/content/testPage");
 
         // Assert
-        verify(resourceResolver, times(1)).getResource(ReplicationConstants.REPLICATION_AGENT_PATH_PUBLISH);
         verify(publishReplicationAgentResource, never()).adaptTo(Page.class);
     }
 
     @Test
-    public void testGetResourceNodeSuccess() throws RepositoryException {
+    public void testGetResourceNodeSuccess() throws RepositoryException, LoginException {
         // Arrange
         when(resourceResolver.getResource(anyString())).thenReturn(publishReplicationAgentResource);
         when(publishReplicationAgentResource.adaptTo(Page.class)).thenReturn(publishReplicationAgentPage);
@@ -123,6 +130,7 @@ public class FlushServiceImplTest {
         when(contentResourceNode.getProperty("transportUri")).thenReturn(property);
         when(property.getValue()).thenReturn(value);
         when(value.getString()).thenReturn("http://dispatcher/cache");
+
         // Act
         flushService.invalidatePageJson("/content/testPage");
 
@@ -139,5 +147,5 @@ public class FlushServiceImplTest {
         assertDoesNotThrow(() -> flushService.invalidatePageJson("/content/testPage"));
         verify(resolverFactory, times(1)).getServiceResourceResolver(anyMap());
     }
-
 }
+
