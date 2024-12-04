@@ -103,7 +103,8 @@ Import-Package: javax.annotation;version=0.0.0,*
                         <_plugin>
                             <!-- Enable registration of Sling Models classes via bnd plugin -->
                             org.apache.sling.bnd.models.ModelsScannerPlugin,
-                                                                                    <!-- Allow the processing of SCR annotations via a bnd plugin --> org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}
+                            <!-- Allow the processing of SCR annotations via a bnd plugin -->
+                            org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}
                         </_plugin>
                         <!-- Include sling mapper configuration file -->
                         <Sling-Initial-Content>
