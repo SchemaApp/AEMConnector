@@ -7,6 +7,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import com.schemaapp.core.util.UrlUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -319,7 +320,8 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
     private void setSiteURLProperty(SchemaAppConfig config, Node pageNode, Resource urlResource)
             throws RepositoryException {
         if (StringUtils.isNotEmpty(config.getSiteURL())) {
-            pageNode.setProperty(Constants.SITEURL, config.getSiteURL() + urlResource.getPath());
+            pageNode.setProperty(Constants.SITEURL,
+					UrlUtils.concatSiteUrlPath(config.getSiteURL(), urlResource.getPath()));
         }
     }
 
