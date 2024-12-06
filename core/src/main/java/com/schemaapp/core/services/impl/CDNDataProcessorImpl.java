@@ -211,11 +211,10 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
      * @param configDetailMap The configuration details.
      * @return The extracted account ID.
      */
-    private String extractAccountId(ValueMap configDetailMap) {
-        String accountId = configDetailMap != null ? configDetailMap.get("accountID", String.class) : StringUtils.EMPTY;
-        if (accountId != null && accountId.lastIndexOf('/') > 0) {
-            int index = accountId.lastIndexOf('/');
-            accountId = accountId.substring(index + 1);
+    protected String extractAccountId(ValueMap configDetailMap) {
+        String accountId = configDetailMap != null ? configDetailMap.get("accountID", StringUtils.EMPTY) : StringUtils.EMPTY;
+        if (StringUtils.isNotBlank(accountId)) {
+            return accountId.replaceFirst("http.+/db/", "");
         }
         return accountId;
     }
