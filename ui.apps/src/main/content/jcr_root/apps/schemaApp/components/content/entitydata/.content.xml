@@ -3,5 +3,4 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="cq:Component"
           jcr:title="Entity Data Component"
-		  sling:resourceSuperType="core/wcm/components/teaser/v1/teaser"
           componentGroup="SchemaApp Components"/>
