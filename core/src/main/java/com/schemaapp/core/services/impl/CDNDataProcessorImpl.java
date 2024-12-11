@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.jcr.Session;
 
+import com.schemaapp.core.util.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -210,11 +211,10 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
      * @param configDetailMap The configuration details.
      * @return The extracted account ID.
      */
-    private String extractAccountId(ValueMap configDetailMap) {
-        String accountId = configDetailMap != null ? configDetailMap.get("accountID", String.class) : StringUtils.EMPTY;
-        if (accountId != null && accountId.lastIndexOf('/') > 0) {
-            int index = accountId.lastIndexOf('/');
-            accountId = accountId.substring(index + 1);
+    protected String extractAccountId(ValueMap configDetailMap) {
+        String accountId = configDetailMap != null ? configDetailMap.get("accountID", StringUtils.EMPTY) : StringUtils.EMPTY;
+        if (StringUtils.isNotBlank(accountId)) {
+            return accountId.replaceFirst("http.+/db/", "");
         }
         return accountId;
     }
@@ -273,7 +273,8 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
                 String nodeName = "schemaapp";
                 ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
                 properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
-                properties.put(Constants.SITEURL, siteURL + child.getPath());
+                properties.put(Constants.SITEURL,
+                        UrlUtils.concatSiteUrlPath(siteURL, child.getPath()));
 
                 // Create the node
                 resourceResolver.create(parentNode, nodeName, properties);
@@ -285,7 +286,8 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
 
                 if (map != null) {
                     map.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "schemaApp/components/content/entitydata");
-                    map.put(Constants.SITEURL, siteURL + child.getPath());
+                    map.put(Constants.SITEURL,
+                            UrlUtils.concatSiteUrlPath(siteURL, child.getPath()));
                     
                     LOG.debug("Schema App update node, updating existing node, node path {}", nodePath);
                 }
