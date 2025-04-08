@@ -63,8 +63,9 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
      */
     public void fetchAndProcessPaginatedData(SchemaAppConfig config, ResourceResolver resourceResolver) {
         try {
-            String baseUrl = "https://api.schemaapp.com";
+            String baseUrl = "https://9hdj7mg1a7.execute-api.us-east-1.amazonaws.com/prod"; //"https://api.schemaapp.com";
             String nextPage = baseUrl + "/export/" + config.getAccountId();
+            logger.info("Next Page: {}", nextPage);
             List<String> newPages = new ArrayList<>();
             existing = false;
             while (nextPage != null) {
