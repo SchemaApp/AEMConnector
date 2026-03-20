@@ -17,13 +17,15 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import io.wcm.testing.mock.aem.junit5.AemContext;
+import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit5.SlingContext;
+//import org.apache.sling.testing.mock.sling.junit5.SlingContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +45,7 @@ import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.impl.CDNHandlerServiceImpl;
 import com.schemaapp.core.util.Constants;
 
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({ MockitoExtension.class, AemContextExtension.class})
 public class CDNHandlerServiceTest {
 
     @Spy
@@ -74,7 +76,8 @@ public class CDNHandlerServiceTest {
 
     @BeforeEach
     public void setUp() throws RepositoryException {
-        SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+//        SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+        AemContext context = new AemContext();
         context.registerService(QueryBuilder.class, mock(QueryBuilder.class));
         context.registerService(FlushService.class, mock(FlushService.class));
         context.registerService(Replicator.class, mock(Replicator.class));

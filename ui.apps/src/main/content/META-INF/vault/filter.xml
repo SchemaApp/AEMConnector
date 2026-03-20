@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/schemaApp"/>
-    <filter root="/apps/cq" mode="merge">
-        <include pattern="/apps/cq" mode="merge"/>
-        <include pattern="/apps/cq/core" mode="merge"/>
-        <include pattern="/apps/cq/core/content" mode="merge"/>
-        <include pattern="/apps/cq/core/content/nav" mode="merge"/>
-        <include pattern="/apps/cq/core/content/nav/tools" mode="merge"/>
-        <include pattern="/apps/cq/core/content/nav/tools/cloudservices" mode="merge"/>
-        <include pattern="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig(/.*)?"/>
-    </filter>
+    <filter root="/apps/cq" mode="merge_properties"/>
+<!--        <include pattern="/apps/cq"/>-->
+<!--        <include pattern="/apps/cq/core"/>-->
+<!--        <include pattern="/apps/cq/core/content"/>-->
+<!--        <include pattern="/apps/cq/core/content/nav"/>-->
+<!--        <include pattern="/apps/cq/core/content/nav/tools"/>-->
+<!--        <include pattern="/apps/cq/core/content/nav/tools/cloudservices"/>-->
+<!--        <include pattern="/apps/cq/core/content/nav/tools/cloudservices/schemaAppconfig(/.*)?"/>-->
+<!--    </filter>-->
+    <filter root="/apps/cloudservices" mode="merge_properties"/>
+<!--    <filter root="/etc/replication" mode="merge_properties"/>-->
 </workspaceFilter>

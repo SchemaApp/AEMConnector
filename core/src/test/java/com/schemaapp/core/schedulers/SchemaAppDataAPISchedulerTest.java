@@ -10,11 +10,13 @@ import static org.mockito.Mockito.mock;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.wcm.testing.mock.aem.junit5.AemContext;
+import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.apache.sling.testing.mock.sling.junit5.SlingContext;
-import org.junit.Rule;
+//import org.apache.sling.testing.mock.sling.junit5.SlingContext;
+//import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +31,15 @@ import com.schemaapp.core.services.CDNDataProcessor;
 
 import junitx.util.PrivateAccessor;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith({MockitoExtension.class, AemContextExtension.class})
 class SchemaAppDataAPISchedulerTest {
 
 	@InjectMocks
 	SchemaAppDataAPIScheduler schemaAppDataAPIScheduler = new SchemaAppDataAPIScheduler();
 
-	@Rule
-	public SlingContext context = new SlingContext();
+//	@Rule
+//	public SlingContext context = new SlingContext();
+	public AemContext context = new AemContext();
 
 	@Mock
 	ConfigurationAdmin configurationAdmin;
