@@ -1,0 +1,12 @@
+<sly data-sly-use.model="com.schemaapp.core.models.SchemaAppHeadlibs">
+    <sly data-sly-test="${model.accountID && model.deploymentMethod == 'javaScript'}">
+        <script>window.schema_highlighter={output: false, accountId: ${model.accountID @ context='scriptString'}</script>
+        <script async src="https://cdn.schemaapp.com/javascript/highlight.js"></script>
+    </sly>
+
+    <meta data-page-path="${request.scheme}://${request.serverName}${currentPage.path}">
+
+    <sly data-sly-test="${model.graphData}">
+        <script type="application/ld+json" data-source="${model.source @ context='attribute'}">${model.graphData @ context='scriptString'}</script>
+    </sly>
+</sly>

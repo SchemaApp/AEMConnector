@@ -1,9 +1,7 @@
 package com.schemaapp.core.schedulers;
 
-import java.util.UUID;
-
-import org.apache.sling.commons.scheduler.ScheduleOptions;
-import org.apache.sling.commons.scheduler.Scheduler;
+import org.apache.sling.event.jobs.JobManager;
+import org.apache.sling.event.jobs.ScheduledJobInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -13,21 +11,24 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.schemaapp.core.services.CDNDataProcessor;
+import java.util.Collection;
 
 @Designate(ocd = SchemaAppDataAPIScheduler.Config.class)
-@Component
+@Component(
+		service = SchemaAppDataAPIScheduler.class,
+		immediate = true,
+		property = {
+				"scheduler.runOn=LEADER"
+		}
+)
 public class SchemaAppDataAPIScheduler {
 
 	private final Logger LOG = LoggerFactory.getLogger(SchemaAppDataAPIScheduler.class);
 
-	private static final String AUTOSUGGESTJOBNAME = "SchemaAppDataAPIScheduler";
+	public static final String AUTOSUGGESTJOBNAME = "SchemaAppDataAPIScheduler";
 
 	@Reference
-	private Scheduler scheduler;
-
-	@Reference
-	private CDNDataProcessor cndDataProcessor;
+	private JobManager jobManager;
 	
 	boolean enabled;
 	String schedulerExpression;
@@ -55,31 +56,25 @@ public class SchemaAppDataAPIScheduler {
 		schedulerExpression = config.expression();
 		schedulerConcurrent = config.concurrent();
 
-		ScheduleOptions scheduleOptions = scheduler.EXPR(schedulerExpression);
-		scheduleOptions.name(AUTOSUGGESTJOBNAME);
-		scheduleOptions.canRunConcurrently(schedulerConcurrent);
+		//remove any previously existing scheduled jobs
+		removeScheduler();
 
-		final Runnable autoSuggestSchedulerJob = () -> {
-			if(enabled) {
-				schedulerJob();
-			}
-		};
-		autoSuggestSchedulerJob.run();
-		try {
-			scheduler.schedule(autoSuggestSchedulerJob, scheduleOptions);
-		} catch (Exception e) {
-			LOG.error("Exception executing auto suggest scheduler: {}", e.getMessage());
-			autoSuggestSchedulerJob.run();
+		ScheduledJobInfo info = jobManager.createJob(AUTOSUGGESTJOBNAME)
+				.schedule()
+				.cron(schedulerExpression)
+				.add();
+
+		if (info == null) {
+			LOG.error(" :: SchemaAppDataAPIScheduler activate :: Failed to create scheduled job");
 		}
+		jobManager.getScheduledJobs(AUTOSUGGESTJOBNAME, Integer.MAX_VALUE, null)
+				.forEach(i ->
+						LOG.info(" :: SchemaAppDataAPIScheduler activate :: Scheduled job next at: {}", i.getNextScheduledExecution()));
 	}
 
-	public boolean schedulerJob() {
-	    UUID uuid = UUID.randomUUID();
-        String uuidAsString = uuid.toString();
-		LOG.info(" :: SchemaAppDataAPIScheduler start :: {} " , uuidAsString);
-		cndDataProcessor.processCDNDataAndUpdateSchema();
-		LOG.info(" :: SchemaAppDataAPIScheduler end :: {} ", uuidAsString);
-		return enabled;
-
+	private void removeScheduler() {
+		Collection<ScheduledJobInfo> jobs = jobManager.getScheduledJobs(AUTOSUGGESTJOBNAME, Integer.MAX_VALUE, null);
+		jobs.forEach(ScheduledJobInfo::unschedule);
 	}
+
 }
