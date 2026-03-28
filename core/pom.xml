@@ -148,11 +148,11 @@ Import-Package: javax.annotation;version=0.0.0,*
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>uk.org.lidalia</groupId>-->
+<!--            <artifactId>slf4j-test</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>aem-sdk-api</artifactId>
