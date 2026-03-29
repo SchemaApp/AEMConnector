@@ -15,7 +15,7 @@ import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.replication.ReplicationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.BulkDataLoaderAPIService;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -189,7 +188,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                 logger.debug("is existing :: {}", existing);
                 
                 String path = getContentPagePath(pageUri);
-                if (Strings.isNullOrEmpty(path) || "/".equals(path)) continue;
+                if (StringUtils.isBlank(path) || "/".equals(path)) continue;
                 newPages.add(path);
 
                 //if (!existing) {
@@ -199,7 +198,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                     String eTagAEM = schemaappResource != null ? schemaappResource.getValueMap().get(Constants.E_TAG, StringUtils.EMPTY) : StringUtils.EMPTY;
                     String eTag = pageData.get("schemamodel:etag") != null ? pageData.get("schemamodel:etag").asText() : null;
 
-                    if (Strings.isNullOrEmpty(eTag) || !eTagAEM.equals(eTag)) {
+                    if (StringUtils.isBlank(eTag) || !eTagAEM.equals(eTag)) {
                         processDifferentETagsPages(pageData, path, resourceResolver, config);
                     } else {
                         existing = true;
