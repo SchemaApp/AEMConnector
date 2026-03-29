@@ -159,6 +159,7 @@ Import-Package: javax.annotation;version=0.0.0,*
         <dependency>
             <groupId>com.adobe.cq</groupId>
             <artifactId>core.wcm.components.core</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -211,6 +212,7 @@ Import-Package: javax.annotation;version=0.0.0,*
       	<dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
+          <scope>test</scope>
 		</dependency>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.core</groupId>
@@ -225,13 +227,8 @@ Import-Package: javax.annotation;version=0.0.0,*
 		    <artifactId>jackson-annotations</artifactId>
 		</dependency>
         <dependency>
-            <groupId>uk.org.lidalia</groupId>
+            <groupId>com.github.valfirst</groupId>
             <artifactId>slf4j-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
