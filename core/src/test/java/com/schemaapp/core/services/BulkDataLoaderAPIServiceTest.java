@@ -158,35 +158,42 @@ public class BulkDataLoaderAPIServiceTest {
         when(rootNode.get("member")).thenReturn(memberNode);
         when(memberNode.isArray()).thenReturn(true);
 
-        when(fieldNames.hasNext()).thenReturn(true, false); // Simulate one element in the array
-        when(fieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html"); 
-        when(memberNode.fieldNames()).thenReturn(fieldNames);
-        when(memberNode.get("https://experience.adobe.com/content/testpag.html")).thenReturn(pageData);
-
-        when(pageData.get(anyString())).thenReturn(pageData);
-        when(pageData.asText()).thenReturn("testData");
+        JsonNode objectNode = mock(JsonNode.class);
         Iterator<JsonNode> mockIterator = mock(Iterator.class);
-        when(mockIterator.hasNext()).thenReturn(true, false); // Simulate one element
-        when(mockIterator.next()).thenReturn(memberNode); // Provide mock object node
-        when(memberNode.elements()).thenReturn(mockIterator); // Return mock iterator
+        when(mockIterator.hasNext()).thenReturn(true, false);
+        when(mockIterator.next()).thenReturn(objectNode);
+        when(memberNode.iterator()).thenReturn(mockIterator);
 
-        
-        List<String> newPages =  new ArrayList();
+        Iterator<String> objectFieldNames = mock(Iterator.class);
+        when(objectFieldNames.hasNext()).thenReturn(true, false);
+        when(objectFieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html");
+        when(objectNode.fieldNames()).thenReturn(objectFieldNames);
+
+        when(objectNode.get("https://experience.adobe.com/content/testpag.html")).thenReturn(pageData);
+
+        when(pageData.get("schemamodel:etag")).thenReturn(pageData);
+        when(pageData.get("schemamodel:source")).thenReturn(pageData);
+        when(pageData.get("aws:lastUpdated")).thenReturn(pageData);
+        when(pageData.get("@graph")).thenReturn(pageData);
+        when(pageData.asText()).thenReturn("testData");
+        when(pageData.toString()).thenReturn("{\"test\":\"data\"}");
+
+        when(resourceResolver.getResource(anyString())).thenReturn(null);
+
+        List<String> newPages = new ArrayList<>();
         newPages.add("/content/testpage");
 
         bulkDataLoaderAPIService.processJsonData(rootNode, newPages, resourceResolver, config);
 
         // Assert
-        // Verify that the interactions with mocks occurred as expected
         verify(rootNode).get("member");
         verify(memberNode).isArray();
-        verify(memberNode).elements();
+        verify(memberNode).iterator();
+        verify(objectNode).fieldNames();
 
-        // Add meaningful assertions based on your logic (example)
         assertNotNull(newPages);
         assertEquals(2, newPages.size());
         assertTrue(newPages.contains("/content/testpage"));
-
     }
 
 

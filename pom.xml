@@ -174,7 +174,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <id>coverage-initialize</id>
@@ -361,7 +361,7 @@ Bundle-DocURL:
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-          <version>1.0.6</version>
+                    <version>1.0.6</version>
                     <configuration>
                         <targetURL>http://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
                         <failOnError>true</failOnError>
@@ -583,8 +583,8 @@ Bundle-DocURL:
         <dependencies>
             <dependency>
                 <groupId>com.adobe.aem</groupId>
-        <artifactId>aem-sdk-api</artifactId>
-        <version>${aem.sdk.api}</version>
+                <artifactId>aem-sdk-api</artifactId>
+                <version>${aem.sdk.api}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -610,13 +610,13 @@ Bundle-DocURL:
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.1.0</version>
+                <version>5.18.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>4.1.0</version>
+                <version>5.18.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -628,16 +628,19 @@ Bundle-DocURL:
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-                <version>5.5.4</version>
+                <version>5.1.2</version>
                 <scope>test</scope>
                 <exclusions>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>org.apache.sling</groupId>
                         <artifactId>org.apache.sling.scripting.api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.caconfig-mock-plugin</artifactId>
@@ -685,13 +688,38 @@ Bundle-DocURL:
 			    <artifactId>jackson-annotations</artifactId>
 			    <version>2.16.2</version>
 			</dependency>
-<!--            <dependency>-->
-<!--                <groupId>uk.org.lidalia</groupId>-->
-<!--                <artifactId>slf4j-test</artifactId>-->
-<!--                <version>1.0.1</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>uk.org.lidalia</groupId>
+                <artifactId>slf4j-test</artifactId>
+                <version>1.0.1</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>32.0.1-jre</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+                <version>2.4.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.1</version>
+<!--                <scope>test</scope>-->
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

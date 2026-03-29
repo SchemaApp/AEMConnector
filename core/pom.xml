@@ -148,24 +148,17 @@ Import-Package: javax.annotation;version=0.0.0,*
     </build>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>uk.org.lidalia</groupId>-->
-<!--            <artifactId>slf4j-test</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>aem-sdk-api</artifactId>
 		</dependency>
-<!--        Temp commenting out this dependency-->
-<!--         <dependency>-->
-<!--		  <groupId>org.apache.httpcomponents</groupId>-->
-<!--		  <artifactId>httpclient</artifactId>-->
-<!--		</dependency>-->
+         <dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>httpclient</artifactId>
+		</dependency>
         <dependency>
             <groupId>com.adobe.cq</groupId>
             <artifactId>core.wcm.components.core</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -207,20 +200,18 @@ Import-Package: javax.annotation;version=0.0.0,*
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
-            <version>1.4.14</version>
+            <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
-<!--        Testing dropping JUnit-->
-<!--        <dependency>-->
-<!--           <groupId>org.apache.sling</groupId>-->
-<!--           <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>-->
-<!--           <scope>test</scope>-->
-<!--      	</dependency>-->
-<!--      	<dependency>-->
-<!--          <groupId>junit</groupId>-->
-<!--          <artifactId>junit</artifactId>-->
-<!--		</dependency>-->
-<!--        I think we need to keep this one for all the fasterxml stuff-->
+        <dependency>
+           <groupId>org.apache.sling</groupId>
+           <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+           <scope>test</scope>
+      	</dependency>
+      	<dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+		</dependency>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.core</groupId>
 		    <artifactId>jackson-databind</artifactId>
@@ -233,6 +224,15 @@ Import-Package: javax.annotation;version=0.0.0,*
 		    <groupId>com.fasterxml.jackson.core</groupId>
 		    <artifactId>jackson-annotations</artifactId>
 		</dependency>
-
+        <dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>slf4j-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
