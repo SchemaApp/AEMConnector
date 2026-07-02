@@ -142,7 +142,7 @@
                                                             name="./proxyUsername"/>
                                                         <proxyPassword
                                                             jcr:primaryType="nt:unstructured"
-                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/password"
                                                             fieldLabel="Proxy Password"
                                                             name="./proxyPassword"/>
                                                         <connect
