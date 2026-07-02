@@ -66,7 +66,7 @@ public class FlushServiceImpl implements FlushService {
         LOGGER.info("Starting Dispatcher cache invalidation for node: {}", nodePath);
         try {
             DistributionRequest distributionRequest = new SimpleDistributionRequest(
-                    DistributionRequestType.INVALIDATE, //This may need to use DistributionRequestType.ADD instead to actually publish the node
+                    DistributionRequestType.ADD,
                     false,
                     nodePath
             );
