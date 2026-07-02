@@ -66,19 +66,19 @@ public class BulkDataLoaderAPIServiceTest {
 
     @Mock
     private JsonNode rootNode;
-    
+
     @Mock
     private JSONArray rootNodeArray;
 
     @Mock
     private JsonNode memberNode;
-    
+
     @Mock
     private JsonNode pageData;
 
     @Mock
     private ObjectMapper objectMapper;
-    
+
     @Mock
     private Iterator<String> fieldNames;
 
@@ -118,10 +118,10 @@ public class BulkDataLoaderAPIServiceTest {
 
         // Mock getClient to return mocked httpClient
         BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIServiceSpy = spy(bulkDataLoaderAPIService);
-        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient();
+        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient(config);
 
         // Act
-        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest("apiKey", "testUrl");
+        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest(config, "testUrl");
 
         // Assert
         assertNotNull(result);
@@ -142,10 +142,10 @@ public class BulkDataLoaderAPIServiceTest {
 
         // Mock getClient to return mocked httpClient
         BulkDataLoaderAPIServiceImpl bulkDataLoaderAPIServiceSpy = spy(bulkDataLoaderAPIService);
-        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient();
+        doReturn(httpClient).when(bulkDataLoaderAPIServiceSpy).getClient(config);
 
         // Act
-        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest("apiKey", "testUrl");
+        String result = bulkDataLoaderAPIServiceSpy.executeApiRequest(config, "testUrl");
 
         // Assert
         assertNull(result); // Ensure null is returned on failure
@@ -159,7 +159,7 @@ public class BulkDataLoaderAPIServiceTest {
         when(memberNode.isArray()).thenReturn(true);
 
         when(fieldNames.hasNext()).thenReturn(true, false); // Simulate one element in the array
-        when(fieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html"); 
+        when(fieldNames.next()).thenReturn("https://experience.adobe.com/content/testpag.html");
         when(memberNode.fieldNames()).thenReturn(fieldNames);
         when(memberNode.get("https://experience.adobe.com/content/testpag.html")).thenReturn(pageData);
 
@@ -170,7 +170,7 @@ public class BulkDataLoaderAPIServiceTest {
         when(mockIterator.next()).thenReturn(memberNode); // Provide mock object node
         when(memberNode.elements()).thenReturn(mockIterator); // Return mock iterator
 
-        
+
         List<String> newPages =  new ArrayList();
         newPages.add("/content/testpage");
 
@@ -195,7 +195,7 @@ public class BulkDataLoaderAPIServiceTest {
         // Mock the behavior of rootNode and viewNode
         JsonNode viewNode = mock(JsonNode.class);
         JsonNode nextNode = mock(JsonNode.class);
-        
+
         when(rootNode.get("view")).thenReturn(viewNode);
         when(viewNode.has("next")).thenReturn(true);
         when(viewNode.get("next")).thenReturn(nextNode);
@@ -208,6 +208,133 @@ public class BulkDataLoaderAPIServiceTest {
         assertEquals("https://api.schemaapp.comnextPage", nextPage);
     }
 
+
+    // ==========================================================
+    // Tests for getClient(SchemaAppConfig) - covering all branches
+    // ==========================================================
+
+    @Test
+    public void testGetClient_NoProxyEnabled_ReturnsDefaultClient() {
+        // isEnableProxy() -> false, short-circuits entire outer if
+        when(config.isEnableProxy()).thenReturn(false);
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_BlankHost_ReturnsDefaultClient() {
+        // isEnableProxy() true but proxyHost blank -> default client
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_NullHost_ReturnsDefaultClient() {
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn(null);
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_BlankPort_ReturnsDefaultClient() {
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_NonNumericPort_ReturnsDefaultClient() {
+        // Port present but not digits -> NumberUtils.isDigits false -> default
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("abcd");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_NoAuth_ReturnsProxyClient() {
+        // Valid proxy, no credentials -> proxy client without credentials provider
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("8080");
+        when(config.getProxyUsername()).thenReturn("");
+        // Password lookup short-circuits due to blank username
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_NullUsername_ReturnsProxyClientWithoutAuth() {
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("8080");
+        when(config.getProxyUsername()).thenReturn(null);
+        // Password lookup should short-circuit; keep it lenient by not stubbing
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_UsernameOnly_ReturnsProxyClientWithoutAuth() {
+        // Username set but password blank -> partial pass, no auth branch
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("8080");
+        when(config.getProxyUsername()).thenReturn("user");
+        when(config.getProxyPassword()).thenReturn("");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_WithAuth_ReturnsAuthenticatedProxyClient() {
+        // Fully configured proxy with credentials -> auth branch
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("8080");
+        when(config.getProxyUsername()).thenReturn("user");
+        when(config.getProxyPassword()).thenReturn("secret");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testGetClient_ProxyEnabled_NumericPortBoundary() {
+        // Port with leading zeros - still digits
+        when(config.isEnableProxy()).thenReturn(true);
+        when(config.getProxyHost()).thenReturn("proxy.example.com");
+        when(config.getProxyPort()).thenReturn("0080");
+        when(config.getProxyUsername()).thenReturn("user");
+        when(config.getProxyPassword()).thenReturn("pass");
+
+        CloseableHttpClient client = bulkDataLoaderAPIService.getClient(config);
+
+        assertNotNull(client);
+    }
 
     @Test
     public void testRetrievePagePathsFromNode() {

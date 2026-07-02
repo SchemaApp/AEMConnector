@@ -1,26 +1,25 @@
 package com.schemaapp.core.services.impl;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.RepositoryException;
-
+import com.day.cq.replication.ReplicationException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.schemaapp.core.models.SchemaAppConfig;
+import com.schemaapp.core.services.BulkDataLoaderAPIService;
+import com.schemaapp.core.services.CDNHandlerService;
+import com.schemaapp.core.util.Constants;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -33,14 +32,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.replication.ReplicationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.schemaapp.core.models.SchemaAppConfig;
-import com.schemaapp.core.services.BulkDataLoaderAPIService;
-import com.schemaapp.core.services.CDNHandlerService;
-import com.schemaapp.core.util.Constants;
+import javax.jcr.RepositoryException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES;
 
 @Component(service = BulkDataLoaderAPIService.class, immediate = true)
 public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
@@ -68,7 +67,7 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             List<String> newPages = new ArrayList<>();
             existing = false;
             while (nextPage != null) {
-                String response = executeApiRequest(config.getApiKey(), nextPage);
+                String response = executeApiRequest(config, nextPage);
                 if (response == null) break;
                 JsonNode rootNode = parseJsonResponse(response);
 
@@ -91,14 +90,14 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
     /**
      * Executes an API request and returns the response as a string.
      *
-     * @param apiKey The API key.
+     * @param config The SchemaApp configuration.
      * @param url    The URL to execute the request.
      * @return The API response as a string.
      */
-    public String executeApiRequest(String apiKey, String url) {
-        try (CloseableHttpClient client = getClient()) {
+    public String executeApiRequest(SchemaAppConfig config, String url) {
+        try (CloseableHttpClient client = getClient(config)) {
             HttpGet httpGet = new HttpGet(URI.create(url));
-            httpGet.addHeader("x-api-key", apiKey);
+            httpGet.addHeader("x-api-key", config.getApiKey());
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -124,7 +123,32 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
     }
 
 
-    public CloseableHttpClient getClient() {
+    /**
+     * Creates a CloseableHttpClient instance based on the configuration.
+     * @param config The SchemaApp configuration.
+     * @return CloseableHttpClient instance
+     */
+    public CloseableHttpClient getClient(SchemaAppConfig config) {
+        if (config.isEnableProxy() && StringUtils.isNotBlank(config.getProxyHost())
+                && StringUtils.isNotBlank(config.getProxyPort()) && NumberUtils.isDigits(config.getProxyPort())) {
+
+            // Proxy configuration is available, create a proxy-aware HttpClient
+            HttpHost proxy = new HttpHost(config.getProxyHost(), Integer.parseInt(config.getProxyPort()));
+
+            if (StringUtils.isNotBlank(config.getProxyUsername()) && StringUtils.isNotBlank(config.getProxyPassword())) {
+                // Proxy authentication is available, set up credentials provider
+                CredentialsProvider credsProvider = new BasicCredentialsProvider();
+                credsProvider.setCredentials(
+                        new AuthScope(proxy.getHostName(), proxy.getPort()),
+                        new UsernamePasswordCredentials(config.getProxyUsername(), config.getProxyPassword())
+                );
+                return HttpClients.custom().setProxy(proxy).setDefaultCredentialsProvider(credsProvider).build();
+            } else {
+                // No proxy authentication, use default credentials provider
+                return HttpClients.custom().setProxy(proxy).build();
+            }
+        }
+        // No proxy configuration, use default HttpClient
         return HttpClients.createDefault();
     }
 

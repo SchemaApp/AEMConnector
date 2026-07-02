@@ -12,12 +12,27 @@ public class SchemaAppConfig {
     
     private String apiKey;
 
-    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint, String apiKey) {
+    private boolean enableProxy;
+
+    private String proxyHost;
+
+    private String proxyPort;
+
+    private String proxyUsername;
+
+    private String proxyPassword;
+
+    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint, String apiKey, boolean enableProxy, String proxyHost, String proxyPort, String proxyUsername, String proxyPassword) {
         this.accountId = accountId;
         this.siteURL = siteURL;
         this.deploymentMethod = deploymentMethod;
         this.endpoint = endpoint;
         this.apiKey = apiKey;
+        this.enableProxy = enableProxy;
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyPort;
+        this.proxyUsername = proxyUsername;
+        this.proxyPassword = proxyPassword;
     }
 
     public SchemaAppConfig() {
@@ -61,5 +76,45 @@ public class SchemaAppConfig {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public boolean isEnableProxy() {
+        return enableProxy;
+    }
+
+    public void setEnableProxy(boolean enableProxy) {
+        this.enableProxy = enableProxy;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public String getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(String proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public String getProxyUsername() {
+        return proxyUsername;
+    }
+
+    public void setProxyUsername(String proxyUsername) {
+        this.proxyUsername = proxyUsername;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
     }
 }
