@@ -126,13 +126,13 @@
                                                         <proxyHost
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                            fieldDescription="Please provide the proxy host/URL, e.g https://www.mydomain.com."
-                                                            fieldLabel="Proxy Host "
+                                                            fieldDescription="Please provide the proxy hostname, e.g.: 127.9.9.1 or us.proxytest.net"
+                                                            fieldLabel="Proxy Hostname"
                                                             name="./proxyHost"/>
                                                         <proxyPort
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                            fieldDescription="Please provide the proxy port."
+                                                            fieldDescription="Please provide the proxy port, e.g.: 8080 or 5000
                                                             fieldLabel="Proxy Port"
                                                             name="./proxyPort"/>
                                                         <proxyUsername
