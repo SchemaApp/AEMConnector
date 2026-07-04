@@ -1,5 +1,7 @@
 package com.schemaapp.core.models;
 
+import org.apache.sling.api.resource.ValueMap;
+
 public class SchemaAppConfig {
 
     private String accountId;
@@ -22,17 +24,17 @@ public class SchemaAppConfig {
 
     private String proxyPassword;
 
-    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint, String apiKey, boolean enableProxy, String proxyHost, String proxyPort, String proxyUsername, String proxyPassword) {
+    public SchemaAppConfig(String accountId, String endpoint, ValueMap configDetailMap) {
         this.accountId = accountId;
-        this.siteURL = siteURL;
-        this.deploymentMethod = deploymentMethod;
+        this.siteURL = configDetailMap.get("siteURL", String.class);
+        this.deploymentMethod = configDetailMap.get("deploymentMethod", String.class);
         this.endpoint = endpoint;
-        this.apiKey = apiKey;
-        this.enableProxy = enableProxy;
-        this.proxyHost = proxyHost;
-        this.proxyPort = proxyPort;
-        this.proxyUsername = proxyUsername;
-        this.proxyPassword = proxyPassword;
+        this.apiKey = configDetailMap.get("apiKey", String.class);
+        this.enableProxy = configDetailMap.get("enableProxy", false);
+        this.proxyHost = configDetailMap.get("proxyHost", String.class);
+        this.proxyPort = configDetailMap.get("proxyPort", String.class);
+        this.proxyUsername = configDetailMap.get("proxyUsername", String.class);
+        this.proxyPassword = configDetailMap.get("proxyPassword", String.class);
     }
 
     public SchemaAppConfig() {

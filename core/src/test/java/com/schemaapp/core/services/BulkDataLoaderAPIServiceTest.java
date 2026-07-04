@@ -214,7 +214,7 @@ public class BulkDataLoaderAPIServiceTest {
     // ==========================================================
 
     @Test
-    public void testGetClient_NoProxyEnabled_ReturnsDefaultClient() {
+    public void testGetClientNoProxyEnabledReturnsDefaultClient() {
         // isEnableProxy() -> false, short-circuits entire outer if
         when(config.isEnableProxy()).thenReturn(false);
 
@@ -224,7 +224,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_BlankHost_ReturnsDefaultClient() {
+    public void testGetClientProxyEnabledBlankHostReturnsDefaultClient() {
         // isEnableProxy() true but proxyHost blank -> default client
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("");
@@ -235,7 +235,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_NullHost_ReturnsDefaultClient() {
+    public void testGetClientProxyEnabledNullHostReturnsDefaultClient() {
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn(null);
 
@@ -245,7 +245,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_BlankPort_ReturnsDefaultClient() {
+    public void testGetClientProxyEnabledBlankPortReturnsDefaultClient() {
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
         when(config.getProxyPort()).thenReturn("");
@@ -256,7 +256,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_NonNumericPort_ReturnsDefaultClient() {
+    public void testGetClientProxyEnabledNonNumericPortReturnsDefaultClient() {
         // Port present but not digits -> NumberUtils.isDigits false -> default
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
@@ -268,7 +268,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_NoAuth_ReturnsProxyClient() {
+    public void testGetClientProxyEnabledNoAuthReturnsProxyClient() {
         // Valid proxy, no credentials -> proxy client without credentials provider
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
@@ -282,7 +282,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_NullUsername_ReturnsProxyClientWithoutAuth() {
+    public void testGetClientProxyEnabledNullUsernameReturnsProxyClientWithoutAuth() {
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
         when(config.getProxyPort()).thenReturn("8080");
@@ -295,7 +295,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_UsernameOnly_ReturnsProxyClientWithoutAuth() {
+    public void testGetClientProxyEnabledUsernameOnlyReturnsProxyClientWithoutAuth() {
         // Username set but password blank -> partial pass, no auth branch
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
@@ -309,7 +309,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_WithAuth_ReturnsAuthenticatedProxyClient() {
+    public void testGetClientProxyEnabledWithAuthReturnsAuthenticatedProxyClient() {
         // Fully configured proxy with credentials -> auth branch
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");
@@ -323,7 +323,7 @@ public class BulkDataLoaderAPIServiceTest {
     }
 
     @Test
-    public void testGetClient_ProxyEnabled_NumericPortBoundary() {
+    public void testGetClientProxyEnabledNumericPortBoundary() {
         // Port with leading zeros - still digits
         when(config.isEnableProxy()).thenReturn(true);
         when(config.getProxyHost()).thenReturn("proxy.example.com");

@@ -171,19 +171,12 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
             if (configDetailMap != null) {
                 String accountId = extractAccountId(configDetailMap);
                 String siteURL = configDetailMap.get("siteURL", String.class);
-                String deploymentMethod = configDetailMap.get("deploymentMethod", String.class);
-                String apiKey = configDetailMap.get("apiKey", String.class);
-                boolean enableProxy = configDetailMap.get("enableProxy", false);
-                String proxyHost = configDetailMap.get("proxyHost", String.class);
-                String proxyPort = configDetailMap.get("proxyPort", String.class);
-                String proxyUsername = configDetailMap.get("proxyUsername", String.class);
-                String proxyPassword = configDetailMap.get("proxyPassword", String.class);
-                
+
                 Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
                 String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
                         Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
 
-                SchemaAppConfig config = new SchemaAppConfig(accountId, siteURL, deploymentMethod, endpoint, apiKey, enableProxy, proxyHost, proxyPort, proxyUsername, proxyPassword);
+                SchemaAppConfig config = new SchemaAppConfig(accountId, endpoint, configDetailMap);
                 while (childPages.hasNext()) {
                     createOrUpdateSchemaNode(childPages, resolver, siteURL);
                 }
