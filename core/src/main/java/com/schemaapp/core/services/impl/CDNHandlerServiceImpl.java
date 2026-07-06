@@ -14,7 +14,6 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.Replicator;
-import com.day.cq.search.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.schemaapp.core.models.SchemaAppConfig;
 import com.schemaapp.core.services.CDNHandlerService;
@@ -40,19 +37,9 @@ public class CDNHandlerServiceImpl implements CDNHandlerService {
 	private static final String SCHEMA_APP_COMPONENTS_RESOURCE_TYPE = "schemaApp/components/content/entitydata";
 
 	@Reference
-	ResourceResolverFactory resolverFactory;
-
-	@Reference
-	private QueryBuilder builder;
-
-	@Reference
 	FlushService flushService;
 
-	@Reference
-	Replicator replicator;
-	
     public static Logger logger = LoggerFactory.getLogger(CDNHandlerServiceImpl.class);
-
 
 	/**
 	 * Save Graph Data to AEM Node

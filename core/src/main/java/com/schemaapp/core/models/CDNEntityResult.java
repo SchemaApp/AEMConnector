@@ -1,7 +1,5 @@
 package com.schemaapp.core.models;
 
-import com.google.common.base.Objects;
-
 /**
  * The <code>WebhookEntityResult</code> class to prepare Webhook API response.
  * 
@@ -51,11 +49,10 @@ class WebhookEntitySucessResult extends CDNEntityResult {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
-				.add(ID_CONSTANT, id)
-				.add(TYPE_CONSTANT, type)
-				.add(SUCCESS_MESSAGE, "Successfully, request completed!")
-				.toString();
+		return "WebhookEntitySucessResult{"
+				+ ID_CONSTANT+"="+id+", "
+				+ TYPE_CONSTANT+"="+type+", "
+				+ SUCCESS_MESSAGE+"=Successfully, request completed!}";
 	}
 }
 
@@ -74,8 +71,6 @@ class WebhookEntityErrorResult extends CDNEntityResult {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
-				.add(ERROR_MESSAGE, errorMessage)
-				.toString();
+		return "WebhookEntityErrorResult{"+ERROR_MESSAGE+"="+errorMessage+"}";
 	}
 }
