@@ -133,10 +133,12 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
                 && StringUtils.isNotBlank(config.getProxyPort()) && NumberUtils.isDigits(config.getProxyPort())) {
 
             // Proxy configuration is available, create a proxy-aware HttpClient
+            logger.info("Proxy configuration is available, creating proxy-aware HttpClient");
             HttpHost proxy = new HttpHost(config.getProxyHost(), Integer.parseInt(config.getProxyPort()));
 
             if (StringUtils.isNotBlank(config.getProxyUsername()) && StringUtils.isNotBlank(config.getProxyPassword())) {
                 // Proxy authentication is available, set up credentials provider
+                logger.info("Proxy authentication is available, setting up credentials provider");
                 CredentialsProvider credsProvider = new BasicCredentialsProvider();
                 credsProvider.setCredentials(
                         new AuthScope(proxy.getHostName(), proxy.getPort()),
@@ -149,6 +151,9 @@ public class BulkDataLoaderAPIServiceImpl implements BulkDataLoaderAPIService {
             }
         }
         // No proxy configuration, use default HttpClient
+        logger.info("No proxy configuration, using default HttpClient");
+        logger.info("Proxy Enabled: {}, Proxy Host: {}, Proxy Port: {} & is digits {}",
+                config.isEnableProxy(), config.getProxyHost(), config.getProxyPort(), NumberUtils.isDigits(config.getProxyPort()));
         return HttpClients.createDefault();
     }
 
