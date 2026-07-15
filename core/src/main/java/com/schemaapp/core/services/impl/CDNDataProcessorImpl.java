@@ -171,14 +171,12 @@ public class CDNDataProcessorImpl implements CDNDataProcessor {
             if (configDetailMap != null) {
                 String accountId = extractAccountId(configDetailMap);
                 String siteURL = configDetailMap.get("siteURL", String.class);
-                String deploymentMethod = configDetailMap.get("deploymentMethod", String.class);
-                String apiKey = configDetailMap.get("apiKey", String.class);
-                
+
                 Iterator<Page> childPages = page.listChildren(new PageFilter(), true);
                 String endpoint = ConfigurationUtil.getConfiguration(Constants.SCHEMAAPP_DATA_API_ENDPOINT_KEY,
                         Constants.API_ENDPOINT_CONFIG_PID, configurationAdmin, "");
 
-                SchemaAppConfig config = new SchemaAppConfig(accountId, siteURL, deploymentMethod, endpoint, apiKey);
+                SchemaAppConfig config = new SchemaAppConfig(accountId, endpoint, configDetailMap);
                 while (childPages.hasNext()) {
                     createOrUpdateSchemaNode(childPages, resolver, siteURL);
                 }

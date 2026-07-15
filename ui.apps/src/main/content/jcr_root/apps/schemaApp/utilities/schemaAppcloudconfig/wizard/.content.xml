@@ -115,13 +115,43 @@
 														            sling:resourceType="granite/ui/components/foundation/form/hidden"/>
 									                        </items>
 									                    </radiogroupA>
+                                                        <enableProxy
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                                            name="./enableProxy"
+                                                            text="Enable Proxy"
+                                                            checked="{Boolean}false"
+                                                            uncheckedValue="{Boolean}false"
+                                                            value="{Boolean}true"/>
+                                                        <proxyHost
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            fieldDescription="Please provide the proxy hostname, e.g.: 127.9.9.1 or us.proxytest.net"
+                                                            fieldLabel="Proxy Hostname"
+                                                            name="./proxyHost"/>
+                                                        <proxyPort
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            fieldDescription="Please provide the proxy port, e.g.: 8080 or 5000
+                                                            fieldLabel="Proxy Port"
+                                                            name="./proxyPort"/>
+                                                        <proxyUsername
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            fieldLabel="Proxy Username"
+                                                            name="./proxyUsername"/>
+                                                        <proxyPassword
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/password"
+                                                            fieldLabel="Proxy Password"
+                                                            name="./proxyPassword"/>
                                                         <connect
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                                             text="Connect to Schema App"	
-                                                            granite:class="cq-confadmin-schema-app-connect"															
+                                                            granite:class="cq-confadmin-schema-app-connect"
 															variant="primary"
-                                                            name="./siteURL"/>                                                                        
+                                                            name="./siteURL"/>
                                                     </items>
                                                 </propColumn>
                                             </items>

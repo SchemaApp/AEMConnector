@@ -1,5 +1,7 @@
 package com.schemaapp.core.models;
 
+import org.apache.sling.api.resource.ValueMap;
+
 public class SchemaAppConfig {
 
     private String accountId;
@@ -12,12 +14,27 @@ public class SchemaAppConfig {
     
     private String apiKey;
 
-    public SchemaAppConfig(String accountId, String siteURL, String deploymentMethod, String endpoint, String apiKey) {
+    private boolean enableProxy;
+
+    private String proxyHost;
+
+    private String proxyPort;
+
+    private String proxyUsername;
+
+    private String proxyPassword;
+
+    public SchemaAppConfig(String accountId, String endpoint, ValueMap configDetailMap) {
         this.accountId = accountId;
-        this.siteURL = siteURL;
-        this.deploymentMethod = deploymentMethod;
+        this.siteURL = configDetailMap.get("siteURL", String.class);
+        this.deploymentMethod = configDetailMap.get("deploymentMethod", String.class);
         this.endpoint = endpoint;
-        this.apiKey = apiKey;
+        this.apiKey = configDetailMap.get("apiKey", String.class);
+        this.enableProxy = configDetailMap.get("enableProxy", false);
+        this.proxyHost = configDetailMap.get("proxyHost", String.class);
+        this.proxyPort = configDetailMap.get("proxyPort", String.class);
+        this.proxyUsername = configDetailMap.get("proxyUsername", String.class);
+        this.proxyPassword = configDetailMap.get("proxyPassword", String.class);
     }
 
     public SchemaAppConfig() {
@@ -61,5 +78,45 @@ public class SchemaAppConfig {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public boolean isEnableProxy() {
+        return enableProxy;
+    }
+
+    public void setEnableProxy(boolean enableProxy) {
+        this.enableProxy = enableProxy;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public String getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(String proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public String getProxyUsername() {
+        return proxyUsername;
+    }
+
+    public void setProxyUsername(String proxyUsername) {
+        this.proxyUsername = proxyUsername;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
     }
 }
