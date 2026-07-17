@@ -132,7 +132,7 @@
                                                         <proxyPort
                                                             jcr:primaryType="nt:unstructured"
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                            fieldDescription="Please provide the proxy port, e.g.: 8080 or 5000
+                                                            fieldDescription="Please provide the proxy port, e.g.: 8080 or 5000"
                                                             fieldLabel="Proxy Port"
                                                             name="./proxyPort"/>
                                                         <proxyUsername
