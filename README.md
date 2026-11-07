@@ -18,7 +18,7 @@ The Schema App AEM Connector fetches structured data markup from the Schema App 
 | **Group ID** | `com.schemaapp` |
 | **Artifact ID** | `schemaapp-aem` |
 | **Version** | `2.0.6.1` |
-| **Repository** | https://github.com/SchemaApp/AEMConnector |
+| **Repository** | <https://github.com/SchemaApp/AEMConnector> |
 | **License** | MIT |
 
 ## Related Technologies
@@ -124,26 +124,42 @@ Schema App markup is stored under each page's `jcr:content` node:
 
 ### The Entity Data Component
 
-The connector uses the `schemaApp/components/content/entitydata` component to store and expose JSON-LD data.
+The connector uses the `schemaApp/components/content/entitydata` component to store JSON-LD data.
 
 **Component location:** `/apps/schemaApp/components/content/entitydata`
 
 **Sling Model:** `com.schemaapp.core.models.EntityDataModel`
 
 The component:
-1. Is automatically created under `jcr:content/schemaapp` for each page with Schema App configured
-2. Stores the JSON-LD markup in the `entity` property
-3. Exposes data via Sling Model JSON export (`.model.json` selector)
 
-### Rendering JSON-LD on Pages
+1. Is automatically created under `jcr:content/schemaapp` for each page with Schema App configured
+2. Stores the JSON-LD markup as a JSON string in the `entity` property
+3. Exposes data via Sling Model JSON export on the child resource (not the page)
+
+### Accessing Cached Data
 
 The JSON-LD data can be accessed via:
 
-1. **Sling Model Export** - Request the page with `.model.json` extension to get the entity data as JSON
+1. **Child Resource Model Export** - Request the schemaapp resource directly with `.model.json`:
+   ```
+   /content/mysite/mypage/jcr:content/schemaapp.model.json
+   ```
+   Note: The `EntityDataModel` exporter is registered for the `schemaApp/components/content/entitydata` resource type, not the page. A page-level `.model.json` request will only include this data if the site's page exporter is configured to include child components.
 
-2. **Direct Node Access** - Read from `/jcr:content/schemaapp/entity` property
+2. **Direct Node Access** - Read from `/jcr:content/schemaapp/entity` property (returns a JSON string)
 
-3. **HTL/Component Include** - Include the schemaapp resource in your page template to render the JSON-LD script tag
+### Rendering JSON-LD Script Tags
+
+The connector provides a cloud service headlibs integration for rendering JSON-LD in the page `<head>`:
+
+**Headlibs JSP:** `/apps/schemaApp/registration/components/schemaapp/headlibs.jsp`
+
+This JSP:
+1. Calls `PageJSONDataReaderService` to retrieve the cached JSON-LD data
+2. Emits a `<script type="application/ld+json">` tag containing the graph data
+3. For JavaScript deployment method, also includes the Schema App highlighter script
+
+To enable JSON-LD rendering, ensure the Schema App cloud service is configured on your site and the headlibs are included in your page template's head section via the cloud service configuration mechanism.
 
 ### PageJSONDataReaderService
 
@@ -204,8 +220,10 @@ For environments requiring HTTP proxy:
 | Property | Default | Description |
 |----------|---------|-------------|
 | `enabled` | `true` | Enable/disable the scheduler |
-| `scheduler.expression` | `0 */30 * ? * *` | Cron expression (default: every 30 min) |
-| `scheduler.concurrent` | `false` | Allow concurrent execution |
+| `expression` | `0 */30 * ? * *` | Cron expression (default: every 30 min) |
+| `concurrent` | `false` | Allow concurrent execution |
+
+> **Note:** The scheduler's `@ObjectClassDefinition` interface defines methods `enabled()`, `expression()`, and `concurrent()`, which OSGi maps to config properties `enabled`, `expression`, and `concurrent`. The packaged XML config incorrectly uses `scheduler.expression` and `scheduler.concurrent`—these keys are not read by the scheduler code. Use the correct property names shown above when customizing the configuration.
 
 #### API Endpoint Configuration
 
@@ -217,6 +235,8 @@ For environments requiring HTTP proxy:
 |----------|---------|-------------|
 | `SchemaAppCDNDataAPIEndpoint` | `https://data.schemaapp.com` | Schema App data API endpoint |
 
+> **Note:** This endpoint configuration is **not used** by the bulk data export flow. The `BulkDataLoaderAPIServiceImpl` hardcodes the API endpoint as `https://api.schemaapp.com`. Changing this configuration property will not redirect synchronization requests. The property may be intended for future use or other integration points.
+
 ### Service User
 
 The connector uses a dedicated service user for JCR operations:
@@ -224,6 +244,7 @@ The connector uses a dedicated service user for JCR operations:
 **Service User:** `aem-schema-app-service-user`
 
 **Permissions:**
+
 - Read: `/etc/cloudservices`
 - Read/Write/Replicate: `/content`
 - Read/Write: `/conf`
@@ -368,9 +389,9 @@ The project uses Adobe's public Maven repository. Configure in your Maven settin
 </repository>
 ```
 
-See: http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html
+See: <http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html>
 
 ## Support
 
-- **Schema App Support:** support@schemaapp.com
-- **Schema App Website:** https://www.schemaapp.com
+- **Schema App Support:** <support@schemaapp.com>
+- **Schema App Website:** <https://www.schemaapp.com>
