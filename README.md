@@ -155,6 +155,7 @@ The connector provides a cloud service headlibs integration for rendering JSON-L
 **Headlibs JSP:** `/apps/schemaApp/registration/components/schemaapp/headlibs.jsp`
 
 This JSP:
+
 1. Calls `PageJSONDataReaderService` to retrieve the cached JSON-LD data
 2. Emits a `<script type="application/ld+json">` tag containing the graph data
 3. For JavaScript deployment method, also includes the Schema App highlighter script
